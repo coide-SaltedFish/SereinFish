@@ -7,12 +7,8 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.dao.DAO;
-import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
-import sereinfish.bot.database.table.WhiteList;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.log.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -24,10 +20,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * 初始化类
