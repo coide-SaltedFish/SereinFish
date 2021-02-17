@@ -25,15 +25,19 @@ public class GroupHistoryMsg {
     @Field(name = "msg", type = "nvarchar", size = 10000, isNotNull = true, isChar = true)
     private String msg;//消息内容
 
+    @Field(name = "msg", type = "nvarchar", size = 10000, isNotNull = true, isChar = true)
+    private String msgSource;//消息内容
+
     public GroupHistoryMsg() {
     }
 
-    public GroupHistoryMsg(long time, long group, long qq, int id, String msg) {
+    public GroupHistoryMsg(long time, long group, long qq, int id, String msg, String msgSource) {
         this.time = time;
         this.group = group;
         this.qq = qq;
         this.id = id;
         this.msg = msg;
+        this.msgSource = msgSource;
     }
 
     public long getTime() {
@@ -54,6 +58,10 @@ public class GroupHistoryMsg {
 
     public String getMsg() {
         return msg;
+    }
+
+    public String getMsgSource() {
+        return msgSource;
     }
 
     public Message getMessage(){
