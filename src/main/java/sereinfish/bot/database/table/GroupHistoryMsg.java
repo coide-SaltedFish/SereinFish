@@ -25,7 +25,7 @@ public class GroupHistoryMsg {
     @Field(name = "msg", type = "nvarchar", size = 10000, isNotNull = true, isChar = true)
     private String msg;//消息内容
 
-    @Field(name = "msg", type = "nvarchar", size = 10000, isNotNull = true, isChar = true)
+    @Field(name = "msgSource", type = "nvarchar", size = 10000, isNotNull = true, isChar = true)
     private String msgSource;//消息内容
 
     public GroupHistoryMsg() {
