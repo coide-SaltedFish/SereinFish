@@ -1,4 +1,4 @@
-package sereinfish.bot.log;
+package sereinfish.bot.mlog;
 
 import sereinfish.bot.myYuq.time.Time;
 

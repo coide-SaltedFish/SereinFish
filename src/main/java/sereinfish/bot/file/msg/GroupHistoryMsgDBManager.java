@@ -8,7 +8,7 @@ import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.table.GroupHistoryMsg;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -3,7 +3,7 @@ package sereinfish.bot.database.entity;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 
 import java.io.File;
 import java.sql.Connection;

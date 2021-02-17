@@ -1,0 +1,15 @@
+/device.json
+/harmoland_bot.iml
+/tmp/
+/target/
+/.idea/
+/log/
+/SereinFish/
+/src/main/resources/ehcache-YuQ-Mirai-demo.xml
+/src/main/resources/logback.xml
+/conf/
+/build.gradle.kts
+/gradlew
+/gradlew.bat
+/pom.xml
+/settings.gradle.kts

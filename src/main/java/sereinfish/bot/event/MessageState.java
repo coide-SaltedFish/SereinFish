@@ -1,7 +1,6 @@
 package sereinfish.bot.event;
 
-import com.icecreamqaq.yuq.message.Message;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.tray.AppTray;
 
 import java.util.*;

@@ -1,6 +1,6 @@
 package sereinfish.bot.myYuq.time;
 
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

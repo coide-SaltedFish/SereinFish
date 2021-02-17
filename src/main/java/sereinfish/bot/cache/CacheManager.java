@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import sereinfish.bot.entity.mc.GamerInfo;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.imageio.ImageIO;

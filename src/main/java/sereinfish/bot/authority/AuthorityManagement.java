@@ -2,7 +2,7 @@ package sereinfish.bot.authority;
 
 import com.icecreamqaq.yuq.entity.Member;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.IOException;

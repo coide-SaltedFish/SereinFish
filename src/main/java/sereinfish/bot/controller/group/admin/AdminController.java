@@ -9,7 +9,7 @@ import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.sql.SQLException;

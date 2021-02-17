@@ -10,7 +10,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
-import sereinfish.bot.log.SfLog;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.tray.AppTray;
