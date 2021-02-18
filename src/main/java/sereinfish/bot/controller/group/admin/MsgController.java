@@ -8,11 +8,8 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.authority.AuthorityManagement;
-import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.myYuq.MyYuQ;
-
-import java.sql.SQLException;
 
 /**
  * 消息相关命令处理

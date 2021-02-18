@@ -13,6 +13,8 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 public class MyYuQ {
@@ -173,5 +175,17 @@ public class MyYuQ {
         return appName + "\n" +
                 "测试版本：" + versionName + "\n" +
                 "V:" + version;
+    }
+
+    /**
+     * 得到群组列表
+     * @return
+     */
+    public static ArrayList<Group> getGroups(){
+        ArrayList<Group> groups = new ArrayList<>();
+        for (Map.Entry<Long,Group> entry:yuQ.getGroups().entrySet()){
+            groups.add(entry.getValue());
+        }
+        return groups;
     }
 }

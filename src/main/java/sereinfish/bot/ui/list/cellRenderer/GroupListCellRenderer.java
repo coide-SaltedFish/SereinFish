@@ -67,7 +67,7 @@ public class GroupListCellRenderer implements ListCellRenderer{
         panel.setLayout(new BorderLayout(0, 0));
 
         String name = group.getName();
-        //群组配置
+        //TODO:群组配置
 //        if (!groupConf.isEnable()){
 //            name += "[未启用]";
 //        }

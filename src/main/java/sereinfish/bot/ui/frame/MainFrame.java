@@ -1,7 +1,10 @@
 package sereinfish.bot.ui.frame;
 
+import com.sun.deploy.panel.GeneralPanel;
 import sereinfish.bot.file.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.panel.BotInfoPanel;
+import sereinfish.bot.ui.panel.GroupListPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,22 +51,15 @@ public class MainFrame extends JFrame {
         JSplitPane splitPane_left = new JSplitPane();
         splitPane_left.setOrientation(JSplitPane.VERTICAL_SPLIT);
         splitPane_left.setDividerSize(2);
-        splitPane_left.setDividerLocation(200);
+        splitPane_left.setDividerLocation(150);
         splitPane_left.setContinuousLayout(true);
 
         splitPane.setLeftComponent(splitPane_left);
         //左边视图上半部分
-        JPanel panel_botInfo = new JPanel(new BorderLayout());
-        splitPane_left.setTopComponent(panel_botInfo);
-        JLabel label_botHead = new JLabel();//bot头像
-        label_botHead.setHorizontalAlignment(SwingConstants.CENTER);
-        label_botHead.setIcon(new ImageIcon(ImageHandle.getMemberHeadImage(MyYuQ.getYuQ().getBotId(),70)));
+        splitPane_left.setTopComponent(new BotInfoPanel());
 
-        JLabel label_botName = new JLabel(MyYuQ.getYuQ().getBotInfo().getName());//bot名称
-        label_botName.setHorizontalAlignment(SwingConstants.CENTER);
-
-        panel_botInfo.add(label_botHead,BorderLayout.CENTER);
-        panel_botInfo.add(label_botName,BorderLayout.SOUTH);
+        //左边视图下半部分
+        splitPane_left.setBottomComponent(new GroupListPanel());
 
 
         //设置窗体关闭事件

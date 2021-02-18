@@ -66,7 +66,7 @@ public class CacheManager {
         }
         //从网络获取
         try {
-            Image image = NetHandle.getImage(new URL("https://p.qlogo.cn/gh/726324810/726324810/640"));
+            Image image = NetHandle.getImage(new URL("https://p.qlogo.cn/gh/" + group + "/" + group + "/640"));
             ImageIO.write((BufferedImage) image,"PNG",file);//写入文件
             return image;
         } catch (IOException e) {
