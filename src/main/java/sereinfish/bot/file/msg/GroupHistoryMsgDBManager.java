@@ -70,10 +70,10 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
      * @param id
      * @return
      */
-    public GroupHistoryMsg query(Group group,long qq, int id) throws SQLException {
+    public GroupHistoryMsg query(long group,long qq, int id) throws SQLException {
         PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement("SELECT * FROM " + getTableName() +
                 " Where group_num = ? AND qq = ? AND id = ?");
-        preparedStatement.setLong(1,group.getId());
+        preparedStatement.setLong(1,group);
         preparedStatement.setLong(2,qq);
         preparedStatement.setInt(3,id);
 

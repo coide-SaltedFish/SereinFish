@@ -25,7 +25,7 @@ public class AuthorityManagement {
 
     private AuthorityManagement() throws IOException {
         sfLog = SfLog.getInstance();
-        getAuthorityList();//得到权限列表
+        readAuthorityList();//得到权限列表
     }
 
     public static AuthorityManagement init() throws IOException {
@@ -91,25 +91,29 @@ public class AuthorityManagement {
     /**
      * 得到权限列表
      */
-    private void getAuthorityList() throws IOException {
+    private void readAuthorityList() throws IOException {
         authorityList = MyYuQ.toClass(FileHandle.read(FileHandle.AuthorityConfigFile),AuthorityList.class);
         if (authorityList == null){
             authorityList = new AuthorityList();
-            setAuthorityList();
+            writeAuthorityList();
         }
     }
 
     /**
      * 设置权限列表
      */
-    private void setAuthorityList() throws IOException {
+    private void writeAuthorityList() throws IOException {
         FileHandle.write(FileHandle.AuthorityConfigFile, MyYuQ.toJson(authorityList,AuthorityList.class));
+    }
+
+    public AuthorityList getAuthorityList() {
+        return authorityList;
     }
 
     /**
      * 权限列表类
      */
-    class AuthorityList{
+    public class AuthorityList{
         Map<Long,Long> opList = new HashMap<>();//op列表
         Map<Long,Long> masterList = new HashMap<>();//拥有者列表
         Map<Long,Long> adminList = new HashMap<>();//管理员列表
@@ -131,7 +135,7 @@ public class AuthorityManagement {
         public boolean addOP(long id){
             opList.put(id,id);
             try {
-                setAuthorityList();
+                AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 sfLog.e(this.getClass(),"op添加失败:" + id,e);
@@ -150,7 +154,7 @@ public class AuthorityManagement {
             }
             if (opList.remove(id,id)){
                 try {
-                    setAuthorityList();
+                    AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     sfLog.e(this.getClass(),"op删除失败:" + id,e);
@@ -177,7 +181,7 @@ public class AuthorityManagement {
         public boolean addMaster(long id){
             masterList.put(id,id);
             try {
-                setAuthorityList();
+                AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 sfLog.e(this.getClass(),"拥有者添加失败：" + id,e);
@@ -197,7 +201,7 @@ public class AuthorityManagement {
             }
             if(masterList.remove(id,id)){
                 try {
-                    setAuthorityList();
+                    AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     sfLog.e(this.getClass(),"拥有者删除失败:" + id,e);
@@ -225,7 +229,7 @@ public class AuthorityManagement {
         public boolean addAdmin(long id){
             adminList.put(id,id);
             try {
-                setAuthorityList();
+                AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 sfLog.e(this.getClass(),"管理员添加失败：" + id,e);
@@ -245,7 +249,7 @@ public class AuthorityManagement {
             }
             if(adminList.remove(id,id)){
                 try {
-                    setAuthorityList();
+                    AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     sfLog.e(this.getClass(),"管理员删除失败:" + id,e);

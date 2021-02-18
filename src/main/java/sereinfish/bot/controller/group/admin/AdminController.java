@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.Before;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.table.GroupHistoryMsg;
@@ -41,7 +42,7 @@ public class AdminController {
     public String readMsg(Message message){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
-            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,sender.getId(),message.getReply().getId());
+            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),sender.getId(),message.getReply().getId());
             if (groupHistoryMsg == null){
                 return "找不到该消息";
             }
@@ -50,5 +51,35 @@ public class AdminController {
             return "操作失败：" + e.getMessage();
         }
         return groupHistoryMsg.getMsg();
+    }
+
+    @Action(".读消息 {group} {qq} {id}")
+    public String readMsg(long group, long qq, int id){
+        GroupHistoryMsg groupHistoryMsg = null;
+        try {
+            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,qq,id);
+            if (groupHistoryMsg == null){
+                return "找不到该消息";
+            }
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return "操作失败：" + e.getMessage();
+        }
+        return groupHistoryMsg.getMsg();
+    }
+
+    @Action(".发消息 {group} {qq} {id}")
+    public Message sendMsg(long group, long qq, int id){
+        GroupHistoryMsg groupHistoryMsg = null;
+        try {
+            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,qq,id);
+            if (groupHistoryMsg == null){
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
+            }
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
+        }
+        return Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
     }
 }
