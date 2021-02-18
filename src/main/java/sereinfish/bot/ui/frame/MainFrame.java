@@ -3,6 +3,7 @@ package sereinfish.bot.ui.frame;
 import com.sun.deploy.panel.GeneralPanel;
 import sereinfish.bot.file.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.menu.MainMenu;
 import sereinfish.bot.ui.panel.BotInfoPanel;
 import sereinfish.bot.ui.panel.GroupListPanel;
 
@@ -38,6 +39,9 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         contentPane = new JPanel(new BorderLayout());
         setContentPane(contentPane);
+        //菜单
+        contentPane.add(new MainMenu(),BorderLayout.NORTH);
+
         //分割面板
         JSplitPane splitPane = new JSplitPane();
         splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);

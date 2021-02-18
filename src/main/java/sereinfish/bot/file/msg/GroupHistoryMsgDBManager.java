@@ -49,7 +49,7 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
      */
     public boolean add(Group group, long qq, Message message){
         GroupHistoryMsg groupHistoryMsg = new GroupHistoryMsg(new Date().getTime(), group.getId(),
-                qq, message.getSource().getId(),Message.Companion.toCodeString(message), message.getSourceMessage().toString());
+                qq, message.getSource().getId(),Message.Companion.toCodeString(message));
         try {
             insert(groupHistoryMsg);
         } catch (IllegalAccessException e) {
@@ -80,7 +80,7 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next()){
             return new GroupHistoryMsg(resultSet.getLong("time"),resultSet.getLong("group_num"),resultSet.getLong("qq"),
-                    resultSet.getInt("id"),resultSet.getString("msg"), resultSet.getString("msgSource"));
+                    resultSet.getInt("id"),resultSet.getString("msg"));
         }
         return null;
     }

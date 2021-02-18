@@ -143,11 +143,12 @@ public class MyYuQ {
      * @param group
      * @param message
      */
-    public static void sendGroupMessage(Group group, Message message){
+    public static boolean sendGroupMessage(Group group, Message message){
         if(group.sendMessage(message).getId() < 0){
             group.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
             //TODO:转图片发送
         }
+        return true;
     }
 
     /**
