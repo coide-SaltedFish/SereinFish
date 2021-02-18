@@ -9,6 +9,7 @@ import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -70,6 +71,9 @@ public class InitEvent {
             SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
             System.exit(-1);
         }
+        //初始化复读管理器
+        RepeaterManager.init();
+        SfLog.getInstance().d(this.getClass(),"复读管理器初始化完成");
 
         //显示托盘
         try {
