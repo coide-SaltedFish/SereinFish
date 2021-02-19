@@ -182,7 +182,6 @@ public class LinkDialog extends JDialog {
      */
     public void close(){
         setVisible(false);
-        setModal(false);
         super.dispose();
     }
 

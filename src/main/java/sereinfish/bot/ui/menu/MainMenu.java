@@ -43,4 +43,23 @@ public class MainMenu extends JMenuBar {
 
         return menu;
     }
+
+    /**
+     * 数据库菜单栏
+     * @return
+     */
+    public JMenu getDataBaseMenu(){
+        JMenu menu = new JMenu("数据库");
+
+        /*******连接************/
+        JMenuItem menuItem_link = new JMenuItem("连接到数据库");
+        menuItem_link.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        return menu;
+    }
 }
