@@ -3,7 +3,6 @@ package sereinfish.bot.database.table;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.database.dao.annotation.DBHandle;
 import sereinfish.bot.database.dao.annotation.Field;
-import sereinfish.bot.myYuq.MyYuQ;
 
 /**
  * 群历史消息数据表

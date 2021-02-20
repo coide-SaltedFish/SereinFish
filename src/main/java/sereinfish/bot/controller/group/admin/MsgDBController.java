@@ -55,6 +55,7 @@ public class MsgDBController extends QQController {
         }
 
         try {
+            //TODO:更改发送者为回复的消息的发送者
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),sender.getId(),message.getReply().getId());
             if (groupHistoryMsg == null){
                 MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到该消息").toMessage());
@@ -177,5 +178,20 @@ public class MsgDBController extends QQController {
             return;
         }
         MyYuQ.sendGroupMessage(this.group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+    }
+
+    @Action(".图片url")
+    public void getImageURL(Message message){
+
+        //TODO:等下周吧
+        message.getReply().getSender();
+
+        GroupHistoryMsg groupHistoryMsg = null;
+        //groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,message.getReply().getId());
+        if (groupHistoryMsg == null){
+            //MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
+            return;
+        }
+        //Message msg = group;
     }
 }

@@ -3,6 +3,7 @@ package sereinfish.bot.myYuq;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.icecreamqaq.yuq.YuQ;
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
@@ -139,13 +140,26 @@ public class MyYuQ {
     }
 
     /**
-     * 发送消息
+     * 发送群消息
      * @param group
      * @param message
      */
     public static boolean sendGroupMessage(Group group, Message message){
         if(group.sendMessage(message).getId() < 0){
             group.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
+            //TODO:转图片发送
+        }
+        return true;
+    }
+
+    /**
+     * 发送消息
+     * @param contact
+     * @param message
+     */
+    public static boolean sendMessage(Contact contact, Message message){
+        if(contact.sendMessage(message).getId() < 0){
+            contact.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
             //TODO:转图片发送
         }
         return true;

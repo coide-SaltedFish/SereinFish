@@ -2,7 +2,9 @@ package sereinfish.bot.file.msg;
 
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageSource;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
@@ -49,6 +51,27 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
      */
     public boolean add(Group group, long qq, Message message){
         GroupHistoryMsg groupHistoryMsg = new GroupHistoryMsg(new Date().getTime(), group.getId(),
+                qq, message.getSource().getId(),Message.Companion.toCodeString(message));
+        try {
+            insert(groupHistoryMsg);
+        } catch (IllegalAccessException e) {
+            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.getSourceMessage(),e);
+            return false;
+        } catch (SQLException throwables) {
+            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.getSourceMessage(),throwables);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 添加记录
+     * @param group
+     * @param message
+     */
+    public boolean add(long group, long qq, Message message){
+        GroupHistoryMsg groupHistoryMsg = new GroupHistoryMsg(new Date().getTime(), group,
                 qq, message.getSource().getId(),Message.Companion.toCodeString(message));
         try {
             insert(groupHistoryMsg);
