@@ -3,7 +3,6 @@ package sereinfish.bot.event.group;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.icecreamqaq.yuq.event.GroupMessageEvent;
-import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -19,5 +18,4 @@ public class OnGroupMessageEvent {
             MyYuQ.sendGroupMessage(event.getGroup(),MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
     }
-
 }

@@ -11,7 +11,7 @@ import java.util.Map;
  * 复读管理器
  */
 public class RepeaterManager {
-    //TODO:配置文件添加复读条数限制
+    //TODO:添加配置文件
     private int n = 3;//当消息重复3次复读
 
     private Map<Group, ReMsg> groupArrayListMap = new HashMap<>();//消息列表
