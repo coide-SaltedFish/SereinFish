@@ -7,6 +7,7 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.event.group.repeater.RepeaterManager;

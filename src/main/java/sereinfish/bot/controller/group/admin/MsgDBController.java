@@ -15,8 +15,11 @@ import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.myYuq.time.Time;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * 操作消息数据库的命令
@@ -193,5 +196,26 @@ public class MsgDBController extends QQController {
             return;
         }
         //Message msg = group;
+    }
+
+    @Action(".最近消息 {qq}")
+    public void newMsg(long qq){
+        GroupHistoryMsg groupHistoryMsg = null;
+        try{
+           groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().queryLast(group.getId(), qq);
+
+           if(groupHistoryMsg == null){
+               MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到消息记录").toMessage());
+           }
+
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
+            return;
+        }
+        String msg = "时间：" + Time.dateToString(new Date(groupHistoryMsg.getTime()),Time.LOG_TIME) + "\nQQ:" + groupHistoryMsg.getQq() + "\nID:" + groupHistoryMsg.getId() +
+                "\n内容如下：\n" + groupHistoryMsg.getMsg();
+
+        MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(msg));
     }
 }

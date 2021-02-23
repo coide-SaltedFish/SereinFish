@@ -11,6 +11,7 @@ import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -106,5 +107,27 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
                     resultSet.getInt("id"),resultSet.getString("msg"));
         }
         return null;
+    }
+
+    /**
+     * 查询最后一条消息
+     * @param group
+     * @param qq
+     * @return
+     * @throws SQLException
+     */
+    public GroupHistoryMsg queryLast(long group, long qq) throws SQLException {
+        GroupHistoryMsg groupHistoryMsg = null;
+
+        String tableName = GroupHistoryMsgDBManager.getInstance().getTableName();
+        String sql = "SELECT * FROM " + tableName + " WHERE time = (SELECT MAX(time) FROM " + tableName + " WHERE qq = " + qq + ")" ;
+        ResultSet resultSet = GroupHistoryMsgDBManager.getInstance().executeQueryDAO(sql);
+
+
+        if (resultSet.next()){
+            groupHistoryMsg = new GroupHistoryMsg(resultSet.getLong("time"),resultSet.getLong("group_num"),resultSet.getLong("qq"),
+                    resultSet.getInt("id"),resultSet.getString("msg"));
+        }
+        return groupHistoryMsg;
     }
 }

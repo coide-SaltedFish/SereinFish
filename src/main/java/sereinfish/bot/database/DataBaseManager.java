@@ -2,6 +2,7 @@ package sereinfish.bot.database;
 
 import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.IllegalModeException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Map;
  * 数据库连接管理
  */
 public class DataBaseManager {
-    private Map<Long,DataBase> dataBases = new HashMap<>();//数据库连接列表
+    private ArrayList<DataBase> dataBases = new ArrayList<>();//数据库连接列表
     private static DataBaseManager dataBaseManager;//单例模式
 
     private DataBaseManager(){
@@ -38,36 +39,28 @@ public class DataBaseManager {
     /**
      * 连接数据库
      */
-    public void linkDataBase(long group){
-
+    public void linkDataBase(DataBaseConfig config) throws IllegalModeException, SQLException, ClassNotFoundException {
+        DataBase dataBase = new DataBase(config);
+        addDataBase(dataBase);
     }
 
     /**
      * 连接池添加数据库
-     * @param group
      * @param dataBase
      */
-    public void addDataBase(long group,DataBase dataBase) throws SQLException {
-        if (dataBases.containsKey(group)){
-            closeDataBase(group);
-        }
-        dataBases.put(group,dataBase);
+    public void addDataBase(DataBase dataBase) throws SQLException {
+        dataBases.add(dataBase);
     }
 
     /**
      * 关闭数据库
-     * @param group
      */
-    public void closeDataBase(long group) throws SQLException {
-        dataBases.get(group).close();
+    public void closeDataBase(DataBase dataBase) throws SQLException {
+        dataBase.close();
+        dataBases.remove(dataBase);
     }
 
-    /**
-     * 得到数据库
-     * @param group
-     * @return
-     */
-    public DataBase getDataBase(long group){
-        return dataBases.get(group);
+    public ArrayList<DataBase> getDataBases() {
+        return dataBases;
     }
 }

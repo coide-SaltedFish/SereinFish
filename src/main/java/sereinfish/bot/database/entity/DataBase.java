@@ -46,17 +46,15 @@ public class DataBase {
      * @throws SQLException
      */
     private void linkSQLServer() throws ClassNotFoundException, SQLException {
-        log.d(this.getClass(),"加载数据库驱动");
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        log.d(this.getClass(),"完成");
+        log.d(this.getClass(),"成功加载SQL Server数据库驱动");
 
         //数据库连接
-        log.d(this.getClass(),"连接到数据库");
         //jdbc:sqlserver://localhost:1433;DatabaseName=name"
         connection = DriverManager.getConnection("jdbc:sqlserver://" + dataBaseConfig.getIp() + ":" + dataBaseConfig.getPort() +
                 ";DatabaseName=" + dataBaseConfig.getBaseName(),dataBaseConfig.getAccount(), dataBaseConfig.getPassword());
         statement = connection.createStatement();
-        log.d(this.getClass(),"成功");
+        log.d(this.getClass(),"SQL Server数据库连接完成");
     }
 
     /**
@@ -65,17 +63,15 @@ public class DataBase {
      * @throws SQLException
      */
     private void linkMySQL() throws ClassNotFoundException, SQLException {
-        log.d(this.getClass(),"加载数据库驱动");
         Class.forName("com.mysql.cj.jdbc.Driver");
-        log.d(this.getClass(),"完成");
+        log.d(this.getClass(),"成功加载MySQL数据库驱动");
 
         //数据库连接
-        log.d(this.getClass(),"连接到数据库");
         //jdbc:sqlserver://localhost:1433;DatabaseName=name"
         connection = DriverManager.getConnection("jdbc:mysql://" + dataBaseConfig.getIp() + ":" + dataBaseConfig.getPort() + "/" + dataBaseConfig.getBaseName() +
                 "?allowPublicKeyRetrieval=true&serverTimezone=UTC", dataBaseConfig.getAccount(), dataBaseConfig.getPassword());
         statement = connection.createStatement();
-        log.d(this.getClass(),"成功");
+        log.d(this.getClass(),"My SQL数据库连接完成");
     }
 
     /**

@@ -1,7 +1,8 @@
 package sereinfish.bot.ui.menu;
 
+import sereinfish.bot.ui.frame.SignInDataBaseFrame;
+
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -19,6 +20,7 @@ public class MainMenu extends JMenuBar {
      */
     public MainMenu build(){
         add(getFileMenu());//文件
+        add(getDataBaseMenu());//数据库
         return this;
     }
 
@@ -53,10 +55,11 @@ public class MainMenu extends JMenuBar {
 
         /*******连接************/
         JMenuItem menuItem_link = new JMenuItem("连接到数据库");
+        menu.add(menuItem_link);
         menuItem_link.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                new SignInDataBaseFrame("连接到新的数据库").build().setVisible(true);
             }
         });
 
