@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageItem;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
@@ -20,6 +21,8 @@ import sereinfish.bot.myYuq.time.Time;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 操作消息数据库的命令
@@ -115,8 +118,8 @@ public class MsgDBController extends QQController {
         reply(message1);
 
         try{
-            Message reMsg = session.waitNextMessage(maxTime);
-            MyYuQ.sendGroupMessage(group,reMsg);
+            String reMsg = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
+            MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(reMsg));
         }catch (Exception e){
             MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("已超时取消").toMessage());
         }
@@ -184,18 +187,24 @@ public class MsgDBController extends QQController {
     }
 
     @Action(".图片url")
-    public void getImageURL(Message message){
+    public void getImageURL(Message message, ContextSession session){
+        reply("请发送图片");
+        Message msg = session.waitNextMessage(maxTime);
+        boolean flag = true;
 
-        //TODO:等下周吧
-        message.getReply().getSender();
-
-        GroupHistoryMsg groupHistoryMsg = null;
-        //groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,message.getReply().getId());
-        if (groupHistoryMsg == null){
-            //MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-            return;
+        for (MessageItem messageItem : msg.getBody()){
+            String msg_str = messageItem.toPath();
+            if (Pattern.matches("img_\\{.*}.jpg",msg_str)){
+                flag = false;
+                String uuid = msg_str.split("img_\\{|\\}.jpg")[1].replace("-","");
+                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("http://gchat.qpic.cn/gchatpic_new/0/-0-" + uuid + "/0").toMessage());
+            }
         }
-        //Message msg = group;
+
+        if (flag){
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未发现图片").toMessage());
+        }
+
     }
 
     @Action(".最近消息 {qq}")
@@ -214,8 +223,8 @@ public class MsgDBController extends QQController {
             return;
         }
         String msg = "时间：" + Time.dateToString(new Date(groupHistoryMsg.getTime()),Time.LOG_TIME) + "\nQQ:" + groupHistoryMsg.getQq() + "\nID:" + groupHistoryMsg.getId() +
-                "\n内容如下：\n" + groupHistoryMsg.getMsg();
-
+                "\n内容如下：";
         MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(msg));
+        MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
     }
 }

@@ -120,7 +120,7 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
         GroupHistoryMsg groupHistoryMsg = null;
 
         String tableName = GroupHistoryMsgDBManager.getInstance().getTableName();
-        String sql = "SELECT * FROM " + tableName + " WHERE time = (SELECT MAX(time) FROM " + tableName + " WHERE qq = " + qq + ")" ;
+        String sql = "SELECT * FROM " + tableName + " WHERE time = (SELECT MAX(time) FROM " + tableName + " WHERE group_num = " + group + " AND qq = " + qq + ")" ;
         ResultSet resultSet = GroupHistoryMsgDBManager.getInstance().executeQueryDAO(sql);
 
 
