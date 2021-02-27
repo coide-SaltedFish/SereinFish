@@ -20,8 +20,8 @@ import java.util.Random;
 
 public class MyYuQ {
     public static final String appName = "SereinFish Bot";
-    public static final int version = 100231;
-    public static final String versionName = "v_0.0.23";
+    public static final int version = 100254;
+    public static final String versionName = "v_0.0.25";
 
     private static MyYuQ myYuQ = null;//单例模式
     //
@@ -203,4 +203,6 @@ public class MyYuQ {
         }
         return groups;
     }
+
+
 }

@@ -59,4 +59,8 @@ public class GroupListPanel extends JPanel {
     public void setGroupListListener(MouseAdapter mouseAdapter){
         groupList.addMouseListener(mouseAdapter);
     }
+
+    public JList getGroupList() {
+        return groupList;
+    }
 }

@@ -10,6 +10,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
@@ -43,6 +44,7 @@ public class InitEvent {
         MyYuQ.init(yuQ,mif);
         //初始化日志
         SfLog.init();
+        SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
         //初始化权限管理器
         try {
             AuthorityManagement.init();
@@ -57,6 +59,9 @@ public class InitEvent {
         //初始化数据库连接池
         DataBaseManager.init();
         SfLog.getInstance().d(this.getClass(),"数据库连接池管理器初始化完成");
+        //初始化群配置管理器
+        GroupConfManager.init();
+        SfLog.getInstance().d(this.getClass(),"群配置管理器初始化完成");
 
         //初始化群消息记录管理器
         try {

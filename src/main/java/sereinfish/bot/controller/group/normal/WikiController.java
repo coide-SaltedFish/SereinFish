@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.mlog.SfLog;
@@ -16,7 +17,7 @@ import java.net.URLEncoder;
 @GroupController
 public class WikiController {
 
-    @Action(".wiki {key}")
+    @Action("\\[!！.]wiki\\ {key}")
     public Message wiki(String key){
         String url = "https://minecraft-zh.gamepedia.com/index.php?search=";
         try {
@@ -27,6 +28,19 @@ public class WikiController {
         }
         return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("Wiki：" + key,key + " - Minecraft Wiki，最详细的官方我的世界百科",
                 "https://images.wikia.com/minecraft_zh_gamepedia/images/b/bc/Wiki.png",url)).toMessage();
+    }
+
+    @Action("\\[!！.]百度\\ {key}")
+    public void baidu(Group group, String key){
+        String url = "http://www.baidu.com/s?wd=";
+        try {
+            url += URLEncoder.encode(key,"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            SfLog.getInstance().e(this.getClass(),"[" + key + "] 查询失败",e);
+            MyYuQ.sendGroupMessage(group, MyYuQ.getMif().text("[" + key + "] 查询失败").toMessage());
+        }
+        MyYuQ.sendGroupMessage(group, MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("百度-" + key,key + "_百度一下，你就知道",
+                "https://www.baidu.com/img/bd_logo1.png",url)).toMessage());
     }
 
 }

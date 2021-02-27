@@ -6,6 +6,7 @@ import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.menu.MainMenu;
 import sereinfish.bot.ui.panel.BotInfoPanel;
 import sereinfish.bot.ui.panel.GroupListPanel;
+import sereinfish.bot.ui.panel.GroupsCardPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class MainFrame extends JFrame {
+    private GroupListPanel groupListPanel;
+
     private static MainFrame mainFrame;
     private JPanel contentPane;
 
@@ -63,7 +66,11 @@ public class MainFrame extends JFrame {
         splitPane_left.setTopComponent(new BotInfoPanel());
 
         //左边视图下半部分
-        splitPane_left.setBottomComponent(new GroupListPanel());
+        groupListPanel = new GroupListPanel();
+        splitPane_left.setBottomComponent(groupListPanel);
+
+        //右半边视图
+        splitPane.setRightComponent(new GroupsCardPanel(groupListPanel));
 
 
         //设置窗体关闭事件

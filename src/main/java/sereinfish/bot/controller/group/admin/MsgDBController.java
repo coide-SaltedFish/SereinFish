@@ -52,7 +52,7 @@ public class MsgDBController extends QQController {
         }
     }
 
-    @Action(".读消息")
+    @Action("\\[!！.]读消息\\")
     public void readMsg(Message message){
         GroupHistoryMsg groupHistoryMsg = null;
 
@@ -75,7 +75,7 @@ public class MsgDBController extends QQController {
         MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
     }
 
-    @Action(".读消息 {group} {qq} {id}")
+    @Action("\\[!！.]读消息\\ {group} {qq} {id}")
     public void readMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -93,7 +93,7 @@ public class MsgDBController extends QQController {
         return;
     }
 
-    @Action(".读消息 {qq} {id}")
+    @Action("\\[!！.]读消息\\ {qq} {id}")
     public void readMsg(long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -111,7 +111,7 @@ public class MsgDBController extends QQController {
         return;
     }
 
-    @Action(".发消息")
+    @Action("\\[!！.]发消息\\")
     public void sendMsg(Message message,ContextSession session){
         Message message1 = MyYuQ.getMif().text("请输入消息内容").toMessage();
         message1.setReply(message.getSource());
@@ -125,7 +125,7 @@ public class MsgDBController extends QQController {
         }
     }
 
-    @Action(".发消息 {group}")
+    @Action("\\[!！.]发消息\\ {group}")
     public void sendMsg(long group,Message message,ContextSession session){
         Group g = MyYuQ.getYuQ().getGroups().get(group);
         if (g != null){
@@ -152,7 +152,7 @@ public class MsgDBController extends QQController {
 
     }
 
-    @Action(".发消息 {group} {qq} {id}")
+    @Action("\\[!！.]发消息\\ {group} {qq} {id}")
     public void sendMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -169,7 +169,7 @@ public class MsgDBController extends QQController {
         MyYuQ.sendGroupMessage(this.group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
     }
 
-    @Action(".发消息 {qq} {id}")
+    @Action("\\[!！.]发消息\\ {qq} {id}")
     public void sendMsg(long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -186,7 +186,7 @@ public class MsgDBController extends QQController {
         MyYuQ.sendGroupMessage(this.group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
     }
 
-    @Action(".图片url")
+    @Action("\\[!！.]图片url\\")
     public void getImageURL(Message message, ContextSession session){
         reply("请发送图片");
         Message msg = session.waitNextMessage(maxTime);
@@ -207,7 +207,7 @@ public class MsgDBController extends QQController {
 
     }
 
-    @Action(".最近消息 {qq}")
+    @Action("\\[!！.]最近消息\\ {qq}")
     public void newMsg(long qq){
         GroupHistoryMsg groupHistoryMsg = null;
         try{
