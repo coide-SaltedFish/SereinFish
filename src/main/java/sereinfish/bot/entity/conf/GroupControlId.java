@@ -9,6 +9,12 @@ public enum GroupControlId {
     CheckBox_QuitGroupTip,//退群提示
     CheckBox_KickTip,//被踢提示
     CheckBox_AddBlackTip,//拉黑提示
+
+    //编辑框
+    Edit_JoinGroupTip,//进群提示
+    Edit_QuitGroupTip,//退群提示
+    Edit_KickTip,//被踢提示
+    Edit_AddBlackTip,//拉黑提示
     //
     CheckBox_AutoAgreeJoinGroup,//自动同意入群
     CheckBox_QuitJoinBlackList,//退群拉黑
@@ -17,14 +23,9 @@ public enum GroupControlId {
     CheckBox_BlackList,//黑名单功能
     CheckBox_GlobalBlackList,//全局黑名单
     //
+    ComboBox_RCON,//rcon下拉选择
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能
-
-    //编辑框
-    Edit_JoinGroupTip,//进群提示
-    Edit_QuitGroupTip,//退群提示
-    Edit_KickTip,//被踢提示
-    Edit_AddBlackTip,//拉黑提示
 
     //下拉列表
     ComboBox_DataBase,//数据库选择器

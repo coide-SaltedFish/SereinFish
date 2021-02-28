@@ -1,13 +1,18 @@
 package sereinfish.bot.entity.conf;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
+
+import java.io.File;
+import java.io.IOException;
 
 public class GroupConfManager {
-    private Map<Long,GroupConf> groupConfMap = new LinkedHashMap<>();//群聊配置列表
 
     private static GroupConfManager manager;
-    private GroupConfManager(){}
+    private GroupConfManager(){
+        //TODO：从文件加载
+    }
 
     public static GroupConfManager init(){
         manager = new GroupConfManager();
@@ -25,8 +30,14 @@ public class GroupConfManager {
      * 添加新配置
      * @param groupConf
      */
-    public void put(GroupConf groupConf){
-        groupConfMap.put(groupConf.getGroup(),groupConf);
+    public boolean put(GroupConf groupConf){
+        try {
+            write(groupConf);
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),"群[" + groupConf.getGroup() + "]写入群配置失败",e);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -34,6 +45,36 @@ public class GroupConfManager {
      * @param group
      */
     public GroupConf get(long group){
-        return groupConfMap.get(group);
+        GroupConf conf = null;
+        try {
+            conf = read(group);
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),"群[" + group + "]读取群配置失败",e);
+        }
+        if (conf == null){
+            conf = new GroupConf(group).init();
+            put(conf);
+        }
+        return conf;
+    }
+
+    /**
+     * 写入群配置
+     * @param conf
+     */
+    public static void write(GroupConf conf) throws IOException {
+        FileHandle.write(new File(FileHandle.groupDataPath,
+                conf.getGroup() + "/conf.json"),
+                MyYuQ.toJson(conf,GroupConf.class));
+    }
+
+    /**
+     * 读取群配置
+     * @param group
+     * @return
+     */
+    public static GroupConf read(long group) throws IOException {
+        return MyYuQ.toClass(FileHandle.read(new File(FileHandle.groupDataPath,
+                group + "/conf.json")),GroupConf.class);
     }
 }
