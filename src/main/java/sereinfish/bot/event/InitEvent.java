@@ -15,10 +15,12 @@ import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.rcon.RconManager;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.tray.AppTray;
 
 import javax.inject.Inject;
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -59,6 +61,9 @@ public class InitEvent {
         //初始化数据库连接池
         DataBaseManager.init();
         SfLog.getInstance().d(this.getClass(),"数据库连接池管理器初始化完成");
+        //初始化RCON
+        RconManager.init();
+        SfLog.getInstance().d(this.getClass(),"RCON管理器初始化完成");
         //初始化群配置管理器
         GroupConfManager.init();
         SfLog.getInstance().d(this.getClass(),"群配置管理器初始化完成");
@@ -81,6 +86,10 @@ public class InitEvent {
         RepeaterManager.init();
         SfLog.getInstance().d(this.getClass(),"复读管理器初始化完成");
 
+        //设置LookAndFeel
+        lookAndFeel();
+        SfLog.getInstance().d(this.getClass(),"LookAndFeel设置完成");
+
         //显示托盘
         try {
             AppTray.init(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("image/icon_16_16.jpg"))).buildMenu().setTray();
@@ -97,5 +106,26 @@ public class InitEvent {
         SfLog.getInstance().d(this.getClass(),"消息队列初始化完成");
         //显示主窗体
         MainFrame.getMainFrame().setVisible(true);
+        SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
+    }
+
+    /**
+     * 设置LookAndFeel
+     */
+    public static void lookAndFeel() {
+        // Windows风格
+        String lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        //String lookAndFeel = "com.jgoodies.looks.windows.WindowsLookAndFeel";
+        try {
+            UIManager.setLookAndFeel(lookAndFeel);
+        } catch (ClassNotFoundException e) {
+            SfLog.getInstance().e(InitEvent.class,e);
+        } catch (InstantiationException e) {
+            SfLog.getInstance().e(InitEvent.class,e);
+        } catch (IllegalAccessException e) {
+            SfLog.getInstance().e(InitEvent.class,e);
+        } catch (UnsupportedLookAndFeelException e) {
+            SfLog.getInstance().e(InitEvent.class,e);
+        }
     }
 }

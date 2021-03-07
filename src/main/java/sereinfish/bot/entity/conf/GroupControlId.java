@@ -22,11 +22,8 @@ public enum GroupControlId {
     CheckBox_GlobalAutoReply,//全局问答开关
     CheckBox_BlackList,//黑名单功能
     CheckBox_GlobalBlackList,//全局黑名单
+    CheckBox_ReRead,//复读
     //
-    ComboBox_RCON,//rcon下拉选择
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能
-
-    //下拉列表
-    ComboBox_DataBase,//数据库选择器
 }

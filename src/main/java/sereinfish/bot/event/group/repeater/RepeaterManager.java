@@ -2,6 +2,9 @@ package sereinfish.bot.event.group.repeater;
 
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
+import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.util.HashMap;
@@ -60,9 +63,12 @@ public class RepeaterManager {
      */
     public void check(){
         for (Map.Entry<Group,ReMsg> entry:groupArrayListMap.entrySet()){
-            if (!entry.getValue().isRepeater && entry.getValue().num >= n){
-                entry.getValue().isRepeater = true;
-                MyYuQ.sendGroupMessage(entry.getKey(),Message.Companion.toMessageByRainCode(entry.getValue().msg));
+            GroupConf conf = GroupConfManager.getInstance().get(entry.getKey().getId());
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_ReRead).getValue()){
+                if (!entry.getValue().isRepeater && entry.getValue().num >= n){
+                    entry.getValue().isRepeater = true;
+                    MyYuQ.sendGroupMessage(entry.getKey(),Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                }
             }
         }
     }

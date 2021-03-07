@@ -8,6 +8,7 @@ public class FileHandle {
     public static File dataPath = new File("SereinFish/");//数据文件保存路径
 
     public static File dataBasePath = new File(dataPath,"data/database/");//本地数据库文件夹
+    public static File dataBaseConfFile = new File(dataBasePath,"conf/databaseConfigs.json");//数据库配置列表文件
     public static File MessageDataBaseFile = new File(dataBasePath,"Msg.db");//消息数据库文件
 
     public static File configPath = new File(dataPath,"conf/");//配置文件夹路径

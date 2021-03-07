@@ -1,5 +1,10 @@
 package sereinfish.bot.entity.conf;
 
+import sereinfish.bot.database.DataBaseConfig;
+import sereinfish.bot.database.DataBaseManager;
+import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.rcon.RconConf_s;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +15,9 @@ import java.util.Map;
 public class GroupConf {
     private long group;//所属群
     private boolean isEnable;//是否启用群
+    private DataBaseConfig dataBaseConfig;//数据库
+    private RconConf_s rcon;//RCON
+
     private Map<String, ArrayList<Control>> confMaps = new LinkedHashMap<>();
 
     public GroupConf(long group) {
@@ -45,18 +53,48 @@ public class GroupConf {
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitJoinBlackList,"全局问答", false,"自动回复是使用全局问答列表"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_BlackList,"黑名单", false,"启用黑名单功能"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
+        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));
         confMaps.put("群功能开关",toolList);
         //
         ArrayList<Control> rconList = new ArrayList<>();
-        rconList.add(new Control(GroupControlType.ComboBox,GroupControlId.ComboBox_RCON,"RCON",0,"选择要连接的RCON"));
+        rconList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
         confMaps.put("RCON",rconList);
 
         //
         ArrayList<Control> databaseList = new ArrayList<>();
-
         confMaps.put("数据库",databaseList);
 
         return this;
+    }
+
+    /**
+     * 得到控件
+     * @param id
+     * @return
+     */
+    public Control getControl(GroupControlId id){
+        for (Map.Entry<String,ArrayList<Control>> entry:confMaps.entrySet()){
+            for (Control control:entry.getValue()){
+                if (control.getId() == id){
+                    return control;
+                }
+            }
+        }
+        return null;
+    }
+
+    public DataBase getDataBase(){
+        if (dataBaseConfig == null){
+            return null;
+        }
+        return DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID());
+    }
+
+    public boolean isDataBaseEnable(){
+        if (dataBaseConfig == null){
+            return false;
+        }
+        return DataBaseManager.getInstance().exist(dataBaseConfig.getID());
     }
 
     public long getGroup() {
@@ -67,21 +105,39 @@ public class GroupConf {
         return isEnable;
     }
 
+    public void setEnable(boolean enable) {
+        isEnable = enable;
+    }
+
     public Map<String, ArrayList<Control>> getConfMaps() {
         return confMaps;
+    }
+
+    public RconConf_s getRcon() {
+        return rcon;
+    }
+
+    public void setRcon(RconConf_s rcon) {
+        this.rcon = rcon;
+    }
+
+    public DataBaseConfig getDataBaseConfig() {
+        return dataBaseConfig;
+    }
+
+    public void setDataBaseConfig(DataBaseConfig dataBaseConfig) {
+        this.dataBaseConfig = dataBaseConfig;
     }
 
     /**
      * 组件
      */
-    public class Control{
+    public class Control<T>{
         GroupControlType type;//组件类型
         GroupControlId id;//组件id
         String name;//组件名称
         Object value;//值
         String tip;//组件提示
-
-        ArrayList<String> list = new ArrayList<>();//为下拉列表组件提供的变量
 
         public Control() {
         }
@@ -92,15 +148,6 @@ public class GroupConf {
             this.name = name;
             this.value = value;
             this.tip = tip;
-        }
-
-        public Control(GroupControlType type, GroupControlId id, String name, Object value, String tip, ArrayList<String> list) {
-            this.type = type;
-            this.id = id;
-            this.name = name;
-            this.value = value;
-            this.tip = tip;
-            this.list = list;
         }
 
         public GroupControlId getId() {
@@ -123,14 +170,8 @@ public class GroupConf {
             return tip;
         }
 
-        public ArrayList<String> getList() {
-            return list;
-        }
-
         public GroupControlType getType() {
             return type;
         }
-
-
     }
 }

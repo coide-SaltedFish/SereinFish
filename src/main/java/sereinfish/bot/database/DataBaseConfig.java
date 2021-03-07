@@ -1,5 +1,7 @@
 package sereinfish.bot.database;
 
+import sereinfish.bot.myYuq.MyYuQ;
+
 /**
  * 数据库配置信息
  */
@@ -31,6 +33,10 @@ public class DataBaseConfig {
 
     public int getState() {
         return state;
+    }
+
+    public String getID(){
+        return MyYuQ.stringToMD5(state+account+password+baseName+ip+port);
     }
 
     public void setState(int state) {

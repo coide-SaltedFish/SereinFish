@@ -21,5 +21,6 @@ public class GroupPanel extends JTabbedPane {
         setBorder(BorderFactory.createTitledBorder("群[" + group + "]"));
 
         add("群配置",new GroupConfPanel(GroupConfManager.getInstance().get(group)));
+        add("数据库",new JPanel());//TODO:
     }
 }

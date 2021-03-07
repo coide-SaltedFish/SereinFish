@@ -120,7 +120,6 @@ public class MyYuQ {
      * fromName：操作qq名称
      * @return
      */
-    public static int VAR_NULL = -1;
     public static String messageVariable(String msg, Member sender, Member operator, Group group){
         //进行变量替换
         if (sender != null){
@@ -134,7 +133,9 @@ public class MyYuQ {
         }
         //group
         if (group != null){
-            msg = replace(msg,"<group>",group.getId()+"");
+            msg = replace(msg,"<groupID>",group.getId()+"");
+            msg = replace(msg,"<groupName>",group.getName());
+            msg = replace(msg,"<group>",group.toString());
         }
         return msg;
     }

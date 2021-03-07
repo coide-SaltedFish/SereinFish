@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 多个群的卡片面板
@@ -14,6 +17,7 @@ import java.awt.event.MouseEvent;
 public class GroupsCardPanel extends JPanel {
     private CardLayout cardLayout;
     private GroupListPanel groupListPanel;//群组列表面板
+    private Map<Long,Long> groups = new LinkedHashMap<>();
 
     public GroupsCardPanel(GroupListPanel groupListPanel) {
         this.groupListPanel = groupListPanel;
@@ -27,6 +31,7 @@ public class GroupsCardPanel extends JPanel {
         for (Group group: MyYuQ.getGroups()){
             GroupPanel groupPanel = new GroupPanel(group.getId());
             add(groupPanel,group.getId() + "");
+            groups.put(group.getId(),group.getId());
         }
 
         //列表监听
@@ -36,6 +41,11 @@ public class GroupsCardPanel extends JPanel {
                 super.mouseClicked(e);
                 //得到群
                 Group group = (Group)groupListPanel.getGroupList().getModel().getElementAt(groupListPanel.getGroupList().getSelectedIndex());
+                if (!groups.containsKey(group.getId())){
+                    GroupPanel groupPanel = new GroupPanel(group.getId());
+                    add(groupPanel,group.getId() + "");
+                    groups.put(group.getId(),group.getId());
+                }
                 cardLayout.show(GroupsCardPanel.this,group.getId() + "");
             }
         });

@@ -6,5 +6,4 @@ package sereinfish.bot.entity.conf;
 public enum  GroupControlType {
     CheckBox,//单选框
     Edit,//编辑框
-    ComboBox//下拉框
 }

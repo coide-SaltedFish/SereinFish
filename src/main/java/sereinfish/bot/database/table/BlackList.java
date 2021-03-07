@@ -1,0 +1,64 @@
+package sereinfish.bot.database.table;
+
+import sereinfish.bot.database.dao.annotation.DBHandle;
+import sereinfish.bot.database.dao.annotation.Field;
+import sereinfish.bot.database.dao.annotation.Primary;
+
+import java.util.Date;
+
+/**
+ * 黑名单
+ */
+@DBHandle(tableName = "blacklist")
+public class BlackList {
+    @Field(name = "time",type = "bigint", isNotNull = true)
+    @Primary
+    private long time;
+
+    @Field(name = "qq", type = "bigint", isNotNull = true)
+    private long qq;
+
+    @Field(name = "group_num", type = "bigint", isNotNull = false)
+    private long group;
+
+    @Field(name = "remarks", type = "nvarchar", size = 4000, isChar = true, isNotNull = false)
+    private String remarks;//备注
+
+    public BlackList() {
+    }
+
+    public BlackList(long time, long qq, long group, String remarks) {
+        this.time = time;
+        this.qq = qq;
+        this.group = group;
+        this.remarks = remarks;
+    }
+
+    public BlackList(Date time, long qq, long group, String remarks) {
+        this.time = time.getTime();
+        this.qq = qq;
+        this.group = group;
+        this.remarks = remarks;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public Date getDate(){
+        Date date = new Date(time);
+        return date;
+    }
+
+    public long getQq() {
+        return qq;
+    }
+
+    public long getGroup() {
+        return group;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+}

@@ -1,6 +1,8 @@
 package sereinfish.bot.ui.list.cellRenderer;
 
 import com.icecreamqaq.yuq.entity.Group;
+import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.ImageHandle;
 import sereinfish.bot.ui.list.CellManager;
 
@@ -18,6 +20,7 @@ public class GroupListCellRenderer implements ListCellRenderer{
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Group group = (Group)value;//得到群组对象
+        GroupConf groupConf = GroupConfManager.getInstance().get(group.getId());
 
         if (cellManager.exist(index)){
             JPanel jPanel = cellManager.get(index);
@@ -31,10 +34,9 @@ public class GroupListCellRenderer implements ListCellRenderer{
             }
             //设置群组显示的名字
             String name = group.getName();
-            //TODO:群组配置
-//            if (!groupConf.isEnable()){
-//                name += "[未启用]";
-//            }
+            if (!groupConf.isEnable()){
+                name += "[未启用]";
+            }
             JLabel label = (JLabel) cellManager.getControl(index,0);
             label.setText(name);
 
@@ -67,10 +69,9 @@ public class GroupListCellRenderer implements ListCellRenderer{
         panel.setLayout(new BorderLayout(0, 0));
 
         String name = group.getName();
-        //TODO:群组配置
-//        if (!groupConf.isEnable()){
-//            name += "[未启用]";
-//        }
+        if (!groupConf.isEnable()){
+            name += "[未启用]";
+        }
         JLabel lbl_group_name = new JLabel(name);
         lbl_group_name.setName("name");
         lbl_group_name.setOpaque(false);
