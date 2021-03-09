@@ -47,10 +47,11 @@ public class DAO<E>{
                 stringBuilder.append(dField.name() + " ");//名称
                 stringBuilder.append(dField.type());//类型
                 if(dField.size() > -1){
-                    stringBuilder.append("(" + dField.size() + ") ");//大小
-                }else {
-                    stringBuilder.append(" ");
+                    stringBuilder.append("(" + dField.size() + ")");//大小
+                }else if (dField.size() == SizeEnum.MAX){
+                    stringBuilder.append("(max)");//大小
                 }
+                stringBuilder.append(" ");
                 //主键
                 if (field.isAnnotationPresent(Primary.class)){
                     stringBuilder.append("PRIMARY KEY ");

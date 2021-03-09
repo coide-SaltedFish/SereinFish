@@ -3,6 +3,7 @@ package sereinfish.bot.database.table;
 import sereinfish.bot.database.dao.annotation.DBHandle;
 import sereinfish.bot.database.dao.annotation.Field;
 import sereinfish.bot.database.dao.annotation.Primary;
+import sereinfish.bot.database.dao.annotation.SizeEnum;
 
 import java.util.Date;
 
@@ -21,7 +22,7 @@ public class BlackList {
     @Field(name = "group_num", type = "bigint", isNotNull = false)
     private long group;
 
-    @Field(name = "remarks", type = "nvarchar", size = 4000, isChar = true, isNotNull = false)
+    @Field(name = "remarks", type = "nvarchar", size = SizeEnum.MAX, isChar = true, isNotNull = false)
     private String remarks;//备注
 
     public BlackList() {

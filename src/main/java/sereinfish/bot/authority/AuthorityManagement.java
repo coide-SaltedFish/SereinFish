@@ -49,6 +49,11 @@ public class AuthorityManagement {
             sfLog.w(this.getClass(),"无法获取发送者信息：null");
             return false;
         }
+        try {
+            readAuthorityList();//得到权限列表
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), "权限列表更新失败，使用缓存中", e);
+        }
 
         if (authority == NORMAL){//普通权限
             return true;

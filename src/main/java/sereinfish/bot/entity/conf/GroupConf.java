@@ -50,7 +50,7 @@ public class GroupConf {
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoAgreeJoinGroup,"自动同意入群", false,"在有人申请入群时自动同意申请"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitJoinBlackList,"退群拉黑", false,"在有人退群时自动拉入黑名单"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoReply,"自动回复", false,"自动查表根据关键词进行回复"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitJoinBlackList,"全局问答", false,"自动回复是使用全局问答列表"));
+        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalAutoReply,"全局问答", false,"自动回复是使用全局问答列表"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_BlackList,"黑名单", false,"启用黑名单功能"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));

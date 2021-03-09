@@ -62,7 +62,7 @@ public class MsgDBController extends QQController {
 
         try {
             //TODO:更改发送者为回复的消息的发送者
-            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),sender.getId(),message.getReply().getId());
+            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),message.getReply().getId());
             if (groupHistoryMsg == null){
                 MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到该消息").toMessage());
                 return;
@@ -80,6 +80,24 @@ public class MsgDBController extends QQController {
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,qq,id);
+            if (groupHistoryMsg == null){
+                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
+                return;
+            }
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
+            return;
+        }
+        MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
+        return;
+    }
+
+    @Action("\\[!！.]读消息\\ {id}")
+    public void readMsg(int id){
+        GroupHistoryMsg groupHistoryMsg = null;
+        try {
+            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),id);
             if (groupHistoryMsg == null){
                 MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
                 return;

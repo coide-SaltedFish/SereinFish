@@ -110,6 +110,26 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
     }
 
     /**
+     * 查询记录
+     * @param group
+     * @param id
+     * @return
+     */
+    public GroupHistoryMsg query(long group, int id) throws SQLException {
+        PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement("SELECT * FROM " + getTableName() +
+                " Where group_num = ? AND id = ?");
+        preparedStatement.setLong(1,group);
+        preparedStatement.setInt(2,id);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()){
+            return new GroupHistoryMsg(resultSet.getLong("time"),resultSet.getLong("group_num"),resultSet.getLong("qq"),
+                    resultSet.getInt("id"),resultSet.getString("msg"));
+        }
+        return null;
+    }
+
+    /**
      * 查询最后一条消息
      * @param group
      * @param qq

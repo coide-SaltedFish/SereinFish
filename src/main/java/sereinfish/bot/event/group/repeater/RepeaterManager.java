@@ -17,7 +17,7 @@ public class RepeaterManager {
     //TODO:添加配置文件
     private int n = 3;//当消息重复3次复读
 
-    private Map<Group, ReMsg> groupArrayListMap = new HashMap<>();//消息列表
+    private Map<Long, ReMsg> groupArrayListMap = new HashMap<>();//消息列表
 
     private static RepeaterManager repeaterManager;
     private RepeaterManager(){
@@ -41,7 +41,7 @@ public class RepeaterManager {
      * @param group
      * @param message
      */
-    public void add(Group group, Message message){
+    public void add(long group, Message message){
         String msg = Message.Companion.toCodeString(message);
 
         if (groupArrayListMap.containsKey(group)){
@@ -62,12 +62,14 @@ public class RepeaterManager {
      * 检查是否该复读了
      */
     public void check(){
-        for (Map.Entry<Group,ReMsg> entry:groupArrayListMap.entrySet()){
-            GroupConf conf = GroupConfManager.getInstance().get(entry.getKey().getId());
+        for (Map.Entry<Long,ReMsg> entry:groupArrayListMap.entrySet()){
+            GroupConf conf = GroupConfManager.getInstance().get(entry.getKey());
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_ReRead).getValue()){
                 if (!entry.getValue().isRepeater && entry.getValue().num >= n){
                     entry.getValue().isRepeater = true;
-                    MyYuQ.sendGroupMessage(entry.getKey(),Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                    if (MyYuQ.getYuQ().getGroups().containsKey(entry.getKey())){
+                        MyYuQ.sendGroupMessage(MyYuQ.getYuQ().getGroups().get(entry.getKey()),Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                    }
                 }
             }
         }

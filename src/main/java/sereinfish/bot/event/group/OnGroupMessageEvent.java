@@ -6,7 +6,9 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
+import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.handle.BlackListDao;
+import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.conf.GroupConf;
@@ -39,6 +41,20 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
+        }else {
+            //自动回复
+            if (conf.isDataBaseEnable()){
+                try {
+                    ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
+                    String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
+                    if (str != null){
+                        MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(str));
+                        SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
+                    }
+                } catch (SQLException e) {
+                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+                }
+            }
         }
     }
 
