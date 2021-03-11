@@ -79,7 +79,7 @@ public class DBReplyPanel extends JPanel {
     private void build(){
         JSplitPane splitPane = new JSplitPane();
         splitPane.setDividerSize(2);
-        splitPane.setDividerLocation(250);
+        splitPane.setDividerLocation(300);
         contentPane.add(splitPane,BorderLayout.CENTER);
         splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
@@ -182,13 +182,11 @@ public class DBReplyPanel extends JPanel {
      */
     private void loadTable(){
         try {
-            replies = replyDao.query();
+            replies = replyDao.query(conf.getGroup());
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
         } catch (IllegalAccessException e) {
             SfLog.getInstance().e(this.getClass(),e);
-        } catch (InstantiationException e) {
-            SfLog.getInstance().e(this.getClass(), e);
         }
         if (model == null) {
             //如果表格数据模型为null，就新建模型并应用

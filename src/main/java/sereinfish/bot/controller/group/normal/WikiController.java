@@ -1,6 +1,7 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
+import com.IceCreamQAQ.Yu.annotation.Before;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
@@ -16,6 +17,11 @@ import java.net.URLEncoder;
  */
 @GroupController
 public class WikiController {
+
+    @Before
+    public void before(){
+
+    }
 
     @Action("\\[!！.]wiki\\ {key}")
     public Message wiki(String key){

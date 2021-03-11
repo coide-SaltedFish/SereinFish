@@ -127,6 +127,41 @@ public class ReplyDao extends DAO<Reply> {
     }
 
     /**
+     * 查询本群词库
+     * @param group
+     * @return
+     * @throws SQLException
+     */
+    public ArrayList<Reply> query(long group) throws SQLException, IllegalAccessException {
+        ArrayList<Reply> replies = new ArrayList<>();
+        String sql = "SELECT * FROM " + getTableName() + " WHERE group_num = ?";
+        PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement(sql);
+        preparedStatement.setLong(1, group);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        //读取
+        while(resultSet.next()) {
+            Reply record = new Reply();
+
+            for (Field field:record.getClass().getDeclaredFields()){
+                if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                    sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+                    try{
+                        field.set(record,resultSet.getObject(dField.name()));
+                    }catch (Exception e){
+                        field.setAccessible(true);
+                        field.set(record,resultSet.getObject(dField.name()));
+                    }
+                }
+            }
+
+            replies.add(record);
+        }
+
+        return replies;
+    }
+
+    /**
      * 检测关键词是否存在
      * @param group
      * @param key
