@@ -12,8 +12,8 @@ import java.util.Date;
  */
 @DBHandle(tableName = "blacklist")
 public class BlackList {
-    @Field(name = "time",type = "bigint", isNotNull = true)
     @Primary
+    @Field(name = "time",type = "bigint", isNotNull = true)
     private long time;
 
     @Field(name = "qq", type = "bigint", isNotNull = true)

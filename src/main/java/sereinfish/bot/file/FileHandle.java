@@ -18,6 +18,7 @@ public class FileHandle {
     public static File groupHeadCachePath = new File(cachePath,"group/head/");//群头像缓存路径
     public static File memberHeadCachePath = new File(cachePath,"member/head/");//qq头像缓存路径
     public static File gameInfoCacheFile = new File(cachePath,"gameInfo.json");//玩家信息缓存
+    public static File imageCachePath = new File(cachePath,"image/");//网络图片缓存
 
     public static File groupDataPath = new File(dataPath,"data/group/");//群数据文件路径
 

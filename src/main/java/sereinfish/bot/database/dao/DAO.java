@@ -208,13 +208,15 @@ public class DAO<E>{
             E record = (E)table.newInstance();
 
             for (Field field:record.getClass().getDeclaredFields()){
-                sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
-                try{
-                    field.set(record,resultSet.getObject(dField.name()));
-                }catch (Exception e){
-                    field.setAccessible(true);
-                    field.set(record,resultSet.getObject(dField.name()));
-                }
+               if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                   sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+                   try{
+                       field.set(record,resultSet.getObject(dField.name()));
+                   }catch (Exception e){
+                       field.setAccessible(true);
+                       field.set(record,resultSet.getObject(dField.name()));
+                   }
+               }
             }
 
             list.add(record);
@@ -339,5 +341,9 @@ public class DAO<E>{
 
     public DataBase getDataBase() {
         return dataBase;
+    }
+
+    public Class getType(){
+        return table;
     }
 }

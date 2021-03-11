@@ -1,6 +1,8 @@
 package sereinfish.bot.cache;
 
 import com.google.gson.reflect.TypeToken;
+import sereinfish.bot.entity.lolicon.Lolicon;
+import sereinfish.bot.entity.lolicon.LoliconManager;
 import sereinfish.bot.entity.mc.GamerInfo;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
@@ -11,6 +13,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -111,6 +114,38 @@ public class CacheManager {
         BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
         bufferedImage.createGraphics().drawString("错误",0,0);
         return bufferedImage;
+    }
+
+    /**Lolicon**/
+
+    /**
+     * 得到一个Lolicon图片
+     * @param id
+     * @param setu
+     * @return
+     */
+    public static File getLoliconImage(int id, Lolicon.Setu setu) throws FileNotFoundException {
+        File file = setu.isR18() ? new File(FileHandle.imageCachePath,"R18/lolicon_" + id) : new File(FileHandle.imageCachePath,"lolicon_" + id);
+        SfLog.getInstance().d(CacheManager.class,"图片获取：" + file);
+        if (!file.getParentFile().exists()){
+            file.getParentFile().mkdirs();
+        }
+        if (file.exists() && file.isFile()){
+            //从缓存获取
+            return file;
+        }else {
+            //从网络获取
+            try {
+                LoliconManager.download(setu.getUrl(),file);
+                return file;
+            } catch (IOException e) {
+                SfLog.getInstance().e(CacheManager.class,"图片下载失败：" + setu.getUrl(),e);
+            } catch (Exception e) {
+                SfLog.getInstance().e(CacheManager.class,"图片下载失败：" + setu.getUrl(),e);
+            }
+        }
+        //获取失败，返回一个错误图片
+        throw new FileNotFoundException("文件未找到：" + file);
     }
 
     /**关于游戏**/

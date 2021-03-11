@@ -1,8 +1,10 @@
 package sereinfish.bot.file;
 
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -29,7 +31,7 @@ public class ImageHandle {
      * @return
      */
     public static Image getMemberHeadImage(long qq,int size){
-        return getHeadImage(CacheManager.getMemberHeadImage(MyYuQ.getYuQ().getBotId()),size,size);
+        return getHeadImage(CacheManager.getMemberHeadImage(qq),size,size);
     }
 
     /**
@@ -69,5 +71,38 @@ public class ImageHandle {
         return formatAvatarImage;
     }
 
+    /**
+     * Image 转 Buf
+     * @param image
+     * @return
+     */
+    public static BufferedImage toBufferedImage(Image image) {
+        if (image instanceof BufferedImage) {
+            return (BufferedImage)image;
+        }
+        image = new ImageIcon(image).getImage();
+        BufferedImage bimage = null;
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        try {
+            int transparency = Transparency.OPAQUE;
+            GraphicsDevice gs = ge.getDefaultScreenDevice();
+            GraphicsConfiguration gc = gs.getDefaultConfiguration();
+            bimage = gc.createCompatibleImage(
+                    image.getWidth(null), image.getHeight(null), transparency);
+        } catch (HeadlessException e) {
+            SfLog.getInstance().e(ImageHandle.class,e);
+        }
+
+        if (bimage == null) {
+            int type = BufferedImage.TYPE_INT_RGB;
+            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+        }
+        Graphics g = bimage.createGraphics();
+
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+
+        return bimage;
+    }
 
 }

@@ -23,6 +23,13 @@ public enum GroupControlId {
     CheckBox_BlackList,//黑名单功能
     CheckBox_GlobalBlackList,//全局黑名单
     CheckBox_ReRead,//复读
+    //setu
+    CheckBox_SetuEnable,//是否启用setu
+    Edit_SetuKey,//API Key
+    CheckBox_SetuR18,//是否启用R18
+    CheckBox_PlainAndR18,//混合模式
+    CheckBox_LocalImage,//本地图片
+    Button_jumpLolicon,//跳转至lolicon
     //
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能

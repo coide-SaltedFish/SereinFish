@@ -80,4 +80,8 @@ public class MsgController {
         MyYuQ.sendGroupMessage(group,MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage());
     }
 
+    @Action("\\img_\\{9F900F08-EAF5-DC06-977F-DA1450846F68\\}.jpg\\")
+    public void image(){
+        //MyYuQ.sendGroupMessage(group,"123");
+    }
 }

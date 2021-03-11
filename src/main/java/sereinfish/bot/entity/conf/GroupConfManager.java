@@ -11,7 +11,6 @@ public class GroupConfManager {
 
     private static GroupConfManager manager;
     private GroupConfManager(){
-        //TODO：从文件加载
     }
 
     public static GroupConfManager init(){

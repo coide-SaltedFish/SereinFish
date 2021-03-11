@@ -1,4 +1,6 @@
-package sereinfish.bot.rcon;
+package sereinfish.bot.net.rcon;
+
+import sereinfish.bot.myYuq.MyYuQ;
 
 public class RconConf_s {
     String ip;
@@ -9,6 +11,10 @@ public class RconConf_s {
         this.ip = ip;
         this.port = port;
         this.password = password;
+    }
+
+    public String getID(){
+        return MyYuQ.stringToMD5(ip+password+port);
     }
 
     public String getIp() {

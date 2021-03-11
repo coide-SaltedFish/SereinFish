@@ -1,6 +1,5 @@
-package sereinfish.bot.ui.frame;
+package sereinfish.bot.ui.frame.select;
 
-import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.ui.list.CellManager;

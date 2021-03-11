@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class MyYuQ {
+    public static boolean isEnable = false;//功能启用标志
     public static final String appName = "SereinFish Bot";
     public static final int version = 100254;
     public static final String versionName = "v_0.0.25";
@@ -154,6 +155,19 @@ public class MyYuQ {
     }
 
     /**
+     * 发送群消息
+     * @param group
+     * @param message
+     */
+    public static boolean sendGroupMessage(Group group, String message){
+        if(group.sendMessage(mif.text(message).toMessage()).getId() < 0){
+            group.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
+            //TODO:转图片发送
+        }
+        return true;
+    }
+
+    /**
      * 发送消息
      * @param contact
      * @param message
@@ -161,6 +175,17 @@ public class MyYuQ {
     public static boolean sendMessage(Contact contact, Message message){
         if(contact.sendMessage(message).getId() < 0){
             contact.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
+            //TODO:转图片发送
+        }
+        return true;
+    }
+
+    /**
+     * 发送消息
+     */
+    public static boolean sendMessage(Member sender, Message message){
+        if(sender.sendMessage(message).getId() < 0){
+            sender.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
             //TODO:转图片发送
         }
         return true;

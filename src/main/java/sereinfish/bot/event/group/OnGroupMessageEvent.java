@@ -27,6 +27,13 @@ import java.util.Date;
 @EventListener
 public class OnGroupMessageEvent {
 
+    @Event
+    public void messageEvent(MessageEvent event){
+        if (!MyYuQ.isEnable){
+            event.setCancel(true);
+        }
+    }
+
     /**
      * 群消息记录
      * @param event
@@ -54,6 +61,10 @@ public class OnGroupMessageEvent {
                 } catch (SQLException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 }
+            }
+            //lolicon
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_SetuEnable).getValue()){
+
             }
         }
     }
@@ -185,9 +196,45 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         //自动同意入群
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_AutoAgreeJoinGroup).getValue()){
-            //TODO:黑名单验证
-            event.setAccept(true);
-            event.setCancel(true);
+            //黑名单验证
+            if (!conf.isDataBaseEnable()){
+                MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库未启用，自动同意入群已停止");
+            }else {
+                try {
+                    BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
+                    if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
+                        //全局黑名单
+                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_GlobalBlackList).getValue()){
+                            if(blackListDao.exist(event.getQq().getId())){
+                                //拒绝
+                                event.setAccept(false);
+                                event.setCancel(true);
+                                MyYuQ.sendGroupMessage(event.getGroup(),"[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                        ")，尝试加入本群，已自动拒绝");
+                            }else {
+                                //同意
+                                event.setAccept(true);
+                                event.setCancel(true);
+                            }
+                        }else {
+                            if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
+                                //拒绝
+                                event.setAccept(false);
+                                event.setCancel(true);
+                                MyYuQ.sendGroupMessage(event.getGroup(),"[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                        ")，尝试加入本群，已自动拒绝");
+                            }else {
+                                //同意
+                                event.setAccept(true);
+                                event.setCancel(true);
+                            }
+                        }
+                    }
+                } catch (SQLException e) {
+                    MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库错误：" + e.getMessage());
+                }
+
+            }
         }
     }
 }

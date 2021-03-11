@@ -1,6 +1,6 @@
-package sereinfish.bot.rcon;
+package sereinfish.bot.net.rcon;
 
-import sereinfish.bot.rcon.ex.AuthenticationException;
+import sereinfish.bot.net.rcon.ex.AuthenticationException;
 
 import java.io.IOException;
 import java.net.Socket;

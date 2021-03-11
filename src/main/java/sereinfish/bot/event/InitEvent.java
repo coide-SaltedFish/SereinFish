@@ -7,7 +7,6 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.conf.GroupConfManager;
@@ -15,7 +14,7 @@ import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
-import sereinfish.bot.rcon.RconManager;
+import sereinfish.bot.net.rcon.RconManager;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.tray.AppTray;
 
@@ -107,6 +106,9 @@ public class InitEvent {
         //显示主窗体
         MainFrame.getMainFrame().setVisible(true);
         SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
+
+        //bot开始处理消息
+        MyYuQ.isEnable = true;
     }
 
     /**

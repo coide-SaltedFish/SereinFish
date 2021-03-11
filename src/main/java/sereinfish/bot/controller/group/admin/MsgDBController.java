@@ -61,7 +61,6 @@ public class MsgDBController extends QQController {
         }
 
         try {
-            //TODO:更改发送者为回复的消息的发送者
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),message.getReply().getId());
             if (groupHistoryMsg == null){
                 MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到该消息").toMessage());

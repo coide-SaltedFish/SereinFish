@@ -35,6 +35,7 @@ public class ReplyController extends QQController {
     private GroupConf conf;
 
     private int maxTime = 25000;
+    int page_num = 4;//一页的记录数
     /**
      * 权限检查
      */
@@ -118,6 +119,33 @@ public class ReplyController extends QQController {
             StringBuilder stringBuilder = new StringBuilder("关键词" + key + "记录查找如下（" + page + "/" + page_max + "）:\n");
             stringBuilder.append("ID\tKEY\tReply");
             for (int i = page_num * (page - 1); i < replies.size() && i < page_num * (page - 1) + page_num; i++){
+                Reply reply = replies.get(i);
+                stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
+            }
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(stringBuilder.toString()).toMessage());
+        } catch (SQLException e) {
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        } catch (IllegalAccessException e) {
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+    }
+
+    @Action("\\[!！.]问答查询\\ \"{key}\"")
+    public void queryReply(String key){
+        try {
+            ReplyDao replyDao = new ReplyDao(dataBase);
+            ArrayList<Reply> replies = replyDao.query(key, group.getId());
+            if (replies.size() == 0){
+                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage());
+                return;
+            }
+
+            int page_max = replies.size() / page_num + (replies.size() % page_num == 0 ? 0:1);
+            StringBuilder stringBuilder = new StringBuilder("关键词" + key + "记录查找如下（1/" + page_max + "）:\n");
+            stringBuilder.append("ID\tKEY\tReply");
+            for (int i = 0; i < replies.size() && i < page_num; i++){
                 Reply reply = replies.get(i);
                 stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
             }

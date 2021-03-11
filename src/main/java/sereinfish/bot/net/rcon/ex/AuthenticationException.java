@@ -1,4 +1,4 @@
-package sereinfish.bot.rcon.ex;
+package sereinfish.bot.net.rcon.ex;
 
 public class AuthenticationException extends Exception {
 

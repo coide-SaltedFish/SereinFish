@@ -1,25 +1,23 @@
 package sereinfish.bot.ui.panel;
 
-import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.conf.GroupControlType;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.EditFrame;
-import sereinfish.bot.ui.frame.SelectDataBaseFrame;
+import sereinfish.bot.ui.frame.select.SelectDataBaseFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -93,6 +91,26 @@ public class GroupConfPanel extends JPanel {
                             });
                             editFrame.setText((String) control.getValue());
                             editFrame.setVisible(true);
+                        }
+                    });
+                    panel.add(button);
+                }else if (control.getType() == GroupControlType.Button){
+                    //按钮
+                    JButton button = new JButton(control.getName());
+                    button.setToolTipText(control.getTip());
+                    button.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent event) {
+                            //放着先
+                            Desktop desktop=Desktop.getDesktop();
+                            String url = (String) control.getValue();
+                            try {
+                                desktop.browse(new URI(url));
+                            } catch (IOException e) {
+                                SfLog.getInstance().e(this.getClass(), url, e);
+                            } catch (URISyntaxException e) {
+                                SfLog.getInstance().e(this.getClass(), url, e);
+                            }
                         }
                     });
                     panel.add(button);

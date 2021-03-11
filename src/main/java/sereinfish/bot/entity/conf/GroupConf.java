@@ -3,8 +3,16 @@ package sereinfish.bot.entity.conf;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
-import sereinfish.bot.rcon.RconConf_s;
+import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.net.rcon.RconConf_s;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,6 +63,15 @@ public class GroupConf {
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
         toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));
         confMaps.put("群功能开关",toolList);
+        //
+        ArrayList<Control> setuList = new ArrayList<>();//setu
+        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
+        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuR18,"R18",false,"Lolicon API R18"));
+        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_PlainAndR18,"混合模式",false,"R18与非R8混合"));
+        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LocalImage,"本地模式",false,"额度用完后使用缓存的图片"));
+        setuList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
+        setuList.add(new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
+        confMaps.put("SETU",setuList);
         //
         ArrayList<Control> rconList = new ArrayList<>();
         rconList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
