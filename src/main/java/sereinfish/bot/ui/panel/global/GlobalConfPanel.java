@@ -13,6 +13,7 @@ public class GlobalConfPanel extends JPanel {
 
     private void build(){
         setLayout(new BorderLayout());
+
         add(new GlobalTabbdPanel(),BorderLayout.CENTER);
     }
 }

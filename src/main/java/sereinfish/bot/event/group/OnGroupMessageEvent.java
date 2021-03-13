@@ -110,6 +110,7 @@ public class OnGroupMessageEvent {
             String tip = (String) conf.getControl(GroupControlId.Edit_JoinGroupTip).getValue();
             if (!tip.trim().equals("")){
                 MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
+                return;
             }
         }
 
@@ -223,6 +224,7 @@ public class OnGroupMessageEvent {
                 //黑名单验证
                 if (!conf.isDataBaseEnable()){
                     MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库未启用，自动同意入群已停止");
+                    return;
                 }else {
                     try {
                         BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
@@ -241,6 +243,7 @@ public class OnGroupMessageEvent {
                                     event.setCancel(true);
                                     SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
                                 }
+                                return;
                             }else {
                                 if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
                                     //拒绝
@@ -254,6 +257,7 @@ public class OnGroupMessageEvent {
                                     event.setCancel(true);
                                     SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
                                 }
+                                return;
                             }
                         }
                     } catch (SQLException e) {
@@ -266,6 +270,7 @@ public class OnGroupMessageEvent {
                 event.setAccept(true);
                 event.setCancel(true);
                 SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                return;
             }
         }else {
             SfLog.getInstance().d(this.getClass(),"自动同意入群未开启");

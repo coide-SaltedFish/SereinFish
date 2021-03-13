@@ -1,7 +1,5 @@
 package sereinfish.bot.ui.panel.table.database;
 
-import sereinfish.bot.database.table.BlackList;
-import sereinfish.bot.database.table.Reply;
 import sereinfish.bot.mlog.SfLog;
 
 import javax.swing.table.AbstractTableModel;

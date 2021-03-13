@@ -6,10 +6,8 @@ import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 
 import static sereinfish.bot.database.DataBaseConfig.*;
 
@@ -100,6 +98,28 @@ public class DataBase {
     public void close() throws SQLException {
         statement.close();
         connection.close();
+    }
+
+    /**
+     * 得到所有表名称
+     * @return
+     */
+    public String[] getTableNames() throws SQLException {
+        ArrayList<String> names = new ArrayList<>();
+        String sql = "";
+        if (dataBaseConfig.getState() == SQL_SERVER){
+            sql = "SELECT Name FROM SysObjects Where XType='U' ORDER BY Name";
+        }else if(dataBaseConfig.getState() == MY_SQL){
+            sql = "SELECT TB.TABLE_NAME FROM INFORMATION_SCHEMA.TABLES TB Where TB.TABLE_SCHEMA = '" + dataBaseConfig.getBaseName() + "'";
+        }else if(dataBaseConfig.getState() == SQLITE){
+
+        }
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            names.add(resultSet.getString(1));
+        }
+        return names.toArray(new String[0]);
     }
 
     public DataBaseConfig getDataBaseConfig() {
