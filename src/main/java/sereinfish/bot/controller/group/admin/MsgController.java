@@ -63,18 +63,6 @@ public class MsgController {
         MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(str.toString()).toMessage());
     }
 
-    @Action("\\[!！.]服务器规则\\")
-    public Message gameRules(){
-        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("Harmoland-服务器规则","桦木原-Harmoland 是一个正版 Minecraft Java Edition 服务器。我们以玩家们和谐友爱为宗旨，以纯净生存为核心玩法。",
-                "https://harmo.redlnn.top/logo.png","https://harmo.redlnn.top/%E6%A1%A6%E6%9C%A8%E5%8E%9FHarmoland_%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%84%E5%88%99_20200925.pdf")).toMessage();
-    }
-
-    @Action("\\[!！.]官网\\")
-    public Message harmoland(){
-        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("桦木原","桦木原Harmoland 是一个正版 Minecraft Java Edition 服务器。我们以玩家们和谐友爱为宗旨，以纯净生存为核心玩法。",
-                "https://harmo.redlnn.top/logo.png","https://harmo.redlnn.top")).toMessage();
-    }
-
     @Action("\\[!！.]json\\ \"{title}\"\"{desc}\"\"{preview}\"\"{jumpUrl}\"")
     public void jsonTest(String title, String desc, String preview, String jumpUrl){
         MyYuQ.sendGroupMessage(group,MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage());

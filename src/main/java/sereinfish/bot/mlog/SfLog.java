@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
  * 日志系统
  */
 public class SfLog {
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static SfLog sfLog = null;
     private SfLog(){}
@@ -30,7 +30,7 @@ public class SfLog {
      * @param message
      */
     public void d(Class clazz,Object message){
-        logger.debug(clazz.getSimpleName() + "::" + message);
+        logger.info(clazz.getSimpleName() + "::" + message);
     }
 
     /**

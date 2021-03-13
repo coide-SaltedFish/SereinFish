@@ -39,7 +39,7 @@ public class OnGroupMessageEvent {
      * 群消息记录
      * @param event
      */
-    @Event(weight = Event.Weight.high)
+    @Event
     public void groupMessageEvent(GroupMessageEvent event){
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getGroup(), event.getSender().getId(), event.getMessage())){
@@ -49,7 +49,6 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
-            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
             return;
         }else {
             //自动回复
@@ -103,7 +102,6 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
-            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
             return;
         }
 
@@ -127,7 +125,6 @@ public class OnGroupMessageEvent {
         //群功能启用判断
         if (!conf.isEnable()){
             event.setCancel(true);
-            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
             return;
         }
 
@@ -193,7 +190,6 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
-            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
             return;
         }
 
@@ -216,7 +212,6 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
-            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
             return;
         }
 

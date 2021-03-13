@@ -216,6 +216,7 @@ public class LoliconController {
     }
 
     @Action("\\img_\\{982776A6-AA3D-D49A-9DE4-57F8EABE4EB0\\}\\")
+    @Synonym("\\img_\\{AE8B71A4-EB5E-5DF1-05E9-EEA61CE6152D\\}\\")
     @QMsg(mastAtBot = true)
     public void enableNoR18(Member sender){
         if (isGroupMsg){

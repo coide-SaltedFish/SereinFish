@@ -3,7 +3,7 @@ package sereinfish.bot.ui.frame;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.menu.MainMenu;
 import sereinfish.bot.ui.panel.BotInfoPanel;
-import sereinfish.bot.ui.panel.GlobalConfPanel;
+import sereinfish.bot.ui.panel.global.GlobalConfPanel;
 import sereinfish.bot.ui.panel.GroupListPanel;
 import sereinfish.bot.ui.panel.GroupsCardPanel;
 

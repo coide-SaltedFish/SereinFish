@@ -122,6 +122,7 @@ public class DBReplyPanel extends JPanel {
                         } catch (SQLException e) {
                             SfLog.getInstance().e(this.getClass(),e);
                         }
+                        update();
                         frame.close();
                     }
 
@@ -147,7 +148,7 @@ public class DBReplyPanel extends JPanel {
                             SfLog.getInstance().e(this.getClass(),e);
                         }
                     }
-                    loadTable();
+                    update();
                 }
             }
         });
@@ -156,16 +157,7 @@ public class DBReplyPanel extends JPanel {
         btn_reLoad.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loadTable();
-                tableSelection = table.getSelectedColumns();
-                if (tableSelection.length > 0){
-                    //展示选中格子
-                    String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-                    textArea_value.setText(value);
-                }else {
-                    textArea_value.setText("");
-                }
-                loadSelectTip();
+               update();
             }
         });
 
@@ -196,6 +188,22 @@ public class DBReplyPanel extends JPanel {
                 textArea_value.setText(value);
             }
         });
+    }
+
+    /**
+     * 刷新
+     */
+    private void update(){
+        loadTable();
+        tableSelection = table.getSelectedColumns();
+        if (tableSelection.length > 0){
+            //展示选中格子
+            String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+            textArea_value.setText(value);
+        }else {
+            textArea_value.setText("");
+        }
+        loadSelectTip();
     }
 
     /**
