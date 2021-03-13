@@ -173,7 +173,7 @@ public class ReplyDao extends DAO<Reply> {
         String sql;
 
         //判断是否启用全局
-        if ((Boolean) conf.getControl(GroupControlId.CheckBox_GlobalAutoReply).getValue()){
+        if (!(Boolean) conf.getControl(GroupControlId.CheckBox_GlobalAutoReply).getValue()){
             //精确匹配
             sql = "SELECT * FROM " + getTableName() + " WHERE key_ = ? AND group_num = ? AND is_fuzzy = ?";
             PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement(sql);

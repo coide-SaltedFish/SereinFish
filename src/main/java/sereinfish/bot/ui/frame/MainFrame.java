@@ -1,15 +1,16 @@
 package sereinfish.bot.ui.frame;
 
-import com.sun.deploy.panel.GeneralPanel;
-import sereinfish.bot.file.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.menu.MainMenu;
 import sereinfish.bot.ui.panel.BotInfoPanel;
+import sereinfish.bot.ui.panel.GlobalConfPanel;
 import sereinfish.bot.ui.panel.GroupListPanel;
 import sereinfish.bot.ui.panel.GroupsCardPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -61,17 +62,25 @@ public class MainFrame extends JFrame {
         splitPane_left.setDividerLocation(150);
         splitPane_left.setContinuousLayout(true);
 
-        splitPane.setLeftComponent(splitPane_left);
-        //左边视图上半部分
-        splitPane_left.setTopComponent(new BotInfoPanel());
-
         //左边视图下半部分
         groupListPanel = new GroupListPanel();
         splitPane_left.setBottomComponent(groupListPanel);
 
         //右半边视图
-        splitPane.setRightComponent(new GroupsCardPanel(groupListPanel));
+        GroupsCardPanel groupsCardPanel = new GroupsCardPanel(groupListPanel);
+        groupsCardPanel.addCard(new GlobalConfPanel(),-1);
+        splitPane.setRightComponent(groupsCardPanel);
 
+        splitPane.setLeftComponent(splitPane_left);
+        //左边视图上半部分
+        JButton btn_global = new JButton("全局配置");
+        btn_global.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                groupsCardPanel.show(-1);
+            }
+        });
+        splitPane_left.setTopComponent(new BotInfoPanel(btn_global));
 
         //设置窗体关闭事件
         addWindowListener(new WindowAdapter() {

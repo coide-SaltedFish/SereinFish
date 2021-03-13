@@ -1,8 +1,5 @@
 package sereinfish.bot.entity.jsonEx;
 
-import com.google.gson.Gson;
-import sereinfish.bot.myYuq.MyYuQ;
-
 public class JsonMsg {
     /**
      * 链接卡片

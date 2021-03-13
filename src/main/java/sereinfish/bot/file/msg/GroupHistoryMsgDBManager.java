@@ -1,17 +1,13 @@
 package sereinfish.bot.file.msg;
 
 import com.icecreamqaq.yuq.entity.Group;
-import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
-import com.icecreamqaq.yuq.message.MessageSource;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.myYuq.MyYuQ;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

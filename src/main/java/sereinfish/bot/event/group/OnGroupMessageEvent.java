@@ -2,6 +2,7 @@ package sereinfish.bot.event.group;
 
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.event.*;
@@ -38,7 +39,7 @@ public class OnGroupMessageEvent {
      * 群消息记录
      * @param event
      */
-    @Event
+    @Event(weight = Event.Weight.high)
     public void groupMessageEvent(GroupMessageEvent event){
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getGroup(), event.getSender().getId(), event.getMessage())){
@@ -48,6 +49,8 @@ public class OnGroupMessageEvent {
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
+            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
+            return;
         }else {
             //自动回复
             if (conf.isDataBaseEnable()){
@@ -61,10 +64,6 @@ public class OnGroupMessageEvent {
                 } catch (SQLException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 }
-            }
-            //lolicon
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_SetuEnable).getValue()){
-
             }
         }
     }
@@ -100,8 +99,14 @@ public class OnGroupMessageEvent {
      * @param event
      */
     @Event
-    public void groupMemberJoinEvent(GroupMemberJoinEvent event){
+    public void groupMemberJoinEvent(GroupMemberJoinEvent event){//群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        if (!conf.isEnable()){
+            event.setCancel(true);
+            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
+            return;
+        }
+
         //进群提示
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_JoinGroupTip).getValue()){
             String tip = (String) conf.getControl(GroupControlId.Edit_JoinGroupTip).getValue();
@@ -119,6 +124,13 @@ public class OnGroupMessageEvent {
     @Event
     public void groupMemberLeaveEvent(GroupMemberLeaveEvent event){
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        //群功能启用判断
+        if (!conf.isEnable()){
+            event.setCancel(true);
+            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
+            return;
+        }
+
         Member member = event.getMember();
         Group group = event.getGroup();
         //退群提示
@@ -177,7 +189,14 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberKickEvent(GroupMemberLeaveEvent.Kick event){
+        //群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        if (!conf.isEnable()){
+            event.setCancel(true);
+            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
+            return;
+        }
+
         //踢人提示
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_KickTip).getValue()){
             String tip = (String) conf.getControl(GroupControlId.Edit_KickTip).getValue();
@@ -193,48 +212,68 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberRequestEvent(GroupMemberRequestEvent event){
+        //群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        if (!conf.isEnable()){
+            event.setCancel(true);
+            SfLog.getInstance().d(this.getClass(),"群[" + event.getGroup() + "]未启用");
+            return;
+        }
+
+        SfLog.getInstance().d(this.getClass(),"[" + event.getQq() + "]申请加入群聊[" + event.getGroup() + "]");
         //自动同意入群
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_AutoAgreeJoinGroup).getValue()){
-            //黑名单验证
-            if (!conf.isDataBaseEnable()){
-                MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库未启用，自动同意入群已停止");
-            }else {
-                try {
-                    BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                    if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
-                        //全局黑名单
-                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_GlobalBlackList).getValue()){
-                            if(blackListDao.exist(event.getQq().getId())){
-                                //拒绝
-                                event.setAccept(false);
-                                event.setCancel(true);
-                                MyYuQ.sendGroupMessage(event.getGroup(),"[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                        ")，尝试加入本群，已自动拒绝");
+            //是否验证黑名单
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
+                //黑名单验证
+                if (!conf.isDataBaseEnable()){
+                    MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库未启用，自动同意入群已停止");
+                }else {
+                    try {
+                        BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
+                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
+                            //全局黑名单
+                            if ((Boolean) conf.getControl(GroupControlId.CheckBox_GlobalBlackList).getValue()){
+                                if(blackListDao.exist(event.getQq().getId())){
+                                    //拒绝
+                                    event.setAccept(false);
+                                    event.setCancel(true);
+                                    MyYuQ.sendGroupMessage(event.getGroup(),"[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                            ")，尝试加入本群，已自动拒绝");
+                                }else {
+                                    //同意
+                                    event.setAccept(true);
+                                    event.setCancel(true);
+                                    SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                                }
                             }else {
-                                //同意
-                                event.setAccept(true);
-                                event.setCancel(true);
-                            }
-                        }else {
-                            if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
-                                //拒绝
-                                event.setAccept(false);
-                                event.setCancel(true);
-                                MyYuQ.sendGroupMessage(event.getGroup(),"[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                        ")，尝试加入本群，已自动拒绝");
-                            }else {
-                                //同意
-                                event.setAccept(true);
-                                event.setCancel(true);
+                                if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
+                                    //拒绝
+                                    event.setAccept(false);
+                                    event.setCancel(true);
+                                    MyYuQ.sendGroupMessage(event.getGroup(),"[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                            ")，尝试加入本群，已自动拒绝");
+                                }else {
+                                    //同意
+                                    event.setAccept(true);
+                                    event.setCancel(true);
+                                    SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                                }
                             }
                         }
+                    } catch (SQLException e) {
+                        MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库错误：" + e.getMessage());
                     }
-                } catch (SQLException e) {
-                    MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库错误：" + e.getMessage());
-                }
 
+                }
+            }else {
+                //同意
+                event.setAccept(true);
+                event.setCancel(true);
+                SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
             }
+        }else {
+            SfLog.getInstance().d(this.getClass(),"自动同意入群未开启");
         }
     }
 }

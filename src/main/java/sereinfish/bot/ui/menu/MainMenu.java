@@ -1,6 +1,6 @@
 package sereinfish.bot.ui.menu;
 
-import sereinfish.bot.ui.frame.SignInDataBaseFrame;
+import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

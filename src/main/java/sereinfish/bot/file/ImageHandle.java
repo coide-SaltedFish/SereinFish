@@ -2,7 +2,6 @@ package sereinfish.bot.file;
 
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.swing.*;
 import java.awt.*;

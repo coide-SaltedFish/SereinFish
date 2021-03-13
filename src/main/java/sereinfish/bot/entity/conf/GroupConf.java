@@ -3,16 +3,8 @@ package sereinfish.bot.entity.conf;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
-import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.net.rcon.RconConf_s;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,8 +13,9 @@ import java.util.Map;
  * 群组配置
  */
 public class GroupConf {
+    private int v = 0;
     private long group;//所属群
-    private boolean isEnable;//是否启用群
+    private boolean isEnable = false;//是否启用群
     private DataBaseConfig dataBaseConfig;//数据库
     private RconConf_s rcon;//RCON
 

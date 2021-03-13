@@ -6,7 +6,7 @@ import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlType;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.EditFrame;
-import sereinfish.bot.ui.frame.select.SelectDataBaseFrame;
+import sereinfish.bot.ui.frame.database.select.SelectDataBaseFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
 
 import javax.swing.*;

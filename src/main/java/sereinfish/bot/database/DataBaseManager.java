@@ -1,19 +1,14 @@
 package sereinfish.bot.database;
 
-import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  * 数据库连接管理

@@ -10,7 +10,7 @@ import java.util.Date;
 /**
  * 黑名单
  */
-@DBHandle(tableName = "blacklist")
+@DBHandle(tableName = "blacklist_n")
 public class BlackList {
     @Primary
     @Field(name = "time",type = "bigint", isNotNull = true)

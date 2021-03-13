@@ -1,4 +1,4 @@
-package sereinfish.bot.ui.frame.select;
+package sereinfish.bot.ui.frame.database.select;
 
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;

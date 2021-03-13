@@ -14,3 +14,15 @@
 /pom.xml
 /settings.gradle.kts
 /.gitignore
+!/bot.jar
+.gradle/
+bot.jar
+gradle/
+src/main/java/sereinfish/bot/controller/privatem/
+src/main/java/sereinfish/bot/job/
+start.bat
+!/bot.jar
+!/start.bat
+/start.bat
+/bot.jar
+/SereinFish_bot-1.0-jar-with-dependencies.jar

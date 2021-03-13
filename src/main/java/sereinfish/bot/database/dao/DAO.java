@@ -49,7 +49,11 @@ public class DAO<E>{
                 if(dField.size() > -1){
                     stringBuilder.append("(" + dField.size() + ")");//大小
                 }else if (dField.size() == SizeEnum.MAX){
-                    stringBuilder.append("(max)");//大小
+                    if (dataBase.getDataBaseConfig().getState() == DataBaseConfig.MY_SQL){
+                        stringBuilder.append("(4000)");//大小
+                    }else {
+                        stringBuilder.append("(max)");//大小
+                    }
                 }
                 stringBuilder.append(" ");
                 //主键

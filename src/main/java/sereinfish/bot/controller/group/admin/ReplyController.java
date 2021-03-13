@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.icecreamqaq.yuq.annotation.GroupController;
-import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -19,7 +18,6 @@ import sereinfish.bot.database.table.Reply;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
-import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -86,6 +84,27 @@ public class ReplyController extends QQController {
             }
         }catch (WaitNextMessageTimeoutException e){
             MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("已超时取消").toMessage());
+        } catch (IllegalAccessException e) {
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        } catch (SQLException e) {
+            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+    }
+
+    @Action("\\[!！.]问答添加\\ 问{key}答{re}")
+    @Synonym("\\[!！.]添加问答\\ 问{key}答{re}")
+    public void addReply(String key,String re){
+        try{
+            ReplyDao replyDao = new ReplyDao(dataBase);
+            Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
+            if (replyDao.exist(reply.getUuid())){
+                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在"));
+            }else {
+                replyDao.insert(reply);
+                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功"));
+            }
         } catch (IllegalAccessException e) {
             MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);

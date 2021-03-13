@@ -6,6 +6,7 @@ import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.MainFrame;
+import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
@@ -22,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class DBBlackPanel extends JPanel {
     private JPanel contentPane;
@@ -110,7 +112,24 @@ public class DBBlackPanel extends JPanel {
         btn_insert.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                new InsertFrame<BlackList>("黑名单", BlackList.class,new BlackList(new Date(),0,conf.getGroup(),"") , new InsertFrame.InsertListener<BlackList>() {
+                    @Override
+                    public void save(InsertFrame frame, BlackList value) {
+                        try {
+                            blackListDao.insert(value);
+                        } catch (IllegalAccessException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        } catch (SQLException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        }
+                        frame.close();
+                    }
 
+                    @Override
+                    public void cancel(InsertFrame frame) {
+                        frame.close();
+                    }
+                }).setVisible(true);
             }
         });
 

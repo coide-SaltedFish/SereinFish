@@ -50,4 +50,15 @@ public class GroupsCardPanel extends JPanel {
             }
         });
     }
+
+    public void show(long id){
+        if (groups.containsKey(id)){
+            cardLayout.show(GroupsCardPanel.this,id + "");
+        }
+    }
+
+    public void addCard(JPanel panel,long id){
+        add(panel,id+"");
+        groups.put(id,id);
+    }
 }

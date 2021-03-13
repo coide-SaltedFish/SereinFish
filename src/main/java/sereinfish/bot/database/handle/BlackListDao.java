@@ -3,7 +3,6 @@ package sereinfish.bot.database.handle;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.table.BlackList;
-import sereinfish.bot.database.table.Reply;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;

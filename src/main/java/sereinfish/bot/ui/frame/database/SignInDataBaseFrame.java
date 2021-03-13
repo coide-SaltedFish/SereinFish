@@ -1,6 +1,5 @@
-package sereinfish.bot.ui.frame;
+package sereinfish.bot.ui.frame.database;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;

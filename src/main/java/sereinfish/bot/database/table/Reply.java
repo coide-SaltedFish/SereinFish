@@ -6,7 +6,7 @@ import sereinfish.bot.myYuq.MyYuQ;
 /**
  * 自动回复表格
  */
-@DBHandle(tableName = "reply")
+@DBHandle(tableName = "reply_n")
 public class Reply {
     public static final int BOOLEAN_FALSE = 0;
     public static final int BOOLEAN_TRUE = 1;

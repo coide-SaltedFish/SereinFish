@@ -1,6 +1,5 @@
 package sereinfish.bot.entity.lolicon;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Lolicon {

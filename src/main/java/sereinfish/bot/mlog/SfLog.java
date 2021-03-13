@@ -1,19 +1,14 @@
 package sereinfish.bot.mlog;
 
-import sereinfish.bot.myYuq.time.Time;
-
-import java.util.ArrayList;
-import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 日志系统
  */
 public class SfLog {
-    public final static int LOG_INFO = 0;//普通日志
-    public final static int LOG_WARN = 1;   //警告日志
-    public final static int LOG_ERROR = 2;  //错误日志
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ArrayList<String> logList = new ArrayList<>();//日志记录列表
     private static SfLog sfLog = null;
     private SfLog(){}
 
@@ -30,28 +25,12 @@ public class SfLog {
     }
 
     /**
-     * 日志记录添加
-     * @param style
-     * @param str
-     */
-    private void add(int style,String str){
-        StringBuilder stringBuilder = new StringBuilder(Time.dateToString(new Date(),Time.LOG_TIME));
-        stringBuilder.append(">" + getLogTag(style) + ">");
-        stringBuilder.append(str);
-        logList.add(stringBuilder.toString());
-        //TODO:检测列表长度保存为文件
-        System.out.println(stringBuilder.toString());
-    }
-
-
-
-    /**
      * 普通日志
      * @param clazz
      * @param message
      */
     public void d(Class clazz,Object message){
-        add(LOG_INFO,clazz.getSimpleName() + "::" + message);
+        logger.debug(clazz.getSimpleName() + "::" + message);
     }
 
     /**
@@ -60,7 +39,7 @@ public class SfLog {
      * @param message
      */
     public void w(Class clazz,Object message){
-        add(LOG_WARN,clazz.getSimpleName() + "::" + message);
+        logger.warn(clazz.getSimpleName() + "::" + message);
     }
 
     /**
@@ -69,7 +48,7 @@ public class SfLog {
      * @param message
      */
     public void e(Class clazz,Object message){
-        add(LOG_ERROR,clazz.getSimpleName() + "::" + message);
+        logger.error(clazz.getSimpleName() + "::" + message);
     }
 
     /**
@@ -78,8 +57,7 @@ public class SfLog {
      * @param e
      */
     public void e(Class clazz,Exception e){
-        add(LOG_ERROR,clazz.getSimpleName() + "::" + e.getLocalizedMessage());
-        e.printStackTrace();
+        logger.error(clazz.getSimpleName() + "::" + e.getLocalizedMessage(),e);
     }
 
     /**
@@ -88,8 +66,7 @@ public class SfLog {
      * @param e
      */
     public void e(Class clazz,Throwable e){
-        add(LOG_ERROR,clazz.getSimpleName() + "::" + e.getLocalizedMessage());
-        e.printStackTrace();
+        logger.error(clazz.getSimpleName() + "::" + e.getLocalizedMessage(),e);
     }
 
     /**
@@ -99,8 +76,7 @@ public class SfLog {
      * @param e
      */
     public void e(Class clazz,Object message,Exception e){
-        add(LOG_ERROR,clazz.getSimpleName() + "::" + message + "\n" + e.getLocalizedMessage());
-        e.printStackTrace();
+        logger.error(clazz.getSimpleName() + "::" + message + "\n" + e.getLocalizedMessage(),e);
     }
 
     /**
@@ -110,26 +86,6 @@ public class SfLog {
      * @param e
      */
     public void e(Class clazz,Object message,Throwable e){
-        add(LOG_ERROR,clazz.getSimpleName() + "::" + message + "\n" + e.getLocalizedMessage());
-        e.printStackTrace();
+        logger.error(clazz.getSimpleName() + "::" + message + "\n" + e.getLocalizedMessage(),e);
     }
-
-    /**
-     * 返回消息类型
-     * @param style
-     * @return
-     */
-    private String getLogTag(int style){
-        switch (style){
-            case LOG_INFO:
-                return "Info";
-            case LOG_WARN:
-                return "Warn";
-            case LOG_ERROR:
-                return "Error";
-            default:
-                return "null";
-        }
-    }
-
 }

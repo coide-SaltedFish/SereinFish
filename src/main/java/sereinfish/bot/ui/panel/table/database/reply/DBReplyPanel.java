@@ -1,10 +1,12 @@
 package sereinfish.bot.ui.panel.table.database.reply;
 
 import sereinfish.bot.database.handle.ReplyDao;
+import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.database.table.Reply;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.MainFrame;
+import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
@@ -21,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class DBReplyPanel extends JPanel {
     private JPanel contentPane;
@@ -108,7 +111,25 @@ public class DBReplyPanel extends JPanel {
         btn_insert.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                new InsertFrame<Reply>("问答", Reply.class, new Reply(0,conf.getGroup(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,
+                        "",""), new InsertFrame.InsertListener<Reply>() {
+                    @Override
+                    public void save(InsertFrame frame, Reply value) {
+                        try {
+                            replyDao.insert(value);
+                        } catch (IllegalAccessException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        } catch (SQLException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        }
+                        frame.close();
+                    }
 
+                    @Override
+                    public void cancel(InsertFrame frame) {
+                        frame.close();
+                    }
+                }).setVisible(true);
             }
         });
 
