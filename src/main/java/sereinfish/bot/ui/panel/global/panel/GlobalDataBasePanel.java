@@ -103,7 +103,11 @@ public class GlobalDataBasePanel extends JPanel {
                 super.mouseClicked(e);
                 //展示选中格子
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-                textArea_cellInfo.setText(value);
+                if (value != null){
+                    textArea_cellInfo.setText(value);
+                }else {
+                    textArea_cellInfo.setText("");
+                }
             }
         });
 

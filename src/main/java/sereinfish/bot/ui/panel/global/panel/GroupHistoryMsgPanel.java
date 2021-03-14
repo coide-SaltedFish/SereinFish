@@ -77,7 +77,11 @@ public class GroupHistoryMsgPanel extends JPanel {
                 super.mouseClicked(e);
                 //展示选中格子
                 String value = table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()),table.getSelectedColumn()).toString();
-                textPane.setText(value);
+                if (value != null){
+                    textPane.setText(value);
+                }else {
+                    textPane.setText("");
+                }
             }
         });
 

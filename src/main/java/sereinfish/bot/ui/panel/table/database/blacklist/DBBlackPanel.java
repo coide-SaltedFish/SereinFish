@@ -185,7 +185,11 @@ public class DBBlackPanel extends JPanel {
                 super.mouseClicked(e);
                 //展示选中格子
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-                textArea_value.setText(value);
+                if (value != null){
+                    textArea_value.setText(value);
+                }else {
+                    textArea_value.setText("");
+                }
             }
         });
     }
@@ -199,7 +203,11 @@ public class DBBlackPanel extends JPanel {
         if (tableSelection.length > 0){
             //展示选中格子
             String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-            textArea_value.setText(value);
+            if (value != null){
+                textArea_value.setText(value);
+            }else {
+                textArea_value.setText("");
+            }
         }else {
             textArea_value.setText("");
         }
