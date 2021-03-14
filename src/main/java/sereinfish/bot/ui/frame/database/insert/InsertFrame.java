@@ -18,7 +18,7 @@ public class InsertFrame<E> extends JFrame {
     private Class t;
     private JPanel contentPane;
     private InsertListener listener;
-    private ArrayList<JTextField> textFields = new ArrayList<>();
+    private ArrayList<JTextPane> textPanes = new ArrayList<>();
     private E value;
 
     public InsertFrame(String title, Class t, InsertListener listener){
@@ -56,11 +56,11 @@ public class InsertFrame<E> extends JFrame {
                 sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
                 JPanel panel = new JPanel(new BorderLayout());
                 JPanel panel_e = new JPanel(new VFlowLayout());
-                JTextField textField = new JTextField();
-                panel_e.add(textField);
+                JTextPane textPane = new JTextPane();
+                panel_e.add(new JScrollPane(textPane));
 
                 JLabel label = new JLabel(dField.name());
-                textFields.add(textField);
+                textPanes.add(textPane);
                 panel.add(label,BorderLayout.WEST);
                 panel.add(panel_e,BorderLayout.CENTER);
 
@@ -73,11 +73,11 @@ public class InsertFrame<E> extends JFrame {
             for (Field field:value.getClass().getDeclaredFields()){
                 if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
                     try {
-                        textFields.get(i).setText(field.get(value) + "");
+                        textPanes.get(i).setText(field.get(value) + "");
                     } catch (IllegalAccessException e) {
                         field.setAccessible(true);
                         try {
-                            textFields.get(i).setText(field.get(value) + "");
+                            textPanes.get(i).setText(field.get(value) + "");
                         } catch (IllegalAccessException illegalAccessException) {
                             SfLog.getInstance().e(this.getClass(),illegalAccessException);
                         }
@@ -102,13 +102,21 @@ public class InsertFrame<E> extends JFrame {
                     int i = 0;
                     for (Field field:value.getClass().getDeclaredFields()){
                         if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
-                            String str = textFields.get(i).getText();
+                            String str = textPanes.get(i).getText();
 
                             try {
-                                field.set(value, MyYuQ.toClass(str,field.getType()));
+                               if (field.getType().isAssignableFrom(String.class)){
+                                   field.set(value,str);
+                               }else {
+                                   field.set(value, MyYuQ.toClass(str,field.getType()));
+                               }
                             } catch (IllegalAccessException e) {
                                 field.setAccessible(true);
-                                field.set(value,MyYuQ.toClass(str,field.getType()));
+                                if (field.getType().isAssignableFrom(String.class)){
+                                    field.set(value,str);
+                                }else {
+                                    field.set(value, MyYuQ.toClass(str,field.getType()));
+                                }
                             }
                             i++;
                         }

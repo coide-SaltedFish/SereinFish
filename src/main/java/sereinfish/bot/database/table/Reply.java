@@ -44,13 +44,17 @@ public class Reply {
     }
 
     public Reply(long qq, long group, int pri, int fuzzy, String key, String reply) {
-        this.uuid = MyYuQ.stringToMD5(key + ":::XX::" + reply);
+        this.uuid = MyYuQ.stringToMD5(key + ":::XX::" + reply + ":::XX::" + group);
         this.qq = qq;
         this.group = group;
         this.pri = pri;
         this.fuzzy = fuzzy;
         this.key = key;
         this.reply = reply;
+    }
+
+    public void setUUID(){
+        this.uuid = MyYuQ.stringToMD5(key + ":::XX::" + reply + ":::XX::" + group);
     }
 
     public void setId(String id) {

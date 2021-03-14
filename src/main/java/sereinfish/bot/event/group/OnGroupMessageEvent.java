@@ -59,6 +59,8 @@ public class OnGroupMessageEvent {
                     if (str != null){
                         MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(str));
                         SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
+                    }else {
+                        SfLog.getInstance().d(this.getClass(),"自动回复:：未匹配到记录");
                     }
                 } catch (SQLException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);

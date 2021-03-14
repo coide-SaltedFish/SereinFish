@@ -168,6 +168,31 @@ public class GlobalDataBasePanel extends JPanel {
     }
 
     /**
+     * 加载表格
+     * @param resultSet
+     * @throws SQLException
+     */
+    private void loadTable(ResultSet resultSet) throws SQLException {
+        ArrayList<String> colNames = new ArrayList<>();//表字段
+        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
+            colNames.add(resultSetMetaData.getColumnName(i));
+        }
+
+        ArrayList<ArrayList<String>> datas = new ArrayList<>();//数据
+        while (resultSet.next()){
+            ArrayList<String> colData = new ArrayList<>();
+            for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
+                colData.add(resultSet.getString(i));
+            }
+            datas.add(colData);
+        }
+        table.setModel(new DBTableModel(colNames.toArray(new String[0]), datas));
+        table.validate();
+        table.repaint();
+    }
+
+    /**
      * 得到右边的面板
      * @return
      */
@@ -221,6 +246,24 @@ public class GlobalDataBasePanel extends JPanel {
         JTextPane textPane_sql = new JTextPane();
         panel_exec.add(textPane_sql,BorderLayout.CENTER);
         JButton btn_exec = new JButton("执行");
+        btn_exec.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sql = textPane_sql.getText();
+                if (dataBaseActivity != null){
+                    try {
+                        PreparedStatement preparedStatement = dataBaseActivity.getConnection().prepareStatement(sql);
+                        if(preparedStatement.execute()){
+                            loadTable(preparedStatement.getResultSet());
+                        }
+                    } catch (SQLException throwables) {
+                        SfLog.getInstance().e(this.getClass(),throwables);
+                        JOptionPane.showMessageDialog(null,"SQL错误：" + throwables.getMessage(),"错误",JOptionPane.ERROR_MESSAGE);
+                    }
+
+                }
+            }
+        });
         panel_exec.add(btn_exec,BorderLayout.SOUTH);
 
         //按钮

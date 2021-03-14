@@ -159,7 +159,7 @@ public class LoliconController {
         }
 
         if (num > 6){
-            num = 10;
+            num = 6;
             sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"));
         }
 

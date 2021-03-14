@@ -28,6 +28,7 @@ public class ReplyDao extends DAO<Reply> {
     @Override
     public void insert(Reply value) throws IllegalAccessException, SQLException {
         value.setId(getID());
+        value.setUUID();
         super.insert(value);
     }
 
@@ -202,23 +203,25 @@ public class ReplyDao extends DAO<Reply> {
                     return replys.get(MyYuQ.getRandom(0,replys.size() - 1));
                 }
             }
-        }else {
+        }else {//全局
             //精确匹配
-            sql = "SELECT * FROM " + getTableName() + " WHERE key_ = ? AND private = ? AND is_fuzzy = ?";
+            sql = "SELECT * FROM " + getTableName() + " WHERE key_ = ? AND (private = ? OR group_num = ?) AND is_fuzzy = ?";
             PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement(sql);
             preparedStatement.setString(1, key);
             preparedStatement.setInt(2,Reply.BOOLEAN_FALSE);
-            preparedStatement.setInt(3,Reply.BOOLEAN_FALSE);
+            preparedStatement.setLong(3,group);
+            preparedStatement.setInt(4,Reply.BOOLEAN_FALSE);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()){
                 return resultSet.getString("reply");
             }else {
-                sql = "SELECT * FROM " + getTableName() + " WHERE key_ LIKE ? AND private = ? AND is_fuzzy = ?";
+                sql = "SELECT * FROM " + getTableName() + " WHERE key_ LIKE ? AND (private = ? OR group_num = ?) AND is_fuzzy = ?";
                 preparedStatement = getDataBase().getConnection().prepareStatement(sql);
                 preparedStatement.setString(1, "%" + key + "%");
                 preparedStatement.setInt(2,Reply.BOOLEAN_FALSE);
-                preparedStatement.setInt(3,Reply.BOOLEAN_TRUE);
+                preparedStatement.setLong(3,group);
+                preparedStatement.setInt(4,Reply.BOOLEAN_TRUE);
                 ArrayList<String> replys = new ArrayList<>();
 
                 while (resultSet.next()){

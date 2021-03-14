@@ -3,6 +3,7 @@ package sereinfish.bot.controller.group.admin;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
@@ -43,13 +44,18 @@ public class ReplyController extends QQController {
         this.sender = sender;
         this.message = message;
 
+        conf = GroupConfManager.getInstance().get(group.getId());
+        if (!conf.isEnable()){
+            throw new DoNone();
+        }
+
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
 
-        conf = GroupConfManager.getInstance().get(group.getId());
+
         if ((Boolean) conf.getControl(GroupControlId.CheckBox_AutoReply).getValue()){
             if (conf.isDataBaseEnable()){
                 dataBase = DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID());
@@ -95,7 +101,12 @@ public class ReplyController extends QQController {
 
     @Action("\\[!！.]问答添加\\ 问{key}答{re}")
     @Synonym("\\[!！.]添加问答\\ 问{key}答{re}")
-    public void addReply(String key,String re){
+    public void addReply(Message message, String key,String re){
+        String msg = Message.Companion.toCodeString(message);
+        String msgInfo = msg.substring(msg.indexOf(" 问"));
+        key = msgInfo.substring(2,msgInfo.indexOf("答"));
+        re = msgInfo.substring(msgInfo.indexOf("答") + 1);
+
         try{
             ReplyDao replyDao = new ReplyDao(dataBase);
             Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
@@ -115,6 +126,7 @@ public class ReplyController extends QQController {
     }
 
     @Action("\\[!！.]问答查询\\ {page} \"{key}\"")
+    @Synonym("\\[!！.]问答查询\\ {page} {key}")
     public void queryReply(int page, String key){
         if (page < 1){
             MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("不合法的页数：" + page).toMessage());
@@ -152,6 +164,7 @@ public class ReplyController extends QQController {
     }
 
     @Action("\\[!！.]问答查询\\ \"{key}\"")
+    @Synonym("\\[!！.]问答查询\\ {key}")
     public void queryReply(String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
