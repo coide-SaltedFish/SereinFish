@@ -1,4 +1,4 @@
-package sereinfish.bot.ui.panel.global;
+package sereinfish.bot.ui.panel.global.table;
 
 import sereinfish.bot.mlog.SfLog;
 

@@ -1,4 +1,4 @@
-package sereinfish.bot.ui.panel.global;
+package sereinfish.bot.ui.panel.global.panel;
 
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
@@ -6,6 +6,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.list.cellRenderer.DataBaseListCellRenderer;
 import sereinfish.bot.ui.list.model.DataBaseListModel;
+import sereinfish.bot.ui.panel.global.table.DBTableModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -244,7 +245,7 @@ public class GlobalDataBasePanel extends JPanel {
         JPanel panel_exec = new JPanel(new BorderLayout());
         splitPane_panel_operation.setBottomComponent(panel_exec);
         JTextPane textPane_sql = new JTextPane();
-        panel_exec.add(textPane_sql,BorderLayout.CENTER);
+        panel_exec.add(new JScrollPane(textPane_sql),BorderLayout.CENTER);
         JButton btn_exec = new JButton("执行");
         btn_exec.addActionListener(new ActionListener() {
             @Override

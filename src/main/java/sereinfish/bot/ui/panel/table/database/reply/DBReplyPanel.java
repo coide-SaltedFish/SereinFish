@@ -220,7 +220,7 @@ public class DBReplyPanel extends JPanel {
         if (model == null) {
             //如果表格数据模型为null，就新建模型并应用
 
-            model = new DBTableModel<Reply>(getTitle(),replies);
+            model = new DBTableModel<Reply>(Reply.class,replies);
             table.setModel(model);
         } else {
             //否则就更新数据模型的数据，并刷新
@@ -246,20 +246,5 @@ public class DBReplyPanel extends JPanel {
         } else {
             label_select_tip.setText("共有" + replies.size() + "条记录，选中" + tableSelection.length + "条记录");
         }
-    }
-
-    /**
-     * 得到标题
-     * @return
-     */
-    private String[] getTitle(){
-        ArrayList<String> list = new ArrayList<>();
-        for (Field field:replyDao.getType().getDeclaredFields()){
-            if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
-                sereinfish.bot.database.dao.annotation.Field S_field = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
-                list.add(S_field.name());
-            }
-        }
-        return list.toArray(new String[0]);
     }
 }

@@ -10,13 +10,15 @@ public class DBTableModel<E> extends AbstractTableModel{
 
     String[] title;
     ArrayList<E> datas = new ArrayList<>();
+    Class t;
 
     /**
      * 初始化数据
      */
-    public DBTableModel(String[] title, ArrayList<E> datas) {
-        this.title = title;
+    public DBTableModel(Class t, ArrayList<E> datas) {
+        this.t = t;
         this.datas = datas;
+        title = getTitle();
     }
 
     /**
@@ -66,5 +68,20 @@ public class DBTableModel<E> extends AbstractTableModel{
     @Override
     public String getColumnName(int column) {
         return title[column];
+    }
+
+    /**
+     * 得到标题
+     * @return
+     */
+    private String[] getTitle(){
+        ArrayList<String> list = new ArrayList<>();
+        for (Field field:t.getDeclaredFields()){
+            if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                sereinfish.bot.database.dao.annotation.Field S_field = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+                list.add(S_field.name());
+            }
+        }
+        return list.toArray(new String[0]);
     }
 }
