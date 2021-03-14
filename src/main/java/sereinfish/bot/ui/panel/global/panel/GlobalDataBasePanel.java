@@ -68,7 +68,7 @@ public class GlobalDataBasePanel extends JPanel {
         });
         panel_dataBaseListPanel.add(btn_DBListUpdate,BorderLayout.NORTH);
         panel_dataBaseListPanel.add(new JScrollPane(dataBaseList), BorderLayout.CENTER);
-        splitPane.setLeftComponent(new JScrollPane(panel_dataBaseListPanel));
+        splitPane.setLeftComponent(panel_dataBaseListPanel);
 
         //数据表和操作界面在右边
         splitPane.setRightComponent(getCenterPanel());
@@ -92,11 +92,7 @@ public class GlobalDataBasePanel extends JPanel {
             public void mouseClicked(MouseEvent event) {
                 super.mouseClicked(event);
                 tableNameActivity = dataBaseTableList.getSelectedValue();
-                try {
-                    loadTable(tableNameActivity);
-                } catch (SQLException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                }
+                loadTable(tableNameActivity);
             }
         });
 
@@ -142,12 +138,43 @@ public class GlobalDataBasePanel extends JPanel {
      * @param tableName
      * @throws SQLException
      */
-    private void loadTable(String tableName) throws SQLException {
-        if(tableName != null && !tableName.trim().equals("")){
-            String sql = "SELECT * FROM " + tableName;//命令
-            PreparedStatement preparedStatement = dataBaseActivity.getConnection().prepareStatement(sql);
-            ResultSet resultSet = preparedStatement.executeQuery();
+    private void loadTable(String tableName) {
+        try {
+            if(tableName != null && !tableName.trim().equals("")){
+                String sql = "SELECT * FROM " + tableName;//命令
+                PreparedStatement preparedStatement = dataBaseActivity.getConnection().prepareStatement(sql);
+                ResultSet resultSet = preparedStatement.executeQuery();
 
+                ArrayList<String> colNames = new ArrayList<>();//表字段
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
+                    colNames.add(resultSetMetaData.getColumnName(i));
+                }
+
+                ArrayList<ArrayList<String>> datas = new ArrayList<>();//数据
+                while (resultSet.next()){
+                    ArrayList<String> colData = new ArrayList<>();
+                    for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
+                        colData.add(resultSet.getString(i));
+                    }
+                    datas.add(colData);
+                }
+                table.setModel(new DBTableModel(colNames.toArray(new String[0]), datas));
+                table.validate();
+                table.repaint();
+            }
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+    }
+
+    /**
+     * 加载表格
+     * @param resultSet
+     * @throws SQLException
+     */
+    private void loadTable(ResultSet resultSet) {
+        try{
             ArrayList<String> colNames = new ArrayList<>();//表字段
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
@@ -165,32 +192,9 @@ public class GlobalDataBasePanel extends JPanel {
             table.setModel(new DBTableModel(colNames.toArray(new String[0]), datas));
             table.validate();
             table.repaint();
+        }catch (SQLException e){
+            SfLog.getInstance().e(this.getClass(),e);
         }
-    }
-
-    /**
-     * 加载表格
-     * @param resultSet
-     * @throws SQLException
-     */
-    private void loadTable(ResultSet resultSet) throws SQLException {
-        ArrayList<String> colNames = new ArrayList<>();//表字段
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
-            colNames.add(resultSetMetaData.getColumnName(i));
-        }
-
-        ArrayList<ArrayList<String>> datas = new ArrayList<>();//数据
-        while (resultSet.next()){
-            ArrayList<String> colData = new ArrayList<>();
-            for (int i = 1; i < resultSetMetaData.getColumnCount() + 1; i++){
-                colData.add(resultSet.getString(i));
-            }
-            datas.add(colData);
-        }
-        table.setModel(new DBTableModel(colNames.toArray(new String[0]), datas));
-        table.validate();
-        table.repaint();
     }
 
     /**
@@ -296,11 +300,7 @@ public class GlobalDataBasePanel extends JPanel {
         btn_update.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    loadTable(tableNameActivity);
-                } catch (SQLException throwables) {
-                    SfLog.getInstance().e(this.getClass(),throwables);
-                }
+                loadTable(tableNameActivity);
             }
         });
 

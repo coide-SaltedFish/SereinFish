@@ -27,6 +27,7 @@ public class GroupHistoryMsgPanel extends JPanel {
     private JTable table;
     private JTextPane textPane;
     private DBTableModel<GroupHistoryMsg> msgDBTableModel;
+    private RowSorter<DBTableModel<GroupHistoryMsg>> sorter;
 
     public GroupHistoryMsgPanel() {
         build();
@@ -75,7 +76,7 @@ public class GroupHistoryMsgPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 //展示选中格子
-                String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+                String value = table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()),table.getSelectedColumn()).toString();
                 textPane.setText(value);
             }
         });
@@ -84,38 +85,43 @@ public class GroupHistoryMsgPanel extends JPanel {
     }
 
     private void loadTable(){
-        ArrayList<GroupHistoryMsg> msgs = null;
-        try {
-            msgs = GroupHistoryMsgDBManager.getInstance().query();
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-        } catch (IllegalAccessException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-        } catch (InstantiationException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-        }
-        if (msgs == null){
-            return;
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<GroupHistoryMsg> msgs = null;
+                try {
+                    msgs = GroupHistoryMsgDBManager.getInstance().query();
+                } catch (SQLException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                } catch (IllegalAccessException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                } catch (InstantiationException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                }
+                if (msgs == null){
+                    return;
+                }
 
-        label_num.setText("共有记录：" + msgs.size() + "条");
-        if (msgDBTableModel == null){
-            msgDBTableModel = new DBTableModel<>(GroupHistoryMsg.class, msgs);
-            table.setModel(msgDBTableModel);
-            RowSorter<DBTableModel<GroupHistoryMsg>> sorter = new TableRowSorter<>(msgDBTableModel);
-            table.setRowSorter(sorter);
+                label_num.setText("共有记录：" + msgs.size() + "条");
+                if (msgDBTableModel == null){
+                    msgDBTableModel = new DBTableModel<>(GroupHistoryMsg.class, msgs);
+                    table.setModel(msgDBTableModel);
+                    sorter = new TableRowSorter<>(msgDBTableModel);
+                    table.setRowSorter(sorter);
 
-        }else {
-            msgDBTableModel.setData(msgs);
-            msgDBTableModel.fireTableDataChanged();
-        }
-        //设置表格第2列的渲染方式，添加图标
-        table.getColumnModel().getColumn(0).setCellRenderer(new TimeCellRenderer(new CellManager()));
-        table.getColumnModel().getColumn(1).setCellRenderer(new GroupCellRenderer(new CellManager()));
-        table.getColumnModel().getColumn(2).setCellRenderer(new QQCellRenderer(new CellManager()));
+                }else {
+                    msgDBTableModel.setData(msgs);
+                    msgDBTableModel.fireTableDataChanged();
+                }
+                //设置表格第2列的渲染方式，添加图标
+                table.getColumnModel().getColumn(0).setCellRenderer(new TimeCellRenderer(new CellManager()));
+                table.getColumnModel().getColumn(1).setCellRenderer(new GroupCellRenderer(new CellManager()));
+                table.getColumnModel().getColumn(2).setCellRenderer(new QQCellRenderer(new CellManager()));
 
-        //更新控件
-        table.validate();
-        table.repaint();
+                //更新控件
+                table.validate();
+                table.repaint();
+            }
+        }).start();
     }
 }

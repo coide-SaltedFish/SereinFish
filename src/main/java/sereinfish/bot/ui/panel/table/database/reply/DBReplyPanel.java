@@ -37,7 +37,7 @@ public class DBReplyPanel extends JPanel {
     private JLabel label_select_tip;//选中提示
 
     private ArrayList<Reply> replies;
-    private int[] tableSelection;//表格选中信息
+    private int[] tableSelection = new int[]{};//表格选中信息
 
     public DBReplyPanel(GroupConf conf){
         this.conf = conf;
@@ -174,7 +174,6 @@ public class DBReplyPanel extends JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 tableSelection = table.getSelectedRows();//更新选中信息
-                loadSelectTip();//更新下面的文字
             }
         });
 
@@ -203,48 +202,47 @@ public class DBReplyPanel extends JPanel {
         }else {
             textArea_value.setText("");
         }
-        loadSelectTip();
     }
 
     /**
      * 加载表格
      */
     private void loadTable(){
-        try {
-            replies = replyDao.query(conf.getGroup());
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-        } catch (IllegalAccessException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-        }
-        if (model == null) {
-            //如果表格数据模型为null，就新建模型并应用
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    replies = replyDao.query(conf.getGroup());
+                } catch (SQLException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                } catch (IllegalAccessException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                }
+                if (model == null) {
+                    //如果表格数据模型为null，就新建模型并应用
 
-            model = new DBTableModel<Reply>(Reply.class,replies);
-            table.setModel(model);
-        } else {
-            //否则就更新数据模型的数据，并刷新
-            model.setData(replies);
-            model.fireTableStructureChanged();
-        }
-        //设置表格第2列的渲染方式，添加图标
-        table.getColumnModel().getColumn(2).setCellRenderer(new QQCellRenderer(new CellManager()));
-        table.getColumnModel().getColumn(3).setCellRenderer(new GroupCellRenderer(new CellManager()));
+                    model = new DBTableModel<Reply>(Reply.class,replies);
+                    table.setModel(model);
+                } else {
+                    //否则就更新数据模型的数据，并刷新
+                    model.setData(replies);
+                    model.fireTableStructureChanged();
+                }
+                //设置表格第2列的渲染方式，添加图标
+                table.getColumnModel().getColumn(2).setCellRenderer(new QQCellRenderer(new CellManager()));
+                table.getColumnModel().getColumn(3).setCellRenderer(new GroupCellRenderer(new CellManager()));
 
-        //更新控件
-        table.validate();
-        table.repaint();
-    }
+                //更新控件
+                table.validate();
+                table.repaint();
 
-    /**
-     * 加载最下面的提示文本
-     */
-    private void loadSelectTip() {
-        if (tableSelection.length == 0) {
-            //如果没选择文件
-            label_select_tip.setText("共有" + replies.size() + "条记录");
-        } else {
-            label_select_tip.setText("共有" + replies.size() + "条记录，选中" + tableSelection.length + "条记录");
-        }
+                if (tableSelection.length == 0) {
+                    //如果没选择文件
+                    label_select_tip.setText("共有" + replies.size() + "条记录");
+                } else {
+                    label_select_tip.setText("共有" + replies.size() + "条记录，选中" + tableSelection.length + "条记录");
+                }
+            }
+        }).start();
     }
 }
