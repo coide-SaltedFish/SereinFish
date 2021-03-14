@@ -1,6 +1,7 @@
 package sereinfish.bot.ui.panel.table;
 
 import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.list.CellManager;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ public class GroupCellRenderer implements TableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        int id = (row+column) * (row + column);
+        String id = MyYuQ.stringToMD5(value.toString() + row + ":::" + column);
         if (cellManager.exist(id)){
             JPanel jPanel = cellManager.get(id);
             //选中颜色设置

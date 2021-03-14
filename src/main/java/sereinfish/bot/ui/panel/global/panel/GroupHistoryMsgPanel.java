@@ -6,9 +6,11 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
+import sereinfish.bot.ui.panel.table.TimeCellRenderer;
 import sereinfish.bot.ui.panel.table.database.DBTableModel;
 
 import javax.swing.*;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -98,12 +100,17 @@ public class GroupHistoryMsgPanel extends JPanel {
 
         label_num.setText("共有记录：" + msgs.size() + "条");
         if (msgDBTableModel == null){
-            table.setModel(new DBTableModel<GroupHistoryMsg>(GroupHistoryMsg.class, msgs));
+            msgDBTableModel = new DBTableModel<>(GroupHistoryMsg.class, msgs);
+            table.setModel(msgDBTableModel);
+            RowSorter<DBTableModel<GroupHistoryMsg>> sorter = new TableRowSorter<>(msgDBTableModel);
+            table.setRowSorter(sorter);
+
         }else {
             msgDBTableModel.setData(msgs);
             msgDBTableModel.fireTableDataChanged();
         }
         //设置表格第2列的渲染方式，添加图标
+        table.getColumnModel().getColumn(0).setCellRenderer(new TimeCellRenderer(new CellManager()));
         table.getColumnModel().getColumn(1).setCellRenderer(new GroupCellRenderer(new CellManager()));
         table.getColumnModel().getColumn(2).setCellRenderer(new QQCellRenderer(new CellManager()));
 

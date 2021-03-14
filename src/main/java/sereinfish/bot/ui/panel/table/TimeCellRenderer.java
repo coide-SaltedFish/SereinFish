@@ -1,43 +1,40 @@
 package sereinfish.bot.ui.panel.table;
 
-import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.file.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.ui.list.CellManager;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.util.Date;
 
-public class QQCellRenderer implements TableCellRenderer {
+public class TimeCellRenderer implements TableCellRenderer {
     private CellManager cellManager;
 
-    public QQCellRenderer(CellManager cellManager) {
+    public TimeCellRenderer(CellManager cellManager) {
         this.cellManager = cellManager;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        String id = MyYuQ.stringToMD5(value.toString() + row + ":::" + column);
+        String id = MyYuQ.stringToMD5(value.toString() + row + "::" + column);
         if (cellManager.exist(id)){
-            JPanel jPanel = cellManager.get(id);
+            JPanel panel = cellManager.get(id);
             //选中颜色设置
             if(isSelected) {
-                jPanel.setBackground(SystemColor.textHighlight);
+                panel.setBackground(SystemColor.textHighlight);
             }else {
-                jPanel.setBackground(Color.WHITE);
+                panel.setBackground(Color.WHITE);
             }
-            return jPanel;
+            return panel;
         }
-
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label_image = new JLabel();//头像
-        label_image.setIcon(new ImageIcon(ImageHandle.getMemberHeadImage(Long.valueOf(value.toString()),15)));
-        JLabel label_name = new JLabel(value.toString());//文字
 
-        panel.add(label_image);
-        panel.add(label_name);
+        Date date = new Date(Long.valueOf(value.toString()));
+        JLabel label = new JLabel(Time.dateToString(date,Time.LOG_TIME));
 
+        panel.add(label);
         //选中颜色设置
         panel.setBackground(Color.WHITE);
 
@@ -46,7 +43,6 @@ public class QQCellRenderer implements TableCellRenderer {
         }else {
             panel.setBackground(Color.WHITE);
         }
-
         cellManager.add(id,panel);
         return panel;
     }

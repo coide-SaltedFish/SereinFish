@@ -10,6 +10,7 @@ import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
+import sereinfish.bot.ui.panel.table.TimeCellRenderer;
 import sereinfish.bot.ui.panel.table.database.DBTableModel;
 
 import javax.swing.*;
@@ -228,6 +229,7 @@ public class DBBlackPanel extends JPanel {
             model.fireTableStructureChanged();
         }
         //设置表格第2列的渲染方式，添加图标
+        table.getColumnModel().getColumn(0).setCellRenderer(new TimeCellRenderer(new CellManager()));
         table.getColumnModel().getColumn(1).setCellRenderer(new QQCellRenderer(new CellManager()));
         table.getColumnModel().getColumn(2).setCellRenderer(new GroupCellRenderer(new CellManager()));
 

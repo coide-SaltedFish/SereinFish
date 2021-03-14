@@ -4,6 +4,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.list.CellManager;
 
 import javax.swing.*;
@@ -21,9 +22,10 @@ public class GroupListCellRenderer implements ListCellRenderer{
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Group group = (Group)value;//得到群组对象
         GroupConf groupConf = GroupConfManager.getInstance().get(group.getId());
+        String id = MyYuQ.stringToMD5(group.toString() + index);
 
-        if (cellManager.exist(index)){
-            JPanel jPanel = cellManager.get(index);
+        if (cellManager.exist(id)){
+            JPanel jPanel = cellManager.get(id);
             //选中颜色设置
             jPanel.setBackground(SystemColor.control);
 
@@ -37,7 +39,7 @@ public class GroupListCellRenderer implements ListCellRenderer{
             if (!groupConf.isEnable()){
                 name += "[未启用]";
             }
-            JLabel label = (JLabel) cellManager.getControl(index,0);
+            JLabel label = (JLabel) cellManager.getControl(id,0);
             label.setText(name);
 
             return jPanel;
@@ -95,8 +97,8 @@ public class GroupListCellRenderer implements ListCellRenderer{
             jPanel.setBackground(SystemColor.control);
         }
 
-        cellManager.addControl(index,0l,lbl_group_name);
-        cellManager.add(index,jPanel);
+        cellManager.addControl(id,0l,lbl_group_name);
+        cellManager.add(id,jPanel);
         return jPanel;
     }
 }

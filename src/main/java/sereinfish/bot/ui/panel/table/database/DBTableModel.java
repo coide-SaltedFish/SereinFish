@@ -21,6 +21,17 @@ public class DBTableModel<E> extends AbstractTableModel{
         title = getTitle();
     }
 
+    @Override
+    public Class getColumnClass(int column) {
+        Class returnValue;
+        if ((column >= 0) && (column < getColumnCount())) {
+            returnValue = getValueAt(0, column).getClass();
+        } else {
+            returnValue = Object.class;
+        }
+        return returnValue;
+    }
+
     /**
      * 设置数据
      *
