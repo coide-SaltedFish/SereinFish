@@ -52,7 +52,7 @@ public class ImageHandle {
         Ellipse2D.Double shape = new Ellipse2D.Double(border, border, width - border * 2, width - border * 2);
         //需要保留的区域
         graphics.setClip(shape);
-        graphics.drawImage(image, border, border, width - border * 2, width - border * 2, null);
+        graphics.drawImage(image.getScaledInstance(width,high,Image.SCALE_SMOOTH), border, border, width - border * 2, width - border * 2, null);
         graphics.dispose();
         //在圆图外面再画一个圆
         //新创建一个graphics，这样画的圆不会有锯齿

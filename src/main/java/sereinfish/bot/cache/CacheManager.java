@@ -125,7 +125,7 @@ public class CacheManager {
      * @return
      */
     public static File getLoliconImage(int id, Lolicon.Setu setu) throws FileNotFoundException {
-        File file = setu.isR18() ? new File(FileHandle.imageCachePath,"R18/lolicon_" + id) : new File(FileHandle.imageCachePath,"lolicon_" + id);
+        File file = setu.isR18() ? new File(FileHandle.imageLoliconCachePath,"R18/lolicon_" + id) : new File(FileHandle.imageLoliconCachePath,"lolicon_" + id);
         SfLog.getInstance().d(CacheManager.class,"图片获取：" + file);
         if (!file.getParentFile().exists()){
             file.getParentFile().mkdirs();
