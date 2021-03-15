@@ -50,6 +50,11 @@ public class ImageController {
         BufferedImage headImage;
         BufferedImage bgImage;
 
+        //触发概率
+        if (MyYuQ.getRandom(0,100) > 60){
+            throw new DoNone();
+        }
+
         int hdW = 146;
 
         try {

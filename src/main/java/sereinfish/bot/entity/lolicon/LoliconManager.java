@@ -117,7 +117,9 @@ public class LoliconManager {
                                 stringBuilderMd5.insert(16,"-");
                                 stringBuilderMd5.insert(12,"-");
                                 stringBuilderMd5.insert(8,"-");
-                                messageList.add(Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>"));
+                                message = Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+                                r18ReCell(message,setu);
+                                messageList.add(message);
                             } catch (IOException e) {
                                 SfLog.getInstance().e(LoliconManager.class,e);
                             }
@@ -126,16 +128,17 @@ public class LoliconManager {
                             messageList.add(message);
                         }
                     }
+                    return messageList;
                 }
             }else {
                 messageList.add(loliconErr(isGroupMsg,conf,lolicon,request));
+                return messageList;
             }
         } catch (IOException e) {
             SfLog.getInstance().e(LoliconManager.class,e);
             messageList.add(MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage());
             return messageList;
         }
-        throw new DoNone();
     }
 
     /**
