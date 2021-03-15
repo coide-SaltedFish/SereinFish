@@ -75,22 +75,22 @@ public class BlackListController {
      */
     @Action("\\[.!！]黑名单添加\\ {qq} \"{remake}\"")
     @Synonym({"\\[.!！]加黑\\ {qq} \"{remake}\""})
-    public void add(long qq, String remake){
+    public Message add(long qq, String remake){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             //判断是否已存在
             if (blackListDao.exist(group.getId(),qq)){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("[" + qq + "]已存在于本群黑名单").toMessage());
+                return MyYuQ.getMif().text("[" + qq + "]已存在于本群黑名单").toMessage();
             }else {
                 blackListDao.insert(new BlackList(new Date(), qq, group.getId(), remake));
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("[" + qq + "]已添加到本群黑名单").toMessage());
+                return MyYuQ.getMif().text("[" + qq + "]已添加到本群黑名单").toMessage();
             }
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 
@@ -100,19 +100,19 @@ public class BlackListController {
      */
     @Action("\\[.!！]黑名单删除\\ {qq}")
     @Synonym({"\\[.!！]删黑\\ {qq}"})
-    public void delete(long qq){
+    public Message delete(long qq){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             //判断是否已存在
             if (!blackListDao.exist(group.getId(),qq)){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("[" + qq + "]不存在于本群黑名单").toMessage());
+                return MyYuQ.getMif().text("[" + qq + "]不存在于本群黑名单").toMessage();
             }else {
                 blackListDao.delete(group.getId(),qq);
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("[" + qq + "]已从本群黑名单移除").toMessage());
+                return MyYuQ.getMif().text("[" + qq + "]已从本群黑名单移除").toMessage();
             }
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 
@@ -121,33 +121,31 @@ public class BlackListController {
      */
     @Action("\\[.!！]本群黑名单\\ {page}")
     @Synonym("\\[.!！]黑名单\\ {page}")
-    public void query(int page){
+    public Message query(int page){
         if (page < 1){
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("页面错误：" + page).toMessage());
-            return;
+            return MyYuQ.getMif().text("页面错误：" + page).toMessage();
         }
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             ArrayList<BlackList> lists = blackListDao.query(group.getId());
             int page_max = lists.size() / page_num + (lists.size() % page_num == 0 ? 0:1);
             if (page > page_max){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("页面错误,最大页数[" + page_max + "]：" + page).toMessage());
-                return;
+                return MyYuQ.getMif().text("页面错误,最大页数[" + page_max + "]：" + page).toMessage();
             }
             ArrayList<String> msgList = new ArrayList<>();
             for (int i = (page - 1) * page_num; i < lists.size() && i < (page - 1) * page_num + page_num; i++){
                 BlackList blackList = lists.get(i);
                 msgList.add(Time.dateToString(new Date(blackList.getTime()),Time.DATE_FORMAT) + ":[" + blackList.getQq() + "]" + blackList.getRemarks());
             }
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("[黑名单列表(" + page + "/" + page_max + ")]",
+            return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("[黑名单列表(" + page + "/" + page_max + ")]",
                     "本群黑名单列表(" + page + "/" + page_max + ")","http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640",
-                    msgList.toArray(new String[0]))).toMessage());
+                    msgList.toArray(new String[0]))).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 
@@ -156,7 +154,7 @@ public class BlackListController {
      */
     @Action("\\[.!！]本群黑名单\\")
     @Synonym("\\[.!！]黑名单\\")
-    public void query(){
+    public Message query(){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             ArrayList<BlackList> lists = blackListDao.query(group.getId());
@@ -167,15 +165,15 @@ public class BlackListController {
                 BlackList blackList = lists.get(i);
                 msgList.add(Time.dateToString(new Date(blackList.getTime()),Time.DATE_FORMAT) + ":[" + blackList.getQq() + "]" + blackList.getRemarks());
             }
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("[黑名单列表(1/" + page_max + ")]",
+            return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("[黑名单列表(1/" + page_max + ")]",
                     "本群黑名单列表(1/" + page_max + ")","http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640",
-                    msgList.toArray(new String[0]))).toMessage());
+                    msgList.toArray(new String[0]))).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 }

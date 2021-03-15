@@ -73,7 +73,7 @@ public class ReplyController extends QQController {
 
     @Action("\\[!！.]添加问答\\")
     @Synonym({"\\[!！.]问答添加\\"})
-    public void addReply(ContextSession session){
+    public Message addReply(ContextSession session){
         try{
             reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
             String key = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
@@ -83,25 +83,25 @@ public class ReplyController extends QQController {
             ReplyDao replyDao = new ReplyDao(dataBase);
             Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
             if (replyDao.exist(reply.getUuid())){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在"));
+                return MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在");
             }else {
                 replyDao.insert(reply);
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功"));
+                return MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功");
             }
         }catch (WaitNextMessageTimeoutException e){
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("已超时取消").toMessage());
+            return MyYuQ.getMif().text("已超时取消").toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         }
     }
 
     @Action("\\[!！.]问答添加\\ 问{key}答{re}")
     @Synonym("\\[!！.]添加问答\\ 问{key}答{re}")
-    public void addReply(Message message, String key,String re){
+    public Message addReply(Message message, String key,String re){
         String msg = Message.Companion.toCodeString(message);
         String msgInfo = msg.substring(msg.indexOf(" 问"));
         key = msgInfo.substring(2,msgInfo.indexOf("答"));
@@ -111,26 +111,25 @@ public class ReplyController extends QQController {
             ReplyDao replyDao = new ReplyDao(dataBase);
             Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
             if (replyDao.exist(reply.getUuid())){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在"));
+                return MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在");
             }else {
                 replyDao.insert(reply);
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功"));
+                return MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功");
             }
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         }
     }
 
     @Action("\\[!！.]问答查询\\ {page} \"{key}\"")
     @Synonym("\\[!！.]问答查询\\ {page} {key}")
-    public void queryReply(int page, String key){
+    public Message queryReply(int page, String key){
         if (page < 1){
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("不合法的页数：" + page).toMessage());
-            return;
+            return MyYuQ.getMif().text("不合法的页数：" + page).toMessage();
         }
 
         int page_num = 4;//一页的记录数
@@ -138,14 +137,12 @@ public class ReplyController extends QQController {
             ReplyDao replyDao = new ReplyDao(dataBase);
             ArrayList<Reply> replies = replyDao.query(key, group.getId());
             if (replies.size() == 0){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage());
-                return;
+                return MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage();
             }
 
             int page_max = replies.size() / page_num + (replies.size() % page_num == 0 ? 0:1);
             if (page > page_max){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("页数太大，最大页数：" + page_max).toMessage());
-                return;
+                return MyYuQ.getMif().text("页数太大，最大页数：" + page_max).toMessage();
             }
             StringBuilder stringBuilder = new StringBuilder("关键词" + key + "记录查找如下（" + page + "/" + page_max + "）:\n");
             stringBuilder.append("ID\tKEY\tReply");
@@ -153,25 +150,24 @@ public class ReplyController extends QQController {
                 Reply reply = replies.get(i);
                 stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
             }
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(stringBuilder.toString()).toMessage());
+            return MyYuQ.getMif().text(stringBuilder.toString()).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         }
     }
 
     @Action("\\[!！.]问答查询\\ \"{key}\"")
     @Synonym("\\[!！.]问答查询\\ {key}")
-    public void queryReply(String key){
+    public Message queryReply(String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
             ArrayList<Reply> replies = replyDao.query(key, group.getId());
             if (replies.size() == 0){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage());
-                return;
+                return MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage();
             }
 
             int page_max = replies.size() / page_num + (replies.size() % page_num == 0 ? 0:1);
@@ -181,29 +177,29 @@ public class ReplyController extends QQController {
                 Reply reply = replies.get(i);
                 stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
             }
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(stringBuilder.toString()).toMessage());
+            return MyYuQ.getMif().text(stringBuilder.toString()).toMessage();
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         }
     }
 
     @Action("\\[!！.]问答删除\\ {id}")
-    public void delete(String id){
+    public Message delete(String id){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
             if (replyDao.isExistId(id)){
                 replyDao.delete(id);
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("已删除记录：" + id).toMessage());
+               return MyYuQ.getMif().text("已删除记录：" + id).toMessage();
             }else {
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未找到ID：" + id).toMessage());
+               return MyYuQ.getMif().text("未找到ID：" + id).toMessage();
             }
         } catch (SQLException e) {
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage());
             SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
         }
     }
 }

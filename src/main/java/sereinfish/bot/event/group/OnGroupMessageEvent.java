@@ -15,6 +15,7 @@ import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -43,7 +44,7 @@ public class OnGroupMessageEvent {
     public void groupMessageEvent(GroupMessageEvent event){
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getGroup(), event.getSender().getId(), event.getMessage())){
-            MyYuQ.sendGroupMessage(event.getGroup(),MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            event.getGroup().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
         //群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
@@ -51,13 +52,14 @@ public class OnGroupMessageEvent {
             event.setCancel(true);
             return;
         }else {
+            RepeaterManager.getInstance().add(event.getGroup().getId(),event.getMessage());
             //自动回复
             if (conf.isDataBaseEnable()){
                 try {
                     ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
                     String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
                     if (str != null){
-                        MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(str));
+                        event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
                         SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
                     }else {
                         SfLog.getInstance().d(this.getClass(),"自动回复:：未匹配到记录");
@@ -77,7 +79,7 @@ public class OnGroupMessageEvent {
     public void privateMessageEvent(PrivateMessageEvent event){
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(-1, event.getSender().getId(), event.getMessage())){
-            MyYuQ.sendMessage(event.getSender(),MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            event.getSender().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
     }
 
@@ -89,10 +91,19 @@ public class OnGroupMessageEvent {
     public void sendMessageEvent(SendMessageEvent.Post event){
         Message message = event.getMessage();
         message.setSource(event.getMessageSource());
+        //检查消息是否发送成功
+        if (event.getMessageSource().getId() < 0){
+            event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
+            //TODO:转图片发送
+
+            return;
+        }
+
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
-            MyYuQ.sendMessage(event.getSendTo(),MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
+        RepeaterManager.getInstance().add(event.getSendTo().getId(),message);
     }
 
     /**
@@ -111,7 +122,7 @@ public class OnGroupMessageEvent {
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_JoinGroupTip).getValue()){
             String tip = (String) conf.getControl(GroupControlId.Edit_JoinGroupTip).getValue();
             if (!tip.trim().equals("")){
-                MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
+                event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
                 return;
             }
         }
@@ -138,21 +149,21 @@ public class OnGroupMessageEvent {
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_QuitGroupTip).getValue()){
                 String tip = (String) conf.getControl(GroupControlId.Edit_QuitGroupTip).getValue();
                 if (!tip.trim().equals("")){
-                    MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
+                    group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
                 }else {
-                    MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("刚刚，" + member.getNameCard() + "(" +
+                    group.sendMessage(MyYuQ.getMif().text("刚刚，" + member.getNameCard() + "(" +
                             member.getName() + ")[" + member.getId() + "]离开了我们，他说过的最后一句话是：").toMessage());
                     try {
                         GroupHistoryMsg groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().queryLast(group.getId(),member.getId());
 
                         if (groupHistoryMsg == null){
-                            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("他好像还没说过话").toMessage());
+                            group.sendMessage(MyYuQ.getMif().text("他好像还没说过话").toMessage());
                             return;
                         }else {
-                            MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+                            group.sendMessage(Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
                         }
                     }catch (Exception e){
-                        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("出现了一点错误喵：" + e.getMessage()).toMessage());
+                        group.sendMessage(MyYuQ.getMif().text("出现了一点错误喵：" + e.getMessage()).toMessage());
                     }
                 }
             }
@@ -165,18 +176,18 @@ public class OnGroupMessageEvent {
                         if ((Boolean) conf.getControl(GroupControlId.CheckBox_AddBlackTip).getValue()){
                             String tip = (String) conf.getControl(GroupControlId.Edit_AddBlackTip).getValue();
                             if (!tip.trim().equals("")){
-                                MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
+                                group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
                             }
                         }
                     } catch (SQLException e) {
-                        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
+                        group.sendMessage(MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
                         SfLog.getInstance().e(this.getClass(),e);
                     } catch (IllegalAccessException e) {
-                        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
+                        group.sendMessage(MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
                         SfLog.getInstance().e(this.getClass(),e);
                     }
                 }else {
-                    MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("退群拉黑失败，数据库未启用").toMessage());
+                    group.sendMessage(MyYuQ.getMif().text("退群拉黑失败，数据库未启用").toMessage());
                 }
             }
         }
@@ -200,7 +211,7 @@ public class OnGroupMessageEvent {
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_KickTip).getValue()){
             String tip = (String) conf.getControl(GroupControlId.Edit_KickTip).getValue();
             if (!tip.trim().equals("")){
-                MyYuQ.sendGroupMessage(event.getGroup(),Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
+                event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
             }
         }
     }
@@ -225,7 +236,7 @@ public class OnGroupMessageEvent {
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
                 //黑名单验证
                 if (!conf.isDataBaseEnable()){
-                    MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库未启用，自动同意入群已停止");
+                    event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库未启用，自动同意入群已停止").toMessage());
                     return;
                 }else {
                     try {
@@ -237,8 +248,8 @@ public class OnGroupMessageEvent {
                                     //拒绝
                                     event.setAccept(false);
                                     event.setCancel(true);
-                                    MyYuQ.sendGroupMessage(event.getGroup(),"[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                            ")，尝试加入本群，已自动拒绝");
+                                    event.getGroup().sendMessage(MyYuQ.getMif().text("[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                            ")，尝试加入本群，已自动拒绝").toMessage());
                                 }else {
                                     //同意
                                     event.setAccept(true);
@@ -251,8 +262,8 @@ public class OnGroupMessageEvent {
                                     //拒绝
                                     event.setAccept(false);
                                     event.setCancel(true);
-                                    MyYuQ.sendGroupMessage(event.getGroup(),"[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                            ")，尝试加入本群，已自动拒绝");
+                                    event.getGroup().sendMessage(MyYuQ.getMif().text("[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                            ")，尝试加入本群，已自动拒绝").toMessage());
                                 }else {
                                     //同意
                                     event.setAccept(true);
@@ -263,7 +274,7 @@ public class OnGroupMessageEvent {
                             }
                         }
                     } catch (SQLException e) {
-                        MyYuQ.sendGroupMessage(event.getGroup(),"黑名单数据库错误：" + e.getMessage());
+                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
                     }
 
                 }

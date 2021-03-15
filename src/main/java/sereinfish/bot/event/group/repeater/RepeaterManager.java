@@ -67,7 +67,7 @@ public class RepeaterManager {
                 if (!entry.getValue().isRepeater && entry.getValue().num >= n){
                     entry.getValue().isRepeater = true;
                     if (MyYuQ.getYuQ().getGroups().containsKey(entry.getKey())){
-                        MyYuQ.sendGroupMessage(MyYuQ.getYuQ().getGroups().get(entry.getKey()),Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                        MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode(entry.getValue().msg));
                     }
                 }
             }

@@ -142,56 +142,6 @@ public class MyYuQ {
     }
 
     /**
-     * 发送群消息
-     * @param group
-     * @param message
-     */
-    public static boolean sendGroupMessage(Group group, Message message){
-        if(group.sendMessage(message).getId() < 0){
-            group.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
-            //TODO:转图片发送
-        }
-        return true;
-    }
-
-    /**
-     * 发送群消息
-     * @param group
-     * @param message
-     */
-    public static boolean sendGroupMessage(Group group, String message){
-        if(group.sendMessage(mif.text(message).toMessage()).getId() < 0){
-            group.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
-            //TODO:转图片发送
-        }
-        return true;
-    }
-
-    /**
-     * 发送消息
-     * @param contact
-     * @param message
-     */
-    public static boolean sendMessage(Contact contact, Message message){
-        if(contact.sendMessage(message).getId() < 0){
-            contact.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
-            //TODO:转图片发送
-        }
-        return true;
-    }
-
-    /**
-     * 发送消息
-     */
-    public static boolean sendMessage(Member sender, Message message){
-        if(sender.sendMessage(message).getId() < 0){
-            sender.sendMessage(myYuQ.mif.text("消息发送失败，转图片发送中，请稍候").toMessage());
-            //TODO:转图片发送
-        }
-        return true;
-    }
-
-    /**
      * 字符串替换
      * @param str 进行替换的文本
      * @param s 要替换的字符串

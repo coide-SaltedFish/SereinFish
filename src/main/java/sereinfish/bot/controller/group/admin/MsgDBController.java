@@ -2,12 +2,14 @@ package sereinfish.bot.controller.group.admin;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
@@ -53,97 +55,86 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]读消息\\")
-    public void readMsg(Message message){
+    public Message readMsg(Message message){
         GroupHistoryMsg groupHistoryMsg = null;
 
         if(message.getReply() == null){
-            return;
+            return MyYuQ.getMif().text("消息为空").toMessage();
         }
 
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),message.getReply().getId());
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
+        return MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage();
     }
 
     @Action("\\[!！.]读消息\\ {group} {qq} {id}")
-    public void readMsg(long group, long qq, int id){
+    public Message readMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,qq,id);
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
-        return;
+        return MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage();
     }
 
     @Action("\\[!！.]读消息\\ {id}")
-    public void readMsg(int id){
+    public Message readMsg(int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),id);
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
-        return;
+        return MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage();
     }
 
     @Action("\\[!！.]读消息\\ {qq} {id}")
-    public void readMsg(long qq, int id){
+    public Message readMsg(long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,id);
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage());
-        return;
+        return MyYuQ.getMif().text(groupHistoryMsg.getMsg()).toMessage();
     }
 
     @Action("\\[!！.]发消息\\")
-    public void sendMsg(Message message,ContextSession session){
+    public Message sendMsg(Message message,ContextSession session){
         Message message1 = MyYuQ.getMif().text("请输入消息内容").toMessage();
         message1.setReply(message.getSource());
         reply(message1);
 
         try{
             String reMsg = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
-            MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(reMsg));
-        }catch (Exception e){
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("已超时取消").toMessage());
+            return Message.Companion.toMessageByRainCode(reMsg);
+        }catch (WaitNextMessageTimeoutException e){
+            return MyYuQ.getMif().text("已超时取消").toMessage();
         }
     }
 
     @Action("\\[!！.]发消息\\ {group}")
-    public void sendMsg(long group,Message message,ContextSession session){
+    public Message sendMsg(long group,Message message,ContextSession session){
         Group g = MyYuQ.getYuQ().getGroups().get(group);
         if (g != null){
             Message message1 = MyYuQ.getMif().text("请输入消息内容").toMessage();
@@ -152,59 +143,53 @@ public class MsgDBController extends QQController {
 
             try{
                 Message reMSg = session.waitNextMessage(maxTime);
-                if(MyYuQ.sendGroupMessage(g,reMSg)){
+                if(g.sendMessage(reMSg).getId() > 0){
                     Message message2 = MyYuQ.getMif().text("发送成功").toMessage();
                     message2.setReply(message.getReply());
-                    MyYuQ.sendGroupMessage(this.group,message2);
+                    return message2;
                 }
-            }catch (Exception e){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("已超时取消").toMessage());
+            }catch (WaitNextMessageTimeoutException e){
+                return MyYuQ.getMif().text("已超时取消").toMessage();
             }
 
-        }else {
-            Message message2 = MyYuQ.getMif().text("找不到群[" + group + "]").toMessage();
-            message2.setReply(message.getReply());
-            MyYuQ.sendGroupMessage(this.group,message2);
         }
-
+        Message message2 = MyYuQ.getMif().text("找不到群[" + group + "]").toMessage();
+        message2.setReply(message.getReply());
+        return message2;
     }
 
     @Action("\\[!！.]发消息\\ {group} {qq} {id}")
-    public void sendMsg(long group, long qq, int id){
+    public Message sendMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group,qq,id);
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(this.group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+        return Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
     }
 
     @Action("\\[!！.]发消息\\ {qq} {id}")
-    public void sendMsg(long qq, int id){
+    public Message sendMsg(long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,id);
             if (groupHistoryMsg == null){
-                MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("找不到该消息").toMessage());
-                return;
+                return MyYuQ.getMif().text("找不到该消息").toMessage();
             }
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
-        MyYuQ.sendGroupMessage(this.group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+        return Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
     }
 
     @Action("\\[!！.]图片url\\")
-    public void getImageURL(Message message, ContextSession session){
+    public Message getImageURL(Message message, ContextSession session){
         reply("请发送图片");
         Message msg = session.waitNextMessage(maxTime);
         boolean flag = true;
@@ -214,34 +199,33 @@ public class MsgDBController extends QQController {
             if (Pattern.matches("img_\\{.*}.jpg",msg_str)){
                 flag = false;
                 String uuid = msg_str.split("img_\\{|\\}.jpg")[1].replace("-","");
-                MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("http://gchat.qpic.cn/gchatpic_new/0/-0-" + uuid + "/0").toMessage());
+                return MyYuQ.getMif().text("http://gchat.qpic.cn/gchatpic_new/0/-0-" + uuid + "/0").toMessage();
             }
         }
 
         if (flag){
-            MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("未发现图片").toMessage());
+            return MyYuQ.getMif().text("未发现图片").toMessage();
         }
-
+        throw new DoNone();
     }
 
     @Action("\\[!！.]最近消息\\ {qq}")
-    public void newMsg(long qq){
+    public Message newMsg(long qq){
         GroupHistoryMsg groupHistoryMsg = null;
         try{
            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().queryLast(group.getId(), qq);
 
            if(groupHistoryMsg == null){
-               MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text("找不到消息记录").toMessage());
+               return MyYuQ.getMif().text("找不到消息记录").toMessage();
            }
 
         } catch (SQLException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            MyYuQ.sendGroupMessage(this.group,MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage());
-            return;
+            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
         }
         String msg = "时间：" + Time.dateToString(new Date(groupHistoryMsg.getTime()),Time.LOG_TIME) + "\nQQ:" + groupHistoryMsg.getQq() + "\nID:" + groupHistoryMsg.getId() +
                 "\n内容如下：";
-        MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(msg));
-        MyYuQ.sendGroupMessage(group,Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+        group.sendMessage(Message.Companion.toMessageByRainCode(msg));
+        return Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
     }
 }

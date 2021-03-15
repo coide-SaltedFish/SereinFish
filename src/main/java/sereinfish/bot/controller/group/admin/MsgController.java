@@ -46,7 +46,7 @@ public class MsgController {
 
     @Action("运行状态")
     @QMsg(reply = true,mastAtBot = true)
-    public void appState(){
+    public Message appState(){
         StringBuilder str = new StringBuilder();
         str.append("程序运行时长：" + MyPerformance.getRunTime());
         str.append("\n进程号：" + MyPerformance.getPid());
@@ -60,11 +60,11 @@ public class MsgController {
         str.append("\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory());
         str.append("\nJAVA版本：" + MyPerformance.getJavaVersion());
 
-        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().text(str.toString()).toMessage());
+        return MyYuQ.getMif().text(str.toString()).toMessage();
     }
 
     @Action("\\[!！.]json\\ \"{title}\"\"{desc}\"\"{preview}\"\"{jumpUrl}\"")
-    public void jsonTest(String title, String desc, String preview, String jumpUrl){
-        MyYuQ.sendGroupMessage(group,MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage());
+    public Message jsonTest(String title, String desc, String preview, String jumpUrl){
+        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage();
     }
 }

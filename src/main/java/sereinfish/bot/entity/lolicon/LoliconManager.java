@@ -1,5 +1,12 @@
 package sereinfish.bot.entity.lolicon;
 
+import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.icecreamqaq.yuq.message.Message;
+import org.apache.commons.codec.digest.DigestUtils;
+import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -7,6 +14,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 public class LoliconManager {
     /**
@@ -75,5 +83,209 @@ public class LoliconManager {
         }
         bos.close();
         return new String(bos.toByteArray(),"utf-8");
+    }
+
+    /**
+     * 解析Lolicon消息
+     * @param isGroupMsg
+     * @param conf
+     * @param apiKey
+     * @param keyWord
+     * @param num
+     * @return
+     */
+    public static ArrayList<Message> getLoliconMsg(boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
+        ArrayList<Message> messageList = new ArrayList<>();
+        Lolicon.Request request = getRequest(isGroupMsg,conf,apiKey,keyWord, 1);
+        try {
+            SfLog.getInstance().d(LoliconManager.class,"Lolicon 获取中");
+            Lolicon lolicon = LoliconManager.getLolicon(request);
+            if (lolicon.getCode() == Lolicon.SUCCESS){
+                if (lolicon.getQuota() == 0){
+                    messageList.add(Message.Companion.toMessageByRainCode("<Rain:Image:{2B15CC31-8393-68DA-A35C-8F314661FF13}.jpg>"));
+                    return messageList;
+                }else {
+                    for (Lolicon.Setu setu:lolicon.getData()){
+                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
+                        SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
+                        //MD5发送方法
+                        Message message = MyYuQ.getMif().imageByFile(file).toMessage();
+                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
+                            try {
+                                StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
+                                stringBuilderMd5.insert(20,"-");
+                                stringBuilderMd5.insert(16,"-");
+                                stringBuilderMd5.insert(12,"-");
+                                stringBuilderMd5.insert(8,"-");
+                                messageList.add(Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>"));
+                            } catch (IOException e) {
+                                SfLog.getInstance().e(LoliconManager.class,e);
+                            }
+                        }else {
+                            r18ReCell(message,setu);
+                            messageList.add(message);
+                        }
+                    }
+                }
+            }else {
+                messageList.add(loliconErr(isGroupMsg,conf,lolicon,request));
+            }
+        } catch (IOException e) {
+            SfLog.getInstance().e(LoliconManager.class,e);
+            messageList.add(MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage());
+            return messageList;
+        }
+        throw new DoNone();
+    }
+
+    /**
+     * 请求失败处理
+     * @param lolicon
+     * @param request
+     */
+    private static Message loliconErr(boolean isGroupMsg, GroupConf conf, Lolicon lolicon, Lolicon.Request request){
+        switch (lolicon.getCode()) {
+            case Lolicon.APIKEY_ERR:
+                return MyYuQ.getMif().text("错误>>APIKEY:" + lolicon.getMsg()).toMessage();
+            case Lolicon.ERR:
+                return MyYuQ.getMif().text("错误>>Lolicon:" + lolicon.getMsg()).toMessage();
+            case Lolicon.QUOTA_ERR:
+                if (isGroupMsg) {
+                    if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconLocalImage).getValue()){
+                        File file = null;
+                        if (request.getR18() == Lolicon.NO_R18){
+                            File files[] = FileHandle.imageCachePath.listFiles();
+                            file = files[MyYuQ.getRandom(0,files.length - 1)];
+                        }else if (request.getR18() == Lolicon.R18){
+                            File files[] = new File(FileHandle.imageCachePath,"R18/").listFiles();
+                            file = files[MyYuQ.getRandom(0,files.length - 1)];
+                        }else if (request.getR18() == Lolicon.PLAIN_AND_R18){
+                            ArrayList<File> arr = new ArrayList<>();
+                            File files[] = FileHandle.imageCachePath.listFiles();
+                            for (File f:files){
+                                arr.add(f);
+                            }
+                            files = new File(FileHandle.imageCachePath,"R18/").listFiles();
+                            for (File f:files){
+                                arr.add(f);
+                            }
+                            file = arr.get(MyYuQ.getRandom(0,arr.size() - 1));
+                        }
+
+                        if (file != null && file.isFile()){
+                            SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
+                            if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
+                                try {
+                                    StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
+                                    stringBuilderMd5.insert(20,"-");
+                                    stringBuilderMd5.insert(16,"-");
+                                    stringBuilderMd5.insert(12,"-");
+                                    stringBuilderMd5.insert(8,"-");
+                                    return Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+                                } catch (IOException e) {
+                                    SfLog.getInstance().e(LoliconManager.class,e);
+                                }
+                            }else {
+                                Message message = MyYuQ.getMif().imageByFile(file).toMessage();
+                                r18ReCell(message,new Lolicon.Setu(false));
+                                return message;
+                            }
+                        }
+                    } else {
+                        return MyYuQ.getMif().text("错误>>额度上限:" + lolicon.getMsg()).toMessage();
+                    }
+                }else {
+                    File file = null;
+                    if (request.getR18() == Lolicon.NO_R18){
+                        File files[] = FileHandle.imageCachePath.listFiles();
+                        file = files[MyYuQ.getRandom(0,files.length - 1)];
+                    }else if (request.getR18() == Lolicon.R18){
+                        File files[] = new File(FileHandle.imageCachePath,"R18/").listFiles();
+                        file = files[MyYuQ.getRandom(0,files.length - 1)];
+                    }else if (request.getR18() == Lolicon.PLAIN_AND_R18){
+                        ArrayList<File> arr = new ArrayList<>();
+                        File files[] = FileHandle.imageCachePath.listFiles();
+                        for (File f:files){
+                            arr.add(f);
+                        }
+                        files = new File(FileHandle.imageCachePath,"R18/").listFiles();
+                        for (File f:files){
+                            arr.add(f);
+                        }
+                        file = arr.get(MyYuQ.getRandom(0,arr.size() - 1));
+                    }
+                    if (file != null && file.isFile()){
+                        SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
+                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
+                            try {
+                                StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
+                                stringBuilderMd5.insert(20,"-");
+                                stringBuilderMd5.insert(16,"-");
+                                stringBuilderMd5.insert(12,"-");
+                                stringBuilderMd5.insert(8,"-");
+                                return Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+                            } catch (IOException e) {
+                                SfLog.getInstance().e(LoliconManager.class,e);
+                            }
+                        }else {
+                            Message message = MyYuQ.getMif().imageByFile(file).toMessage();
+                            r18ReCell(message,new Lolicon.Setu(false));
+                            return message;
+                        }
+                    }
+                }
+                break;
+            default:
+                return MyYuQ.getMif().text("错误:" + lolicon.getMsg()).toMessage();
+        }
+        return null;
+    }
+
+    /**
+     * R18延时撤回
+     * @param message
+     * @param setu
+     */
+    private static void r18ReCell(Message message, Lolicon.Setu setu){
+        //如果是R18，延时撤回
+        int time = 25000;//25s
+        if (setu.isR18()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sleep(time);
+                    message.recall();
+                }
+
+                public void sleep(int ms) {
+                    try {
+                        Thread.sleep(ms);
+                    } catch (InterruptedException e) {
+                        message.recall();
+                        SfLog.getInstance().e(this.getClass(), e);
+                    }
+                }
+            }).start();
+        }
+    }
+
+    /**
+     * 得到请求信息
+     * @return
+     */
+    private static Lolicon.Request getRequest(boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
+        int r18 = Lolicon.NO_R18;
+        if (isGroupMsg){
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()){
+                r18 = Lolicon.R18;
+            }
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue()){
+                r18 = Lolicon.PLAIN_AND_R18;
+            }
+        }
+
+        Lolicon.Request request = new Lolicon.Request(apiKey,r18,keyWord,num,null,true);
+
+        return request;
     }
 }

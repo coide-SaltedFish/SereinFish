@@ -37,16 +37,16 @@ public class WikiController {
     }
 
     @Action("\\[!！.]百度\\ {key}")
-    public void baidu(Group group, String key){
+    public Message baidu(Group group, String key){
         String url = "http://www.baidu.com/s?wd=";
         try {
             url += URLEncoder.encode(key,"utf-8");
         } catch (UnsupportedEncodingException e) {
             SfLog.getInstance().e(this.getClass(),"[" + key + "] 查询失败",e);
-            MyYuQ.sendGroupMessage(group, MyYuQ.getMif().text("[" + key + "] 查询失败").toMessage());
+            return MyYuQ.getMif().text("[" + key + "] 查询失败").toMessage();
         }
-        MyYuQ.sendGroupMessage(group, MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("百度-" + key,key + "_百度一下，你就知道",
-                "https://www.baidu.com/img/bd_logo1.png",url)).toMessage());
+        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("百度-" + key,key + "_百度一下，你就知道",
+                "https://www.baidu.com/img/bd_logo1.png",url)).toMessage();
     }
 
 }
