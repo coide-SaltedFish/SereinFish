@@ -11,6 +11,7 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
+import org.apache.commons.codec.digest.DigestUtils;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.conf.GroupConf;
@@ -23,6 +24,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -80,7 +82,7 @@ public class LoliconController {
                     for (Lolicon.Setu setu:lolicon.getData()){
                         File file = CacheManager.getLoliconImage(setu.getPid(),setu);
                         SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                        sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), setu);
+                        sendMessage(file, setu);
                     }
                 }
             }else {
@@ -107,7 +109,7 @@ public class LoliconController {
                     for (Lolicon.Setu setu:lolicon.getData()){
                         File file = CacheManager.getLoliconImage(setu.getPid(),setu);
                         SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                        sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), setu);
+                        sendMessage(file, setu);
                     }
                 }
             }else {
@@ -134,7 +136,63 @@ public class LoliconController {
                     for (Lolicon.Setu setu:lolicon.getData()){
                         File file = CacheManager.getLoliconImage(setu.getPid(),setu);
                         SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                        sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), setu);
+                        sendMessage(file, setu);
+                    }
+                }
+            }else {
+                loliconErr(lolicon,request);
+            }
+        } catch (IOException e) {
+            sendMessage("错误:" + e.getMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+    }
+
+    @Action("来点{key}色图")
+    @Synonym({"来点{key}涩图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
+    @QMsg(mastAtBot = true)
+    public void setuAtBot(String key){
+        Lolicon.Request request = getRequest(key, 1);
+        try {
+            SfLog.getInstance().d(this.getClass(),"Lolicon 获取中");
+            Lolicon lolicon = LoliconManager.getLolicon(request);
+            if (lolicon.getCode() == Lolicon.SUCCESS){
+                if (lolicon.getQuota() == 0){
+                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:{2B15CC31-8393-68DA-A35C-8F314661FF13}.jpg>"));
+                    return;
+                }else {
+                    for (Lolicon.Setu setu:lolicon.getData()){
+                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
+                        SfLog.getInstance().d(this.getClass(),"返回：" + file);
+                        sendMessage(file, setu);
+                    }
+                }
+            }else {
+                loliconErr(lolicon,request);
+            }
+        } catch (IOException e) {
+            sendMessage("错误:" + e.getMessage());
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+    }
+
+    @Action("涩图摩多")
+    @Synonym({"涩图摩多摩多","色图摩多摩多","涩图摩多","色图摩多"})
+    @QMsg(mastAtBot = true)
+    public void setuAtBotMore(){
+        Lolicon.Request request = getRequest(null, 1);
+        try {
+            SfLog.getInstance().d(this.getClass(),"Lolicon 获取中");
+            Lolicon lolicon = LoliconManager.getLolicon(request);
+            if (lolicon.getCode() == Lolicon.SUCCESS){
+                if (lolicon.getQuota() == 0){
+                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:{2B15CC31-8393-68DA-A35C-8F314661FF13}.jpg>"));
+                    return;
+                }else {
+                    for (Lolicon.Setu setu:lolicon.getData()){
+                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
+                        SfLog.getInstance().d(this.getClass(),"返回：" + file);
+                        sendMessage(file, setu);
                     }
                 }
             }else {
@@ -154,7 +212,11 @@ public class LoliconController {
         try {
             num = Integer.valueOf(strNum);
         }catch (Exception e){
-            sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{5D6083D0-459F-5596-CB99-5088E949B71D}.jpg>"));
+            if (MyYuQ.getRandom(0,100) % 2 == 0){
+                sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{5D6083D0-459F-5596-CB99-5088E949B71D}.jpg>"));
+            }else {
+                sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{53AF664A-B93A-AFF6-2906-32025A1B2787}.jpg>"));
+            }
             return;
         }
 
@@ -179,7 +241,7 @@ public class LoliconController {
                     for (Lolicon.Setu setu:lolicon.getData()){
                         File file = CacheManager.getLoliconImage(setu.getPid(),setu);
                         SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                        sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), setu);
+                        sendMessage(file, setu);
                     }
                 }
             }else {
@@ -245,7 +307,7 @@ public class LoliconController {
                 break;
             case Lolicon.QUOTA_ERR:
                 if (isGroupMsg) {
-                    if ((Boolean) conf.getControl(GroupControlId.CheckBox_LocalImage).getValue()){
+                    if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconLocalImage).getValue()){
                         File file = null;
                         if (request.getR18() == Lolicon.NO_R18){
                             File files[] = FileHandle.imageCachePath.listFiles();
@@ -268,7 +330,7 @@ public class LoliconController {
 
                         if (file != null){
                             SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                            sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), new Lolicon.Setu(false));
+                            sendMessage(file, new Lolicon.Setu(false));
                         }
                     } else {
                         sendMessage("错误>>额度上限:" + lolicon.getMsg());
@@ -295,7 +357,7 @@ public class LoliconController {
                     }
                     if (file != null && file.isFile()){
                         SfLog.getInstance().d(this.getClass(),"返回：" + file);
-                        sendMessage(MyYuQ.getMif().imageByFile(file).toMessage(), new Lolicon.Setu(false));
+                        sendMessage(file, new Lolicon.Setu(false));
                     }
                 }
                 break;
@@ -326,9 +388,24 @@ public class LoliconController {
 
     /**
      * 发送消息
-     * @param message
+     * @param msgFile
      */
-    private void sendMessage(Message message, Lolicon.Setu setu){
+    private void sendMessage(File msgFile, Lolicon.Setu setu){
+        //MD5发送方法
+        Message message = MyYuQ.getMif().imageByFile(msgFile).toMessage();
+        if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
+            try {
+                StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(msgFile)));
+                stringBuilderMd5.insert(20,"-");
+                stringBuilderMd5.insert(16,"-");
+                stringBuilderMd5.insert(12,"-");
+                stringBuilderMd5.insert(8,"-");
+                message = Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (isGroupMsg){
             MyYuQ.sendGroupMessage(group,message);
         }else {
@@ -337,18 +414,19 @@ public class LoliconController {
         //如果是R18，延时撤回
         int time = 25000;//25s
         if (setu.isR18()){
+            Message finalMessage = message;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     sleep(time);
-                    message.recall();
+                    finalMessage.recall();
                 }
 
                 public void sleep(int ms){
                     try {
                         Thread.sleep(ms);
                     } catch (InterruptedException e) {
-                        message.recall();
+                        finalMessage.recall();
                         SfLog.getInstance().e(this.getClass(),e);
                     }
                 }

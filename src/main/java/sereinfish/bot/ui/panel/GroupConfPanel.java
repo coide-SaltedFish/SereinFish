@@ -1,9 +1,7 @@
 package sereinfish.bot.ui.panel;
 
 import sereinfish.bot.database.entity.DataBase;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlType;
+import sereinfish.bot.entity.conf.*;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.EditFrame;
 import sereinfish.bot.ui.frame.database.select.SelectDataBaseFrame;
@@ -25,6 +23,8 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
+    public static final int NOW_V = 1;
+
     private GroupConf conf;
     private JPanel contentPane;
 
@@ -33,6 +33,11 @@ public class GroupConfPanel extends JPanel {
         contentPane = new JPanel();
         setLayout(new BorderLayout());
         add(new JScrollPane(contentPane));
+
+        if (conf.getV() < NOW_V){
+            conf.update();
+            conf.setV(NOW_V);
+        }
         build();
     }
 
@@ -49,11 +54,12 @@ public class GroupConfPanel extends JPanel {
         //数据库选择框
         contentPane.add(comboBoxPanel());
 
-        for (Map.Entry<String, ArrayList<GroupConf.Control>> entry:conf.getConfMaps().entrySet()){
+        for (Map.Entry<String, Map<GroupControlId, GroupConf.Control>> entry:conf.getConfMaps().entrySet()){
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             panel.setBorder(BorderFactory.createTitledBorder(entry.getKey()));
             //解析组件
-            for (GroupConf.Control control:entry.getValue()){
+            for (Map.Entry<GroupControlId, GroupConf.Control> entry1:entry.getValue().entrySet()){
+                GroupConf.Control control = entry1.getValue();
                 //如果是单选框
                 if (control.getType() == GroupControlType.CheckBox){
                     JCheckBox checkBox = new JCheckBox(control.getName());

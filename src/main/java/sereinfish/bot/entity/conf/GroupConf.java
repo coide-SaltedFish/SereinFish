@@ -4,6 +4,7 @@ import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.net.rcon.RconConf_s;
+import sereinfish.bot.ui.panel.GroupConfPanel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,13 +14,13 @@ import java.util.Map;
  * 群组配置
  */
 public class GroupConf {
-    private int v = 0;
+    private int v = GroupConfPanel.NOW_V;
     private long group;//所属群
     private boolean isEnable = false;//是否启用群
     private DataBaseConfig dataBaseConfig;//数据库
     private RconConf_s rcon;//RCON
 
-    private Map<String, ArrayList<Control>> confMaps = new LinkedHashMap<>();
+    private Map<String, Map<GroupControlId,Control>> confMaps = new LinkedHashMap<>();
 
     public GroupConf(long group) {
         this.group = group;
@@ -28,51 +29,56 @@ public class GroupConf {
     }
 
     /**
+     * 在版本号更新时会执行此处
+     */
+    public void update(){
+        confMaps.remove("数据库");
+        confMaps.get("SETU").put(GroupControlId.CheckBox_LoliconMD5Image,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
+    }
+
+    /**
      * 初始化对象
      */
     public GroupConf init(){
         //
-        ArrayList<Control> tipList = new ArrayList<>();//提示
-        tipList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_JoinGroupTip, "进群提示", false, "是否在有人进群时发出公屏提醒"));
-        tipList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitGroupTip, "退群提示", false, "是否在有人退群时发出公屏提醒"));
-        tipList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_KickTip, "被踢提示", false, "是否在有人被踢出群聊时发出公屏提醒"));
-        tipList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AddBlackTip, "加黑提示", false, "是否在有人被添加黑名单时发出公屏提醒"));
+        Map<GroupControlId,Control> tipList = new LinkedHashMap<>();//提示
+        tipList.put(GroupControlId.CheckBox_JoinGroupTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_JoinGroupTip, "进群提示", false, "是否在有人进群时发出公屏提醒"));
+        tipList.put(GroupControlId.CheckBox_QuitGroupTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitGroupTip, "退群提示", false, "是否在有人退群时发出公屏提醒"));
+        tipList.put(GroupControlId.CheckBox_KickTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_KickTip, "被踢提示", false, "是否在有人被踢出群聊时发出公屏提醒"));
+        tipList.put(GroupControlId.CheckBox_AddBlackTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AddBlackTip, "加黑提示", false, "是否在有人被添加黑名单时发出公屏提醒"));
         confMaps.put("群提示开关",tipList);
         //
-        ArrayList<Control> tipMsgList = new ArrayList<>();
-        tipMsgList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_JoinGroupTip,"进群提示","","修改进群提示"));
-        tipMsgList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_QuitGroupTip,"退群提示","","修改退群提示"));
-        tipMsgList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_KickTip,"被踢提示","","修改被踢提示"));
-        tipMsgList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_AddBlackTip,"加黑提示","","修改加黑提示"));
+        Map<GroupControlId,Control> tipMsgList = new LinkedHashMap<>();
+        tipMsgList.put(GroupControlId.Edit_JoinGroupTip, new Control(GroupControlType.Edit,GroupControlId.Edit_JoinGroupTip,"进群提示","","修改进群提示"));
+        tipMsgList.put(GroupControlId.Edit_QuitGroupTip, new Control(GroupControlType.Edit,GroupControlId.Edit_QuitGroupTip,"退群提示","","修改退群提示"));
+        tipMsgList.put(GroupControlId.Edit_KickTip, new Control(GroupControlType.Edit,GroupControlId.Edit_KickTip,"被踢提示","","修改被踢提示"));
+        tipMsgList.put(GroupControlId.Edit_AddBlackTip, new Control(GroupControlType.Edit,GroupControlId.Edit_AddBlackTip,"加黑提示","","修改加黑提示"));
         confMaps.put("群提示编辑",tipMsgList);
 
         //
-        ArrayList<Control> toolList = new ArrayList<>();//群功能开关
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoAgreeJoinGroup,"自动同意入群", false,"在有人申请入群时自动同意申请"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitJoinBlackList,"退群拉黑", false,"在有人退群时自动拉入黑名单"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoReply,"自动回复", false,"自动查表根据关键词进行回复"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalAutoReply,"全局问答", false,"自动回复是使用全局问答列表"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_BlackList,"黑名单", false,"启用黑名单功能"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
-        toolList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));
+        Map<GroupControlId,Control> toolList = new LinkedHashMap<>();//群功能开关
+        toolList.put(GroupControlId.CheckBox_AutoAgreeJoinGroup, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoAgreeJoinGroup,"自动同意入群", false,"在有人申请入群时自动同意申请"));
+        toolList.put(GroupControlId.CheckBox_QuitJoinBlackList, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitJoinBlackList,"退群拉黑", false,"在有人退群时自动拉入黑名单"));
+        toolList.put(GroupControlId.CheckBox_AutoReply, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AutoReply,"自动回复", false,"自动查表根据关键词进行回复"));
+        toolList.put(GroupControlId.CheckBox_GlobalAutoReply, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalAutoReply,"全局问答", false,"自动回复是使用全局问答列表"));
+        toolList.put(GroupControlId.CheckBox_BlackList, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_BlackList,"黑名单", false,"启用黑名单功能"));
+        toolList.put(GroupControlId.CheckBox_GlobalBlackList, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
+        toolList.put(GroupControlId.CheckBox_ReRead, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));
         confMaps.put("群功能开关",toolList);
         //
-        ArrayList<Control> setuList = new ArrayList<>();//setu
-        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
-        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuR18,"R18",false,"Lolicon API R18"));
-        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_PlainAndR18,"混合模式",false,"R18与非R8混合"));
-        setuList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LocalImage,"本地模式",false,"额度用完后使用缓存的图片"));
-        setuList.add(new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
-        setuList.add(new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
+        Map<GroupControlId,Control> setuList = new LinkedHashMap<>();//setu
+        setuList.put(GroupControlId.CheckBox_SetuEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
+        setuList.put(GroupControlId.CheckBox_SetuR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuR18,"R18",false,"Lolicon API R18"));
+        setuList.put(GroupControlId.CheckBox_PlainAndR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_PlainAndR18,"混合模式",false,"R18与非R8混合"));
+        setuList.put(GroupControlId.CheckBox_LoliconLocalImage, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconLocalImage,"本地模式",false,"额度用完后使用缓存的图片"));
+        setuList.put(GroupControlId.CheckBox_LoliconMD5Image, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
+        setuList.put(GroupControlId.Edit_SetuKey, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
+        setuList.put(GroupControlId.Button_jumpLolicon, new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
         confMaps.put("SETU",setuList);
         //
-        ArrayList<Control> rconList = new ArrayList<>();
-        rconList.add(new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
+        Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
+        rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
         confMaps.put("RCON",rconList);
-
-        //
-        ArrayList<Control> databaseList = new ArrayList<>();
-        confMaps.put("数据库",databaseList);
 
         return this;
     }
@@ -83,11 +89,9 @@ public class GroupConf {
      * @return
      */
     public Control getControl(GroupControlId id){
-        for (Map.Entry<String,ArrayList<Control>> entry:confMaps.entrySet()){
-            for (Control control:entry.getValue()){
-                if (control.getId() == id){
-                    return control;
-                }
+        for (Map.Entry<String,Map<GroupControlId,Control>> entry:confMaps.entrySet()){
+            if (entry.getValue().containsKey(id)){
+                return entry.getValue().get(id);
             }
         }
         return null;
@@ -119,7 +123,7 @@ public class GroupConf {
         isEnable = enable;
     }
 
-    public Map<String, ArrayList<Control>> getConfMaps() {
+    public Map<String, Map<GroupControlId,Control>> getConfMaps() {
         return confMaps;
     }
 
@@ -137,6 +141,14 @@ public class GroupConf {
 
     public void setDataBaseConfig(DataBaseConfig dataBaseConfig) {
         this.dataBaseConfig = dataBaseConfig;
+    }
+
+    public int getV() {
+        return v;
+    }
+
+    public void setV(int v) {
+        this.v = v;
     }
 
     /**
@@ -183,5 +195,7 @@ public class GroupConf {
         public GroupControlType getType() {
             return type;
         }
+
+
     }
 }

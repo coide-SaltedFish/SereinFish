@@ -38,4 +38,8 @@ public class RconManager {
         rcons.put(conf_s.getID(),rcon);
         return rcon;
     }
+
+    public Map<String, Rcon> getRcons() {
+        return rcons;
+    }
 }

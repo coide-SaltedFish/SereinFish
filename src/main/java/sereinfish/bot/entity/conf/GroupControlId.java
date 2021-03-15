@@ -28,7 +28,8 @@ public enum GroupControlId {
     Edit_SetuKey,//API Key
     CheckBox_SetuR18,//是否启用R18
     CheckBox_PlainAndR18,//混合模式
-    CheckBox_LocalImage,//本地图片
+    CheckBox_LoliconMD5Image,//图片发送MD5码，高速模式
+    CheckBox_LoliconLocalImage,//本地图片
     Button_jumpLolicon,//跳转至lolicon
     //
     CheckBox_RCON,//rcon功能
