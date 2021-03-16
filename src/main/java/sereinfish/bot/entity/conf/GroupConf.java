@@ -74,6 +74,11 @@ public class GroupConf {
         setuList.put(GroupControlId.CheckBox_LoliconMD5Image, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
         setuList.put(GroupControlId.Edit_SetuKey, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
         setuList.put(GroupControlId.Button_jumpLolicon, new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
+
+        setuList.put(GroupControlId.CheckBox_SFLoliconEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用SF加速",false,"启用SFLoliconAPI"));
+        setuList.put(GroupControlId.CheckBox_SFLoliconKey, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"向SF加速服务器上传Key",false,"向SF加速服务器上传Key"));
+        setuList.put(GroupControlId.Edit_SFLoliconApi, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"SF服务器api","","SF服务器api"));
+
         confMaps.put("SETU",setuList);
         //
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();

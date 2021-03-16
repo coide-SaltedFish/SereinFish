@@ -6,6 +6,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.entity.lolicon.sf.Request;
+import sereinfish.bot.entity.lolicon.sf.Response;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -69,6 +71,23 @@ public class LoliconManager {
     }
 
     /**
+     * 从SFLolicon得到一个图片配置文件
+     * @return
+     */
+    public synchronized static Response getSFLolicon(Request request) throws IOException {
+        URL url = new URL(request.getUrl());
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+        //设置超时间为3秒
+        conn.setConnectTimeout(5*1000);
+        conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+        //得到输入流
+        InputStream inputStream = conn.getInputStream();
+        String res = readInputStream(inputStream);
+        Response response = MyYuQ.toClass(res,Response.class);
+        return response;
+    }
+
+    /**
      * 从输入流中获取字符串
      * @param inputStream
      * @return
@@ -86,67 +105,11 @@ public class LoliconManager {
     }
 
     /**
-     * 解析Lolicon消息
-     * @param isGroupMsg
-     * @param conf
-     * @param apiKey
-     * @param keyWord
-     * @param num
-     * @return
-     */
-    public static ArrayList<Message> getLoliconMsg(boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
-        ArrayList<Message> messageList = new ArrayList<>();
-        Lolicon.Request request = getRequest(isGroupMsg,conf,apiKey,keyWord, 1);
-        try {
-            SfLog.getInstance().d(LoliconManager.class,"Lolicon 获取中");
-            Lolicon lolicon = LoliconManager.getLolicon(request);
-            if (lolicon.getCode() == Lolicon.SUCCESS){
-                if (lolicon.getQuota() == 0){
-                    messageList.add(Message.Companion.toMessageByRainCode("<Rain:Image:{2B15CC31-8393-68DA-A35C-8F314661FF13}.jpg>"));
-                    return messageList;
-                }else {
-                    for (Lolicon.Setu setu:lolicon.getData()){
-                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
-                        SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
-                        //MD5发送方法
-                        Message message = MyYuQ.getMif().imageByFile(file).toMessage();
-                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
-                            try {
-                                StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
-                                stringBuilderMd5.insert(20,"-");
-                                stringBuilderMd5.insert(16,"-");
-                                stringBuilderMd5.insert(12,"-");
-                                stringBuilderMd5.insert(8,"-");
-                                message = Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
-                                r18ReCell(message,setu);
-                                messageList.add(message);
-                            } catch (IOException e) {
-                                SfLog.getInstance().e(LoliconManager.class,e);
-                            }
-                        }else {
-                            r18ReCell(message,setu);
-                            messageList.add(message);
-                        }
-                    }
-                    return messageList;
-                }
-            }else {
-                messageList.add(loliconErr(isGroupMsg,conf,lolicon,request));
-                return messageList;
-            }
-        } catch (IOException e) {
-            SfLog.getInstance().e(LoliconManager.class,e);
-            messageList.add(MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage());
-            return messageList;
-        }
-    }
-
-    /**
      * 请求失败处理
      * @param lolicon
      * @param request
      */
-    private static Message loliconErr(boolean isGroupMsg, GroupConf conf, Lolicon lolicon, Lolicon.Request request){
+    public static Message loliconErr(boolean isGroupMsg, GroupConf conf, Lolicon lolicon, Lolicon.Request request){
         switch (lolicon.getCode()) {
             case Lolicon.APIKEY_ERR:
                 return MyYuQ.getMif().text("错误>>APIKEY:" + lolicon.getMsg()).toMessage();
@@ -276,7 +239,7 @@ public class LoliconManager {
      * 得到请求信息
      * @return
      */
-    private static Lolicon.Request getRequest(boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
+    public static Lolicon.Request getRequest(boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
         int r18 = Lolicon.NO_R18;
         if (isGroupMsg){
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()){

@@ -1,6 +1,11 @@
 package sereinfish.bot.entity.lolicon;
 
+import sereinfish.bot.mlog.SfLog;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ScheduledFuture;
 
 public class Lolicon {
     public static final int NO_R18 = 0;
@@ -183,7 +188,12 @@ public class Lolicon {
             }
 
             if (keyword != null && !keyword.trim().equals("")){
-                api += "&keyword=" + keyword;
+                api += "&keyword=";
+                try {
+                    api += URLEncoder.encode(keyword,"utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                }
             }
 
             api += "&num=" + num;
@@ -193,7 +203,6 @@ public class Lolicon {
             }
 
             api += "&size1200=" + size1200;
-
             return api;
         }
     }

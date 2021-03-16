@@ -31,6 +31,10 @@ public enum GroupControlId {
     CheckBox_LoliconMD5Image,//图片发送MD5码，高速模式
     CheckBox_LoliconLocalImage,//本地图片
     Button_jumpLolicon,//跳转至lolicon
+    CheckBox_SFLoliconEnable,//启用SF加速
+    CheckBox_SFLoliconKey,//在启用加速时上传lolicon key
+    Edit_SFLoliconApi,//SF加速api
+
     //
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能
