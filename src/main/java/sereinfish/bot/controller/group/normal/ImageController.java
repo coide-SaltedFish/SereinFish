@@ -46,9 +46,9 @@ public class ImageController {
      * 丢头像
      * @return
      */
-    @Action("丢 {qq}")
-    public Message diuAt(long qq){
-        if (!group.getMembers().containsKey(qq)){
+    @Action("丢 {member}")
+    public Message diuAt(long member){
+        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
         BufferedImage headImage;
@@ -57,7 +57,7 @@ public class ImageController {
         int hdW = 146;
 
         try {
-            headImage = (BufferedImage) ImageHandle.getMemberHeadImage(qq,hdW);
+            headImage = (BufferedImage) ImageHandle.getMemberHeadImage(member,hdW);
             bgImage = ImageIO.read(getClass().getClassLoader().getResource("image/diu.png"));
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);
@@ -137,6 +137,52 @@ public class ImageController {
 
         //先保存为图片
         File file = new File(FileHandle.imageCachePath,"diu_" + new Date().getTime());
+        try {
+            ImageIO.write(bgImage, "PNG", file);
+            return MyYuQ.getMif().imageByFile(file).toMessage();
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("图片发送失败：" + e.getMessage()).toMessage();
+        }
+    }
+
+
+    @Action("爬 {member}")
+    public Message pa(long member){
+        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
+            throw new SkipMe();
+        }
+        BufferedImage headImage;
+        BufferedImage bgImage;
+        int hdW = 65;
+
+        try {
+            headImage = (BufferedImage) ImageHandle.getMemberHeadImage(member,hdW);
+            bgImage = ImageIO.read(getClass().getClassLoader().getResource("image/pa/" + MyYuQ.getRandom(1,15) + ".jpg"));
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            throw new DoNone();
+        }
+
+        //处理头像
+        BufferedImage formatAvatarImage = new BufferedImage(hdW, hdW, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D graphics = formatAvatarImage.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+        //图片是一个圆型
+        Ellipse2D.Double shape = new Ellipse2D.Double(0, 0, hdW, hdW);
+        //需要保留的区域
+        graphics.setClip(shape);
+        graphics.drawImage(headImage.getScaledInstance(hdW,hdW,Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
+        graphics.dispose();
+
+        //重合图片
+        Graphics2D graphics2D = bgImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+        graphics2D.drawImage(formatAvatarImage,0,bgImage.getHeight() - hdW,hdW,hdW,null);//头画背景上
+        graphics2D.dispose();
+
+        //先保存为图片
+        File file = new File(FileHandle.imageCachePath,"pa_" + new Date().getTime());
         try {
             ImageIO.write(bgImage, "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();
