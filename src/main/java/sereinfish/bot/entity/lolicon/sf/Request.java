@@ -1,15 +1,22 @@
 package sereinfish.bot.entity.lolicon.sf;
 
+import sereinfish.bot.mlog.SfLog;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class Request {
     String api = "";
     int num = 1;
     int isR18 = 0;
+    String keyWord = "";
     String apikey = "";
 
-    public Request(String api, int num, int isR18, String apikey) {
+    public Request(String api, int num, int isR18, String keyWord, String apikey) {
         this.api = api;
         this.num = num;
         this.isR18 = isR18;
+        this.keyWord = keyWord;
         this.apikey = apikey;
     }
 
@@ -37,6 +44,14 @@ public class Request {
         this.isR18 = isR18;
     }
 
+    public String getKeyWord() {
+        return keyWord;
+    }
+
+    public void setKeyWord(String keyWord) {
+        this.keyWord = keyWord;
+    }
+
     public String getApikey() {
         return apikey;
     }
@@ -50,6 +65,13 @@ public class Request {
         url += "?";
         url += "num=" + num;
         url += "&isR18=" + isR18;
+        if (apikey != null && !apikey.trim().equals("")){
+            try {
+                url += "&keyWord=" + URLEncoder.encode(keyWord,"utf-8");
+            } catch (UnsupportedEncodingException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+            }
+        }
 
         return url;
     }

@@ -93,14 +93,24 @@ public class LoliconController {
     @Action(".来点{key}色图")
     @Synonym(".来点{key}涩图")
     public void setu(String key){
-       getLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        //判断是否启用Sf
+        if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
+            getSFLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        }else {
+            getLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        }
     }
 
     @Action("来点{key}色图")
     @Synonym({"来点{key}涩图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
     @QMsg(mastAtBot = true)
     public void setuAtBot(String key){
-        getLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        //判断是否启用Sf
+        if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
+            getSFLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        }else {
+            getLoliconMsg(isGroupMsg,conf,apiKey,key,1);
+        }
     }
 
     @Action("涩图摩多")
@@ -278,7 +288,7 @@ public class LoliconController {
             }
         }
         String api = (String) conf.getControl(GroupControlId.Edit_SFLoliconApi).getValue();
-        Request request = new Request(api,num,r18,apiKey);
+        Request request = new Request(api,num,r18,keyWord,null);
 
         try {
             SfLog.getInstance().d(LoliconManager.class,"SF_Lolicon 获取中");

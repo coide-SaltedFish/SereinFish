@@ -27,25 +27,19 @@ import java.util.regex.Pattern;
  */
 @GroupController
 public class MsgController {
-    private Group group;
-    private Member sender;
-    private Message message;
-
     /**
      * 权限检查
      */
     @Before
-    public void before(Group group, Member sender, Message message){
-        this.group = group;
-        this.sender = sender;
-        this.message = message;
-
+    public Group before(Group group, Member sender, Message message){
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
+
+        return group;
     }
 
     @Action("\\[!！.]版本\\")
@@ -79,9 +73,9 @@ public class MsgController {
     }
 
     //消息放大术
-
-//    @Action("\\[.!！]图片放大\\")
-//    public Message bigImage(Message message){
+//
+//    @Action("\\[.!！]大\\")
+//    public Message bigImage(Group group, Message message){
 //        GroupHistoryMsg groupHistoryMsg = null;
 //
 //        if(message.getReply() == null){
