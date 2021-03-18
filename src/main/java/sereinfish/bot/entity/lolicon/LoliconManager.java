@@ -74,7 +74,7 @@ public class LoliconManager {
      * 从SFLolicon得到一个图片配置文件
      * @return
      */
-    public synchronized static Response getSFLolicon(Request request) throws IOException {
+    public synchronized static Response getSFLolicon(Request request, boolean isRe) throws IOException {
         URL url = new URL(request.getUrl());
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
         //设置超时间为3秒
@@ -83,8 +83,18 @@ public class LoliconManager {
         //得到输入流
         InputStream inputStream = conn.getInputStream();
         String res = readInputStream(inputStream);
-        Response response = MyYuQ.toClass(res,Response.class);
-        return response;
+        try{
+            Response response = MyYuQ.toClass(res,Response.class);
+            return response;
+        }catch (Exception e){
+            if (isRe){
+                SfLog.getInstance().e(LoliconManager.class,"失败，重试：" + request.getUrl());
+                return getSFLolicon(request, false);
+            }else {
+                SfLog.getInstance().e(LoliconManager.class,e);
+                return null;
+            }
+        }
     }
 
     /**
@@ -120,10 +130,10 @@ public class LoliconManager {
                     if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconLocalImage).getValue()){
                         File file = null;
                         if (request.getR18() == Lolicon.NO_R18){
-                            File files[] = FileHandle.imageCachePath.listFiles();
+                            File files[] = new File(FileHandle.imageCachePath,"lolicon/").listFiles();
                             file = files[MyYuQ.getRandom(0,files.length - 1)];
                         }else if (request.getR18() == Lolicon.R18){
-                            File files[] = new File(FileHandle.imageCachePath,"R18/").listFiles();
+                            File files[] = new File(FileHandle.imageCachePath,"lolicon/R18/").listFiles();
                             file = files[MyYuQ.getRandom(0,files.length - 1)];
                         }else if (request.getR18() == Lolicon.PLAIN_AND_R18){
                             ArrayList<File> arr = new ArrayList<>();

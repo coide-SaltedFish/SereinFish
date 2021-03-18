@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -83,7 +84,7 @@ public class ImageController {
         graphics2D.dispose();
 
         //先保存为图片
-        File file = new File(FileHandle.imageCachePath,"diu_" + new Date().getTime());
+        File file = new File(FileHandle.imageCachePath,"diu_temp");
         try {
             ImageIO.write(bgImage, "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();
@@ -136,7 +137,7 @@ public class ImageController {
         graphics2D.dispose();
 
         //先保存为图片
-        File file = new File(FileHandle.imageCachePath,"diu_" + new Date().getTime());
+        File file = new File(FileHandle.imageCachePath,"diu_temp");
         try {
             ImageIO.write(bgImage, "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();
@@ -182,7 +183,7 @@ public class ImageController {
         graphics2D.dispose();
 
         //先保存为图片
-        File file = new File(FileHandle.imageCachePath,"pa_" + new Date().getTime());
+        File file = new File(FileHandle.imageCachePath,"pa_temp");
         try {
             ImageIO.write(bgImage, "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();

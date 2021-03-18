@@ -102,6 +102,42 @@ public class GroupConf {
         return null;
     }
 
+    /**
+     * 得到控件
+     * @param groupName
+     * @param name
+     * @return
+     */
+    public Control getControl(String groupName, String name){
+        if (confMaps.containsKey(groupName)){
+            for (Map.Entry<GroupControlId,Control> entry:confMaps.get(groupName).entrySet()){
+                if (entry.getValue().getName().equals(name)){
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * 得到控件
+     * @param groupName
+     * @param name
+     * @return
+     */
+    public boolean setControlValue(String groupName, String name, Object value){
+        if (confMaps.containsKey(groupName)){
+            for (Map.Entry<GroupControlId,Control> entry:confMaps.get(groupName).entrySet()){
+                if (entry.getValue().getName().equals(name)){
+                    entry.getValue().setValue(value);
+                    return GroupConfManager.getInstance().put(this);
+                }
+            }
+        }
+        return false;
+    }
+
     public DataBase getDataBase(){
         if (dataBaseConfig == null){
             return null;
@@ -114,6 +150,36 @@ public class GroupConf {
             return false;
         }
         return DataBaseManager.getInstance().exist(dataBaseConfig.getID());
+    }
+
+    /**
+     * 得到控件组列表
+     * @return
+     */
+    public ArrayList<String> getGroupNames(){
+        ArrayList<String> list = new ArrayList<>();
+        for (Map.Entry<String, Map<GroupControlId,Control>> entry:confMaps.entrySet()){
+            list.add(entry.getKey());
+        }
+        return list;
+    }
+
+    /**
+     * 得到控件组内控件列表
+     * @param groupName
+     * @return
+     */
+    public ArrayList<String> getGroupControlNames(String groupName){
+        if (confMaps.containsKey(groupName)){
+            ArrayList<String> list = new ArrayList<>();
+            for (Map.Entry<GroupControlId,Control> entry:confMaps.get(groupName).entrySet()){
+                if (entry.getValue().getValue() instanceof Boolean){
+                    list.add(entry.getValue().getName() + ":[" + entry.getValue().getValue() + "]");
+                }
+            }
+            return list;
+        }
+        return null;
     }
 
     public long getGroup() {

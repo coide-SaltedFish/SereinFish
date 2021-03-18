@@ -31,6 +31,7 @@ public class GroupConfManager {
      */
     public boolean put(GroupConf groupConf){
         try {
+            //TODO：同步更新界面，比如事件监听
             write(groupConf);
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),"群[" + groupConf.getGroup() + "]写入群配置失败",e);

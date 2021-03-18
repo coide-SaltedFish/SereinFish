@@ -10,7 +10,6 @@ import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import org.apache.commons.codec.digest.DigestUtils;
 import sereinfish.bot.authority.AuthorityManagement;
@@ -120,7 +119,8 @@ public class LoliconController {
     @Synonym("我要{strNum}张涩图")
     @QMsg(mastAtBot = true)
     public Message setuNum(String strNum){
-        int num = 0;
+        int max = 10;
+        int num;
         try {
             num = Integer.valueOf(strNum);
         }catch (Exception e){
@@ -131,9 +131,9 @@ public class LoliconController {
             }
         }
 
-        if (num > 6){
-            num = 6;
-            return Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>");
+        if (num > max){
+            num = max;
+            sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"),false);
         }
 
         if (num <= 0){
@@ -184,6 +184,20 @@ public class LoliconController {
                 conf.getControl(GroupControlId.CheckBox_PlainAndR18).setValue(false);
                 GroupConfManager.getInstance().put(conf);
                 return Message.Companion.toMessageByRainCode("<Rain:Image:{2098B7EC-BFDC-0C09-2816-EE006E24DB05}.jpg>");
+            }
+        }
+        throw new DoNone();
+    }
+
+    @Action("lolicon混合模式 {state}")
+    @QMsg(mastAtBot = true,reply = true)
+    public Message r18Blend(boolean state, Member sender){
+        if (isGroupMsg){
+            //权限判断
+            if (AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)){
+                conf.getControl(GroupControlId.CheckBox_PlainAndR18).setValue(state);
+                GroupConfManager.getInstance().put(conf);
+                return Message.Companion.toMessageByRainCode("Lolicon 混合模式：" + state);
             }
         }
         throw new DoNone();
@@ -268,7 +282,12 @@ public class LoliconController {
 
         try {
             SfLog.getInstance().d(LoliconManager.class,"SF_Lolicon 获取中");
-            Response response = LoliconManager.getSFLolicon(request);
+            Response response = LoliconManager.getSFLolicon(request, true);
+            if (response == null){
+                sendMessage(MyYuQ.getMif().text("SF加速线路获取失败, 转到Lolicon线路").toMessage(),false);
+                getLoliconMsg(isGroupMsg, conf, apiKey, keyWord, num);
+                return;
+            }
 
             if (response.getCode() == 0){
                 //消息发送
