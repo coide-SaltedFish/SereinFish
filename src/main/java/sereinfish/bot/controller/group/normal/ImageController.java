@@ -100,6 +100,8 @@ public class ImageController {
      */
     @Action("\\.?丢.?\\")
     public Message diu(){
+        final Member sender = this.sender;
+
         BufferedImage headImage;
         BufferedImage bgImage;
 
@@ -283,6 +285,7 @@ public class ImageController {
             //开始生成
             graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
             try {
+                int mfd = 15;//最大幅度
                 int fd = 0;//幅度
                 //得到手
                 BufferedImage shou = ImageIO.read(getClass().getClassLoader().getResource("image/mo/" + (i + 1) + ".png"));
@@ -290,18 +293,96 @@ public class ImageController {
                 //拉伸头
                 switch (i + 1){
                     case 1:
+                        fd = 0;
                         graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
                         break;
                     case 2:
-                        fd = 6;
+                        fd = mfd / 2;
                         graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
                         break;
                     case 3:
-                        fd = 12;
+                        fd = mfd;
                         graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
                         break;
                     case 4:
-                        fd = 7;
+                        fd = mfd / 2 + 1;
+                        graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 5:
+                        fd = 1;
+                        graphics2D.drawImage(headImage,20,y,hw,hw,null);
+                        break;
+                }
+                //放手
+                graphics2D.drawImage(shou,0,0,shou.getWidth(),shou.getHeight(),null);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
+            graphics2D.dispose();
+
+            animatedGifEncoder.addFrame(image);
+        }
+        if(animatedGifEncoder.finish()){
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }
+
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+    }
+
+    @Action("摸")
+    @Synonym({"rua"})
+    public Message mo_2(){
+        final Member sender = this.sender;//线程安全
+
+        File imageFile = new File(FileHandle.imageCachePath,"mo_temp");
+        int hw = 80;//头像宽度
+        //得到头像
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(sender.getId(),hw);
+        //得到mo的gif
+        GifDecoder decoder = new GifDecoder();
+        int status = 0;
+        //w:60 h:67
+        status = decoder.read(getClass().getResourceAsStream("/image/mo/mo.gif"));
+        if (status != GifDecoder.STATUS_OK) {
+            return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误:" + status);
+        }
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        //保存的目标图片
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+        animatedGifEncoder.setRepeat(decoder.getLoopCount());
+        animatedGifEncoder.setDelay(decoder.getDelay(0));
+
+        for (int i = 0; i < decoder.getFrameCount(); i++) {
+            BufferedImage image = decoder.getFrame(i);
+            //清除背景
+            Graphics2D graphics2D = image.createGraphics();
+            graphics2D.setColor(Color.getColor("#fffbf3"));
+            graphics2D.fillRect(0,0,image.getWidth(),image.getHeight());
+            //开始生成
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+            try {
+                int mfd = 15;//最大幅度
+                int fd = 0;//幅度
+                //得到手
+                BufferedImage shou = ImageIO.read(getClass().getClassLoader().getResource("image/mo/" + (i + 1) + ".png"));
+                int y = (image.getHeight() - hw - 10);
+                //拉伸头
+                switch (i + 1){
+                    case 1:
+                        fd = 0;
+                        graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 2:
+                        fd = mfd / 2;
+                        graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 3:
+                        fd = mfd;
+                        graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 4:
+                        fd = mfd / 2 + 1;
                         graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
                         break;
                     case 5:
