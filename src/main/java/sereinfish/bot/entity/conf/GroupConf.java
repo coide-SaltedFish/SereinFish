@@ -3,9 +3,12 @@ package sereinfish.bot.entity.conf;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.net.rcon.RconConf_s;
 import sereinfish.bot.ui.panel.GroupConfPanel;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,7 +23,7 @@ public class GroupConf {
     private DataBaseConfig dataBaseConfig;//数据库
     private RconConf_s rcon;//RCON
 
-    private Map<String, Map<GroupControlId,Control>> confMaps = new LinkedHashMap<>();
+    private Map<String, Map<GroupControlId,Control>> confMaps = new LinkedHashMap<>();//控件开关列表
 
     public GroupConf(long group) {
         this.group = group;
@@ -142,7 +145,16 @@ public class GroupConf {
         if (dataBaseConfig == null){
             return null;
         }
-        return DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID());
+        try {
+            return DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID());
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+        } catch (IllegalModeException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+        } catch (ClassNotFoundException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+        }
+        return null;
     }
 
     public boolean isDataBaseEnable(){

@@ -1,4 +1,4 @@
-package sereinfish.bot.file;
+package sereinfish.bot.file.image;
 
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.mlog.SfLog;

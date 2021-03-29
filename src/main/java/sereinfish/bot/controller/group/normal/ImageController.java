@@ -2,7 +2,7 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
-import com.IceCreamQAQ.Yu.annotation.Catch;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -12,7 +12,9 @@ import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.file.image.ImageHandle;
+import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
+import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -22,8 +24,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
 
 @GroupController
 public class ImageController {
@@ -191,5 +191,138 @@ public class ImageController {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("图片发送失败：" + e.getMessage()).toMessage();
         }
+    }
+
+    @Action("嚼 {member}")
+    @Synonym({"恰 {member}"})
+    public Message jiao(long member){
+        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
+            throw new SkipMe();
+        }
+        File imageFile = new File(FileHandle.imageCachePath,"jiao_temp");
+
+        BufferedImage jiao_top = null;
+        try {
+            jiao_top = ImageIO.read(getClass().getClassLoader().getResource("image/jiao/jiao_top"));
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+        }
+
+        GifDecoder decoder = new GifDecoder();
+        int status = 0;
+        //w:60 h:67
+        status = decoder.read(getClass().getResourceAsStream("/image/jiao/jiao.gif"));
+        if (status != GifDecoder.STATUS_OK) {
+            return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误:" + status);
+        }
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        //保存的目标图片
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+        animatedGifEncoder.setRepeat(decoder.getLoopCount());
+        animatedGifEncoder.setDelay(decoder.getDelay(0));
+        for (int i = 0; i < decoder.getFrameCount(); i++) {
+            BufferedImage image = decoder.getFrame(i);
+            //加入头像  直径：38
+            int f = 38;
+            //得到头
+            BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(member,f);
+            //编辑头，加缺口
+            Graphics2D headGraphics2D = headImage.createGraphics();
+            headGraphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+            headGraphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1.0f));
+            headGraphics2D.fillOval(21, 0, 8, 10);//画椭圆
+            headGraphics2D.dispose();
+            //把头放上去
+            Graphics2D graphics = image.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+            graphics.drawImage(headImage,0,image.getHeight() - headImage.getHeight() + 6,f,f,null);//头画背景上
+            //手
+            graphics.drawImage(jiao_top,0,0,image.getWidth(),image.getHeight(),null);//把手画上
+            graphics.dispose();
+
+            animatedGifEncoder.addFrame(image);
+        }
+        if(animatedGifEncoder.finish()){
+            return MyYuQ.getMif().imageByFile(new File(FileHandle.imageCachePath,"jiao_temp")).toMessage();
+        }
+
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+    }
+
+    @Action("摸 {member}")
+    @Synonym({"rua {member}"})
+    public Message mo(long member){
+        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
+            throw new SkipMe();
+        }
+        File imageFile = new File(FileHandle.imageCachePath,"mo_temp");
+        int hw = 80;//头像宽度
+        //得到头像
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(member,hw);
+        //得到mo的gif
+        GifDecoder decoder = new GifDecoder();
+        int status = 0;
+        //w:60 h:67
+        status = decoder.read(getClass().getResourceAsStream("/image/mo/mo.gif"));
+        if (status != GifDecoder.STATUS_OK) {
+            return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误:" + status);
+        }
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        //保存的目标图片
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+        animatedGifEncoder.setRepeat(decoder.getLoopCount());
+        animatedGifEncoder.setDelay(decoder.getDelay(0));
+
+        for (int i = 0; i < decoder.getFrameCount(); i++) {
+            BufferedImage image = decoder.getFrame(i);
+            //清除背景
+            Graphics2D graphics2D = image.createGraphics();
+            graphics2D.setColor(Color.getColor("#fffbf3"));
+            graphics2D.fillRect(0,0,image.getWidth(),image.getHeight());
+            //开始生成
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+            try {
+                int fd = 0;//幅度
+                //得到手
+                BufferedImage shou = ImageIO.read(getClass().getClassLoader().getResource("image/mo/" + (i + 1) + ".png"));
+                int y = (image.getHeight() - hw - 10);
+                //拉伸头
+                switch (i + 1){
+                    case 1:
+                        graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 2:
+                        fd = 6;
+                        graphics2D.drawImage(headImage,20 - (fd / 2), y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 3:
+                        fd = 12;
+                        graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 4:
+                        fd = 7;
+                        graphics2D.drawImage(headImage,20 - (fd / 2),y + fd,hw + fd, hw - fd,null);
+                        break;
+                    case 5:
+                        fd = 1;
+                        graphics2D.drawImage(headImage,20,y,hw,hw,null);
+                        break;
+                }
+                //放手
+                graphics2D.drawImage(shou,0,0,shou.getWidth(),shou.getHeight(),null);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
+            graphics2D.dispose();
+
+            animatedGifEncoder.addFrame(image);
+        }
+        if(animatedGifEncoder.finish()){
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }
+
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
     }
 }

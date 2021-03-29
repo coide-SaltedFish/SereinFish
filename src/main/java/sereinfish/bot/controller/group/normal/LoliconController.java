@@ -69,7 +69,7 @@ public class LoliconController {
     }
 
     @Action("\\img_\\{B407F708-A2C6-A506-3420-98DF7CAC4A57\\}\\")
-    @Synonym({"\\[!！.]setu\\", "\\[!！.]色图\\"})
+    @Synonym({"\\[!！.]setu\\", "\\[!！.]色图\\","\\img_\\{04923170-2ACB-5E94-ECCD-953F46E6CAB9\\}\\"})
     public void getST(){
         //判断是否启用Sf
         if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
@@ -126,10 +126,10 @@ public class LoliconController {
     }
 
     @Action("我要{strNum}张色图")
-    @Synonym("我要{strNum}张涩图")
+    @Synonym({"我要{strNum}张涩图","来{strNum}份涩图","来{strNum}份色图"})
     @QMsg(mastAtBot = true)
     public Message setuNum(String strNum){
-        int max = 10;
+        int max = 20;
         int num;
         try {
             num = Integer.valueOf(strNum);

@@ -74,9 +74,14 @@ public class DataBaseManager {
      * @param id
      * @return
      */
-    public DataBase getDataBase(String id){
+    public DataBase getDataBase(String id) throws SQLException, IllegalModeException, ClassNotFoundException {
         for (DataBase dataBase:dataBases){
             if (dataBase.getDataBaseConfig().getID().equals(id)){
+                //数据库是否连接正常检查
+                if (dataBase.getConnection().isClosed()){
+                    dataBases.remove(dataBase);
+                    linkDataBase(dataBase.getDataBaseConfig());
+                }
                 return dataBase;
             }
         }

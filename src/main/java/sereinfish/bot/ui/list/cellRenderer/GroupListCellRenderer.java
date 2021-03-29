@@ -3,13 +3,12 @@ package sereinfish.bot.ui.list.cellRenderer;
 import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.list.CellManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class GroupListCellRenderer implements ListCellRenderer{
     private CellManager cellManager;

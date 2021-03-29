@@ -8,6 +8,7 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.database.DataBaseManager;
+import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.BlackList;
@@ -44,7 +45,8 @@ public class OnGroupMessageEvent {
     public void groupMessageEvent(GroupMessageEvent event){
         //消息记录
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getGroup(), event.getSender().getId(), event.getMessage())){
-            event.getGroup().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            SfLog.getInstance().e(this.getClass(),"消息记录失败");
+            //event.getGroup().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
         //群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
@@ -63,6 +65,10 @@ public class OnGroupMessageEvent {
                         SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
                     }
                 } catch (SQLException e) {
+                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+                } catch (IllegalModeException e) {
+                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+                } catch (ClassNotFoundException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 }
             }
@@ -272,6 +278,13 @@ public class OnGroupMessageEvent {
                             }
                         }
                     } catch (SQLException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
+                    } catch (IllegalModeException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
+                    } catch (ClassNotFoundException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
                         event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
                     }
 

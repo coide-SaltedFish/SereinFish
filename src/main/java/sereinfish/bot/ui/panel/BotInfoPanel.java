@@ -1,6 +1,6 @@
 package sereinfish.bot.ui.panel;
 
-import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.layout.VFlowLayout;
 

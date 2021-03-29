@@ -1,8 +1,13 @@
 package sereinfish.bot.event;
 
+import com.IceCreamQAQ.Yu.annotation.Config;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
+import com.IceCreamQAQ.Yu.job.JobManager;
+import com.IceCreamQAQ.Yu.util.DateUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.authority.AuthorityManagement;
@@ -11,18 +16,24 @@ import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
+import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
+import sereinfish.bot.job.JobSFManager;
+import sereinfish.bot.job.MyJob;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.rcon.RconManager;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.tray.AppTray;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.sql.SQLException;
 
 /**
@@ -31,9 +42,18 @@ import java.sql.SQLException;
 @EventListener
 public class InitEvent {
     @Inject
+    private JobManager jobManager;
+    @Inject
     private YuQ yuQ;
     @Inject
     private MessageItemFactory mif;
+    @Inject
+    private DateUtil dateUtil;
+    @Inject
+    private RainBot rainBot;
+
+    @Config("yu.scanPackages")
+    Object a;
 
     /**
      * 软件启动事件
@@ -42,10 +62,12 @@ public class InitEvent {
     @Event
     public void initEvent(AppStartEvent event){
         //初始化MyYuQ
-        MyYuQ.init(yuQ,mif);
+        MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
+
+        System.out.println(a.toString());
         //初始化权限管理器
         try {
             AuthorityManagement.init();
@@ -84,6 +106,10 @@ public class InitEvent {
         //初始化复读管理器
         RepeaterManager.init();
         SfLog.getInstance().d(this.getClass(),"复读管理器初始化完成");
+
+        //初始化定时任务管理器
+        JobSFManager.init();
+        SfLog.getInstance().d(this.getClass(),"定时任务管理器初始化完成");
 
         //设置LookAndFeel
         lookAndFeel();

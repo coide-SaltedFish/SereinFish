@@ -66,6 +66,8 @@ public class LoliconManager {
         //得到输入流
         InputStream inputStream = conn.getInputStream();
         String res = readInputStream(inputStream);
+        inputStream.close();
+        conn.disconnect();
         Lolicon lolicon = MyYuQ.toClass(res,Lolicon.class);
         return lolicon;
     }
@@ -83,6 +85,8 @@ public class LoliconManager {
         //得到输入流
         InputStream inputStream = conn.getInputStream();
         String res = readInputStream(inputStream);
+        inputStream.close();
+        conn.disconnect();
         try{
             Response response = MyYuQ.toClass(res,Response.class);
             return response;

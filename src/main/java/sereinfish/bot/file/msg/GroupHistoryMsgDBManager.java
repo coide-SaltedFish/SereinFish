@@ -73,10 +73,10 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
         try {
             insert(groupHistoryMsg);
         } catch (IllegalAccessException e) {
-            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.getSourceMessage(),e);
+            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.toString(),e);
             return false;
         } catch (SQLException throwables) {
-            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.getSourceMessage(),throwables);
+            sfLog.e(this.getClass(),"消息记录失败[group：" + group + ",message:" + message.toString(),throwables);
             return false;
         }
 

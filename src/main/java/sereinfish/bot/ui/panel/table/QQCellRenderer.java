@@ -1,7 +1,6 @@
 package sereinfish.bot.ui.panel.table;
 
-import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.file.ImageHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.list.CellManager;
 

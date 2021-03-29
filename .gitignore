@@ -19,7 +19,6 @@
 bot.jar
 gradle/
 src/main/java/sereinfish/bot/controller/privatem/
-src/main/java/sereinfish/bot/job/
 start.bat
 !/bot.jar
 !/start.bat
@@ -27,3 +26,5 @@ start.bat
 /bot.jar
 /SereinFish_bot-1.0-jar-with-dependencies.jar
 /build/tmp/compileJava/source-classes-mapping.txt
+build/classes/
+build/generated/

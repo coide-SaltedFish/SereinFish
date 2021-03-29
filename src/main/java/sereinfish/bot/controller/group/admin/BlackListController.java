@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.admin;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -10,6 +11,7 @@ import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.entity.conf.GroupConf;
@@ -41,7 +43,7 @@ public class BlackListController {
      * 权限检查
      */
     @Before
-    public void before(Group group, Member sender, Message message){
+    public void before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
         this.group = group;
         this.sender = sender;
         this.message = message;
@@ -176,4 +178,25 @@ public class BlackListController {
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
+
+    @Catch(error = IllegalModeException.class)
+    public String illegalModeException(IllegalModeException e){
+        SfLog.getInstance().e(this.getClass(),e);
+        return "出现了一点错误：" + e.getMessage();
+    }
+
+    @Catch(error = SQLException.class)
+    public String sQLException(SQLException e){
+        SfLog.getInstance().e(this.getClass(),e);
+        return "出现了一点错误：" + e.getMessage();
+    }
+
+    @Catch(error = ClassNotFoundException.class)
+    public String classNotFoundException(ClassNotFoundException e){
+        SfLog.getInstance().e(this.getClass(),e);
+        return "出现了一点错误：" + e.getMessage();
+    }
+
+
+
 }

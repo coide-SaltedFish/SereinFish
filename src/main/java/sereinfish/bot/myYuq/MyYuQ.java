@@ -1,7 +1,12 @@
 package sereinfish.bot.myYuq;
 
+import com.IceCreamQAQ.Yu.annotation.Config;
+import com.IceCreamQAQ.Yu.controller.Router;
+import com.IceCreamQAQ.Yu.job.JobManager;
+import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
@@ -9,6 +14,7 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 
+import javax.inject.Inject;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -28,14 +34,20 @@ public class MyYuQ {
     //
     private static YuQ yuQ;
     private static MessageItemFactory mif;
+    private static JobManager jobManager;
+    private static DateUtil dateUtil;
+    private static RainBot rainBot;
 
-    private MyYuQ(YuQ yuQ, MessageItemFactory mif) {
+    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot) {
         this.yuQ = yuQ;
         this.mif = mif;
+        this.jobManager = jobManager;
+        this.dateUtil = dateUtil;
+        this.rainBot = rainBot;
     }
 
-    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif){
-        myYuQ = new MyYuQ(yuQ,mif);
+    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot){
+        myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot);
 
         return myYuQ;
     }
@@ -53,6 +65,18 @@ public class MyYuQ {
 
     public static MessageItemFactory getMif() {
         return mif;
+    }
+
+    public static JobManager getJobManager() {
+        return jobManager;
+    }
+
+    public static DateUtil getDateUtil() {
+        return dateUtil;
+    }
+
+    public static RainBot getRainBot() {
+        return rainBot;
     }
 
     /**
