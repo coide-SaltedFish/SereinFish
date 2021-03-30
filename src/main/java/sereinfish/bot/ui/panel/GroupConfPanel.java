@@ -34,7 +34,7 @@ public class GroupConfPanel extends JPanel {
         add(new JScrollPane(contentPane));
 
         if (conf.getV() < NOW_V){
-            //conf.update();//不再支持
+            conf.update();
             conf.setV(NOW_V);
         }
         build();

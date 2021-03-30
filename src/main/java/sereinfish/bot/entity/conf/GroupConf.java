@@ -34,30 +34,38 @@ public class GroupConf {
     /**
      * 在版本号更新时会执行此处
      */
-    @Deprecated
     public void update(){
-        confMaps.remove("数据库");
-        confMaps.get("SETU").put(GroupControlId.CheckBox_LoliconMD5Image,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
+
     }
 
     /**
      * 初始化对象
      */
     public GroupConf init(){
+        confMaps = getConfMap();
+        return this;
+    }
+
+    /**
+     * 得到配置列表
+     * @return
+     */
+    private Map<String, Map<GroupControlId,Control>> getConfMap(){
+        Map<String, Map<GroupControlId,Control>> confNew = new LinkedHashMap<>();//控件开关列表
         //
         Map<GroupControlId,Control> tipList = new LinkedHashMap<>();//提示
         tipList.put(GroupControlId.CheckBox_JoinGroupTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_JoinGroupTip, "进群提示", false, "是否在有人进群时发出公屏提醒"));
         tipList.put(GroupControlId.CheckBox_QuitGroupTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_QuitGroupTip, "退群提示", false, "是否在有人退群时发出公屏提醒"));
         tipList.put(GroupControlId.CheckBox_KickTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_KickTip, "被踢提示", false, "是否在有人被踢出群聊时发出公屏提醒"));
         tipList.put(GroupControlId.CheckBox_AddBlackTip, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_AddBlackTip, "加黑提示", false, "是否在有人被添加黑名单时发出公屏提醒"));
-        confMaps.put("群提示开关",tipList);
+        confNew.put("群提示开关",tipList);
         //
         Map<GroupControlId,Control> tipMsgList = new LinkedHashMap<>();
         tipMsgList.put(GroupControlId.Edit_JoinGroupTip, new Control(GroupControlType.Edit,GroupControlId.Edit_JoinGroupTip,"进群提示","","修改进群提示"));
         tipMsgList.put(GroupControlId.Edit_QuitGroupTip, new Control(GroupControlType.Edit,GroupControlId.Edit_QuitGroupTip,"退群提示","","修改退群提示"));
         tipMsgList.put(GroupControlId.Edit_KickTip, new Control(GroupControlType.Edit,GroupControlId.Edit_KickTip,"被踢提示","","修改被踢提示"));
         tipMsgList.put(GroupControlId.Edit_AddBlackTip, new Control(GroupControlType.Edit,GroupControlId.Edit_AddBlackTip,"加黑提示","","修改加黑提示"));
-        confMaps.put("群提示编辑",tipMsgList);
+        confNew.put("群提示编辑",tipMsgList);
 
         //
         Map<GroupControlId,Control> toolList = new LinkedHashMap<>();//群功能开关
@@ -68,7 +76,7 @@ public class GroupConf {
         toolList.put(GroupControlId.CheckBox_BlackList, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_BlackList,"黑名单", false,"启用黑名单功能"));
         toolList.put(GroupControlId.CheckBox_GlobalBlackList, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_GlobalBlackList,"全局黑名单", false,"黑名单功能使用全局黑名单"));
         toolList.put(GroupControlId.CheckBox_ReRead, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_ReRead,"复读", false,"bot复读功能"));
-        confMaps.put("群功能开关",toolList);
+        confNew.put("群功能开关",toolList);
         //
         Map<GroupControlId,Control> setuList = new LinkedHashMap<>();//setu
         setuList.put(GroupControlId.CheckBox_SetuEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
@@ -83,13 +91,13 @@ public class GroupConf {
         setuList.put(GroupControlId.CheckBox_SFLoliconKey, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"向SF加速服务器上传Key",false,"向SF加速服务器上传Key"));
         setuList.put(GroupControlId.Edit_SFLoliconApi, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"SF服务器api","","SF服务器api"));
 
-        confMaps.put("SETU",setuList);
+        confNew.put("Lolicon",setuList);
         //
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
         rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
-        confMaps.put("RCON",rconList);
+        confNew.put("RCON",rconList);
 
-        return this;
+        return confNew;
     }
 
     /**

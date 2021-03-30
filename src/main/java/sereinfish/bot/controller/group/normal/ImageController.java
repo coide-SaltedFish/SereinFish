@@ -367,7 +367,7 @@ public class ImageController {
 
         File imageFile = new File(FileHandle.imageCachePath,"sPa_temp");
 
-        BufferedImage headImage = headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,hdW);;
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,hdW);;
 
         AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
         animatedGifEncoder.setSize(w,h);
