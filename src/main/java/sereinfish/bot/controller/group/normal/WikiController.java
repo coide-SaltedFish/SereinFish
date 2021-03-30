@@ -2,9 +2,12 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
+import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -19,12 +22,20 @@ import java.net.URLEncoder;
 public class WikiController {
 
     @Before
-    public void before(){
-
+    public void before(Group group){
+        //检查是否启用
+        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiEnable).getValue()){
+            throw new DoNone();
+        }
     }
 
     @Action("\\[!！.]wiki\\ {key}")
-    public Message wiki(String key){
+    public Message mcWiki(Group group, String key){
+        //检查是否启用
+        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiMcEnable).getValue()){
+            throw new DoNone();
+        }
+
         String url = "https://minecraft-zh.gamepedia.com/index.php?search=";
         try {
             url += URLEncoder.encode(key,"utf-8");
@@ -38,6 +49,11 @@ public class WikiController {
 
     @Action("\\[!！.]百度\\ {key}")
     public Message baidu(Group group, String key){
+        //检查是否启用
+        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiBaiduEnable).getValue()){
+            throw new DoNone();
+        }
+
         String url = "http://www.baidu.com/s?wd=";
         try {
             url += URLEncoder.encode(key,"utf-8");

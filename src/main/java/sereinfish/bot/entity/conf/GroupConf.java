@@ -35,7 +35,25 @@ public class GroupConf {
      * 在版本号更新时会执行此处
      */
     public void update(){
-
+        Map<String, Map<GroupControlId,Control>> newMap = getConfMap();
+        //添加新的
+        for (Map.Entry<String, Map<GroupControlId,Control>> entry:newMap.entrySet()){
+            if (confMaps.containsKey(entry.getKey())){
+                for (Map.Entry<GroupControlId,Control> entryValue:entry.getValue().entrySet()){
+                    if (!entry.getValue().containsKey(entryValue.getKey())){
+                        entry.getValue().put(entryValue.getKey(),entryValue.getValue());
+                    }
+                }
+            }else {
+                confMaps.put(entry.getKey(), entry.getValue());
+            }
+        }
+        //去掉旧的
+        for (Map.Entry<String, Map<GroupControlId,Control>> entry:confMaps.entrySet()){
+            if (!newMap.containsKey(entry.getKey())){
+                confMaps.remove(entry.getKey());
+            }
+        }
     }
 
     /**
@@ -86,16 +104,21 @@ public class GroupConf {
         setuList.put(GroupControlId.CheckBox_LoliconMD5Image, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
         setuList.put(GroupControlId.Edit_SetuKey, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
         setuList.put(GroupControlId.Button_jumpLolicon, new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
-
         setuList.put(GroupControlId.CheckBox_SFLoliconEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用SF加速",false,"启用SFLoliconAPI"));
         setuList.put(GroupControlId.CheckBox_SFLoliconKey, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"向SF加速服务器上传Key",false,"向SF加速服务器上传Key"));
         setuList.put(GroupControlId.Edit_SFLoliconApi, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"SF服务器api","","SF服务器api"));
-
         confNew.put("Lolicon",setuList);
+        //
+        Map<GroupControlId,Control> wikiList = new LinkedHashMap<>();//wiki
+        wikiList.put(GroupControlId.CheckBox_wikiEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiEnable,"wiki",false,"启用wiki"));
+        wikiList.put(GroupControlId.CheckBox_wikiMcEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiMcEnable,"mc wiki",false,"启用mc wiki"));
+        wikiList.put(GroupControlId.CheckBox_wikiBaiduEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiBaiduEnable,"百度",false,"启用百度"));
+        confNew.put("Wiki",wikiList);
         //
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
         rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
         confNew.put("RCON",rconList);
+        //
 
         return confNew;
     }

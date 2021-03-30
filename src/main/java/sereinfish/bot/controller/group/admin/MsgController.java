@@ -45,7 +45,7 @@ public class MsgController {
     @Action("\\[!！.]版本\\")
     @QMsg(reply = true)
     public Message version(){
-        return MyYuQ.getMif().text(MyYuQ.getVersion()).toMessage();
+        return MyYuQ.getMif().text(MyYuQ.getVersionInfo()).toMessage();
     }
 
     @Action("运行状态")
@@ -63,6 +63,7 @@ public class MsgController {
         str.append("\nJVM内存总量：" + MyPerformance.getJvmTotalMemory());
         str.append("\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory());
         str.append("\nJAVA版本：" + MyPerformance.getJavaVersion());
+        str.append("\nbot版本：" + MyYuQ.getVersion());
 
         return MyYuQ.getMif().text(str.toString()).toMessage();
     }

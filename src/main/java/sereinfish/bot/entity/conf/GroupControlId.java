@@ -34,6 +34,10 @@ public enum GroupControlId {
     CheckBox_SFLoliconEnable,//启用SF加速
     CheckBox_SFLoliconKey,//在启用加速时上传lolicon key
     Edit_SFLoliconApi,//SF加速api
+    //wiki
+    CheckBox_wikiEnable,
+    CheckBox_wikiMcEnable,//mc wiki开关
+    CheckBox_wikiBaiduEnable,//baidu 查询开关
 
     //
     CheckBox_RCON,//rcon功能

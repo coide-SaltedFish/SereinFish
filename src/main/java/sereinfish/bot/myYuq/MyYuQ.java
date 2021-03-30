@@ -183,13 +183,20 @@ public class MyYuQ {
     }
 
     /**
-     * 得到版本信息
+     * 得到版本
      * @return
      */
     public static String getVersion(){
+        return versionName + "-"+ version;
+    }
+
+    /**
+     * 得到版本信息
+     * @return
+     */
+    public static String getVersionInfo(){
         return appName + "\n" +
-                "测试版本：" + versionName + "\n" +
-                "V:" + version;
+                "测试版本：" + versionName + "-"+ version;
     }
 
     /**

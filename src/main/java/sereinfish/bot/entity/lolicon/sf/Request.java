@@ -65,7 +65,7 @@ public class Request {
         url += "?";
         url += "num=" + num;
         url += "&isR18=" + isR18;
-        if (apikey != null && !apikey.trim().equals("")){
+        if (keyWord != null && !keyWord.trim().equals("")){
             try {
                 url += "&keyWord=" + URLEncoder.encode(keyWord,"utf-8");
             } catch (UnsupportedEncodingException e) {
