@@ -34,6 +34,7 @@ public class GroupConf {
     /**
      * 在版本号更新时会执行此处
      */
+    @Deprecated
     public void update(){
         confMaps.remove("数据库");
         confMaps.get("SETU").put(GroupControlId.CheckBox_LoliconMD5Image,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
