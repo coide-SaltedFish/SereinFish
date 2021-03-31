@@ -101,8 +101,42 @@ public class LoliconController {
         }
     }
 
+    @Action("来{strNum}张{key}色图")
+    @Synonym({"来{strNum}张{key}涩图"})
+    @QMsg(mastAtBot = true)
+    public Message setuAtBotKeyWord(String strNum, String key){
+        int max = 20;
+        int num;
+        try {
+            num = Integer.valueOf(strNum);
+        }catch (Exception e){
+            if (MyYuQ.getRandom(0,100) % 2 == 0){
+                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{5D6083D0-459F-5596-CB99-5088E949B71D}.jpg>");
+            }else {
+                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{53AF664A-B93A-AFF6-2906-32025A1B2787}.jpg>");
+            }
+        }
+
+        if (num > max){
+            num = max;
+            sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"),false);
+        }
+
+        if (num <= 0){
+            return Message.Companion.toMessageByRainCode("<Rain:Image:{22C729AA-4F85-DE57-4605-FA0D19C6A6B7}.jpg>");
+        }
+        //判断是否启用Sf
+        if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
+            getSFLoliconMsg(isGroupMsg,conf,apiKey,key,num);
+        }else {
+            getLoliconMsg(isGroupMsg,conf,apiKey,key,num);
+        }
+
+        throw new DoNone();
+    }
+
     @Action("来点{key}色图")
-    @Synonym({"来点{key}涩图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
+    @Synonym({"来点{key}涩图","来张{key}涩图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
     @QMsg(mastAtBot = true)
     public void setuAtBot(String key){
         //判断是否启用Sf

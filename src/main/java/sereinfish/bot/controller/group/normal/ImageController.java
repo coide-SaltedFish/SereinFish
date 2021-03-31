@@ -3,6 +3,7 @@ package sereinfish.bot.controller.group.normal;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
+import com.IceCreamQAQ.Yu.controller.Router;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -110,6 +111,15 @@ public class ImageController {
             throw new SkipMe();
         }
         return getJiao(member);
+    }
+
+    @Action("mua {member}")
+    @Synonym({"mua {member}"})
+    public Message mua(long member){
+        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
+            throw new SkipMe();
+        }
+        return getMuaGif(member);
     }
 
     @Action("摸 {member}")
@@ -384,6 +394,69 @@ public class ImageController {
                 graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
                 graphics2D.drawImage(bgImage,0,0,w,h,null);
                 graphics2D.drawImage(headImage,0,h - hdW,hdW,hdW,null);//头画背景上
+                graphics2D.dispose();
+                animatedGifEncoder.addFrame(bufferedImage);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
+        }
+
+        if(animatedGifEncoder.finish()){
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+    }
+
+    /**
+     * 得到一个动态的mua
+     * @param m
+     * @return
+     */
+    public Message getMuaGif(long m){
+        int bgWH = 240;//背景宽高
+        int delay = 50;//每张图之间的延迟
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImageNoFrame(m,80);//得到头像
+        File imageFile = new File(FileHandle.imageCachePath,"mua_temp");//文件缓存路径
+
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        animatedGifEncoder.setSize(bgWH,bgWH);
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+        animatedGifEncoder.setDelay(delay);
+        animatedGifEncoder.setRepeat(13);
+
+        //x,y,w,h
+        int imageHeadInfo[][] = {
+                {46,117,62,64},//1
+                {68,107,63,66},//2
+                {76,107,58,69},//3
+                {55,123,58,63},//4
+                {66,123,56,68},//5
+                {71,122,54,66},//6
+                {24,146,57,56},//7
+                {32,128,71,72},//8
+                {73,110,55,72},//9
+                {57,118,54,65},//10
+                {76,114,60,69},//11
+                {47,137,56,66},//12
+                {22,149,68,65}//13
+        };//头像位置信息
+
+        for (int i = 0; i < 13; i++){
+            BufferedImage bgImage;
+            try {
+                //得到背景
+                bgImage = ImageIO.read(getClass().getClassLoader().getResource("image/mua/" + (i + 1) + ".png"));
+                //空白底
+                BufferedImage bufferedImage = new BufferedImage(bgWH,bgWH,BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics2D = bufferedImage.createGraphics();
+                graphics2D.setColor(Color.WHITE);
+                graphics2D.fillRect(0,0,bgWH,bgWH);
+                graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+                //先画头
+                graphics2D.drawImage(headImage,imageHeadInfo[i][0],imageHeadInfo[i][1],imageHeadInfo[i][2],imageHeadInfo[i][3],null);
+                //画背景
+                graphics2D.drawImage(bgImage,0,0,bgWH,bgWH,null);
                 graphics2D.dispose();
                 animatedGifEncoder.addFrame(bufferedImage);
             } catch (IOException e) {
