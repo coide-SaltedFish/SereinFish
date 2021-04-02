@@ -43,7 +43,10 @@ public class ImageController {
         if (!conf.isEnable()){
             throw new DoNone();
         }
-
+        //创建缓存路径
+        if (!FileHandle.imageCachePath.exists() || FileHandle.imageCachePath.isFile()){
+            FileHandle.imageCachePath.mkdirs();
+        }
     }
 
     /**

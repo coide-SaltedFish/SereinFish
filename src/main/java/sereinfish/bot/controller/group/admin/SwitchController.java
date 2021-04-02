@@ -93,7 +93,7 @@ public class SwitchController {
             list.add(l.get(i));
         }
 
-        return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish 开关列表[" + page + "/" + maxPage + "]", "本群开关组列表如下[" + page + "/" + maxPage + "]",
+        return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish 开关列表[" + page + "/" + maxPage + "]", "[" + page + "/" + maxPage + "]开关列表",
                 "http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640", list.toArray(new String[0]))).toMessage();
     }
 
@@ -124,7 +124,7 @@ public class SwitchController {
             list.add(l.get(i));
         }
 
-        return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish 开关列表[" + page + "/" + maxPage + "]", "本群开关组列表如下[" + page + "/" + maxPage + "]",
+        return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish 开关列表[" + page + "/" + maxPage + "]", "[" + page + "/" + maxPage + "]开关列表",
                 "http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640", list.toArray(new String[0]))).toMessage();
     }
 
@@ -147,7 +147,7 @@ public class SwitchController {
         }
 
         return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish [" + groupName + "]开关列表[" + page + "/" + maxPage + "]",
-                "本群[" + groupName + "]开关组开关列表如下[" + page + "/" + maxPage + "]",
+                        "[" + page + "/" + maxPage + "][" + groupName + "]",
                 "http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640", list.toArray(new String[0]))).toMessage();
     }
 
@@ -183,7 +183,7 @@ public class SwitchController {
         }
 
         return MyYuQ.getMif().jsonEx(JsonMsg.getMenuCardNoAction("SereinFish ["  + groupName + "]开关列表[" + page + "/" + maxPage + "]",
-                "本群[" + groupName + "]开关组开关列表如下[" + page + "/" + maxPage + "]",
+                        "[" + page + "/" + maxPage + "][" + groupName + "]",
                 "http://q1.qlogo.cn/g?b=qq&nk=" + MyYuQ.getYuQ().getBotId() + "&s=640", list.toArray(new String[0]))).toMessage();
     }
 }

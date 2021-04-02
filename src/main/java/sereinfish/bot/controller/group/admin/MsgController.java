@@ -55,7 +55,7 @@ public class MsgController {
         str.append("程序运行时长：" + MyPerformance.getRunTime());
         str.append("\n进程号：" + MyPerformance.getPid());
         str.append("\n处理器核心数：" + MyPerformance.getCoresNum());
-        str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
+        //str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
         str.append("\n本程序CPU使用率：" + String.format("%.2f",MyPerformance.getProcessCpuLoad() * 100) + "%");
         str.append("\n总内存：" + MyPerformance.getTotalPhysicalMemorySize());
         str.append("\n已使用内存：" + MyPerformance.getUsedPhysicalMemorySize());

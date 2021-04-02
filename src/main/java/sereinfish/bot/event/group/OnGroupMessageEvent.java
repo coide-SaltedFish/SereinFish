@@ -7,6 +7,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
+import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.BlackListDao;
@@ -50,6 +51,19 @@ public class OnGroupMessageEvent {
         }
         //群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        //启用群命令
+        if (!conf.isEnable()){
+            if (Message.Companion.toCodeString(event.getMessage()).equals("SereinFish Bot 开")){
+                //权限判断
+                if (AuthorityManagement.getInstance().authorityCheck(event.getSender(),AuthorityManagement.ADMIN)){
+                    //开启群
+                    conf.setEnable(true);
+                    GroupConfManager.getInstance().put(conf);
+                    event.getGroup().sendMessage(MyYuQ.getMif().text("本群[启用]开关状态已设置为[true]").plus(MyYuQ.getMif().at(event.getSender())));
+                }
+            }
+        }
+
         if (!conf.isEnable()){
             event.setCancel(true);
             return;
@@ -99,7 +113,7 @@ public class OnGroupMessageEvent {
         if (event.getMessageSource().getId() < 0){
             event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
             //TODO:转图片发送
-
+            event.getSendTo().sendMessage(MyYuQ.getMif().text("//TODO:消息转图片").toMessage());
             return;
         }
 

@@ -102,7 +102,7 @@ public class LoliconController {
     }
 
     @Action("来{strNum}张{key}色图")
-    @Synonym({"来{strNum}张{key}涩图"})
+    @Synonym({"来{strNum}张{key}涩图","来{strNum}份{key}涩图"})
     @QMsg(mastAtBot = true)
     public Message setuAtBotKeyWord(String strNum, String key){
         int max = 20;
@@ -136,7 +136,7 @@ public class LoliconController {
     }
 
     @Action("来点{key}色图")
-    @Synonym({"来点{key}涩图","来张{key}涩图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
+    @Synonym({"来点{key}涩图","来张{key}涩图","来张{key}色图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
     @QMsg(mastAtBot = true)
     public void setuAtBot(String key){
         //判断是否启用Sf
@@ -352,6 +352,16 @@ public class LoliconController {
      * @param message
      */
     private void sendMessage(Message message, boolean isRecall){
+        if ((!(Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue() &&
+                !(Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()) && isRecall){
+            if (isGroupMsg){
+                group.sendMessage(Message.Companion.toMessageByRainCode("欸嘿"));
+            }else {
+                qq.sendMessage(Message.Companion.toMessageByRainCode("欸嘿"));
+            }
+            return;
+        }
+
         if (isGroupMsg){
             group.sendMessage(message);
         }else {

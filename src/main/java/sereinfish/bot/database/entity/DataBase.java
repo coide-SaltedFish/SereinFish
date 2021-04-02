@@ -23,6 +23,7 @@ public class DataBase {
 
     public DataBase(DataBaseConfig dataBaseConfig) throws SQLException, ClassNotFoundException, IllegalModeException {
         this.dataBaseConfig = dataBaseConfig;
+        //TODO:添加h2数据库
         switch (dataBaseConfig.getState()){
             case SQL_SERVER:
                 linkSQLServer();
