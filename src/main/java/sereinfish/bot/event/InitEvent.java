@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
 import com.IceCreamQAQ.Yu.job.JobManager;
 import com.IceCreamQAQ.Yu.util.DateUtil;
+import com.IceCreamQAQ.Yu.util.Web;
 import com.alibaba.fastjson.JSONArray;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
@@ -15,6 +16,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.entity.sauceNAO.SauceNaoAPI;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
@@ -51,9 +53,8 @@ public class InitEvent {
     private DateUtil dateUtil;
     @Inject
     private RainBot rainBot;
-
-    @Config("yu.scanPackages")
-    Object a;
+    @Inject
+    private Web web;
 
     /**
      * 软件启动事件
@@ -62,12 +63,11 @@ public class InitEvent {
     @Event
     public void initEvent(AppStartEvent event){
         //初始化MyYuQ
-        MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot);
+        MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
 
-        System.out.println(a.toString());
         //初始化权限管理器
         try {
             AuthorityManagement.init();

@@ -352,8 +352,8 @@ public class LoliconController {
      * @param message
      */
     private void sendMessage(Message message, boolean isRecall){
-        if ((!(Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue() &&
-                !(Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()) && isRecall){
+        if ((!(Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue()
+                && !(Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()) && isRecall){
             if (isGroupMsg){
                 group.sendMessage(Message.Companion.toMessageByRainCode("欸嘿"));
             }else {

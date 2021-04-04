@@ -22,7 +22,7 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
-    public static final int NOW_V = 3;
+    public static final int NOW_V = 4;
 
     private GroupConf conf;
     private JPanel contentPane;

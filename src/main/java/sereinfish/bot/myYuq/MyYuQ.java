@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.annotation.Config;
 import com.IceCreamQAQ.Yu.controller.Router;
 import com.IceCreamQAQ.Yu.job.JobManager;
 import com.IceCreamQAQ.Yu.util.DateUtil;
+import com.IceCreamQAQ.Yu.util.Web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.icecreamqaq.yuq.RainBot;
@@ -13,6 +14,9 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import lombok.Getter;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import java.io.StringReader;
@@ -37,17 +41,25 @@ public class MyYuQ {
     private static JobManager jobManager;
     private static DateUtil dateUtil;
     private static RainBot rainBot;
+    private static OkHttpClient okHttpClient;
+    private static Web web;
 
-    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot) {
+    @Config("yu.scanPackages")
+    Object scanPackages;
+
+    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot, Web web) {
         this.yuQ = yuQ;
         this.mif = mif;
         this.jobManager = jobManager;
         this.dateUtil = dateUtil;
         this.rainBot = rainBot;
+        this.web = web;
+
+        okHttpClient = new OkHttpClient();
     }
 
-    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot){
-        myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot);
+    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot, Web web){
+        myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot, web);
 
         return myYuQ;
     }
@@ -77,6 +89,14 @@ public class MyYuQ {
 
     public static RainBot getRainBot() {
         return rainBot;
+    }
+
+    public static OkHttpClient getOkHttpClient() {
+        return okHttpClient;
+    }
+
+    public static Web getWeb() {
+        return web;
     }
 
     /**

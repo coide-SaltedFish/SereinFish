@@ -3,9 +3,9 @@ package sereinfish.bot.controller.group.normal;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
-import com.IceCreamQAQ.Yu.controller.Router;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
@@ -25,14 +25,17 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 @GroupController
-public class ImageController {
+public class ImageController extends QQController {
     private Member sender;
     private Group group;
     private GroupConf conf;
 
     private int paIndex = 16;
+
+    private int maxTime = 15000;
 
     @Before
     public void before(Member sender, Group group){

@@ -10,6 +10,7 @@ import sereinfish.bot.ui.panel.GroupConfPanel;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -114,6 +115,11 @@ public class GroupConf {
         wikiList.put(GroupControlId.CheckBox_wikiMcEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiMcEnable,"mc wiki",false,"启用mc wiki"));
         wikiList.put(GroupControlId.CheckBox_wikiBaiduEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiBaiduEnable,"百度",false,"启用百度"));
         confNew.put("Wiki",wikiList);
+        //SauceNAO
+        Map<GroupControlId,Control> sauceNAOList = new LinkedHashMap<>();//SauceNAO
+        sauceNAOList.put(GroupControlId.CheckBox_SauceNAOEnable,new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_SauceNAOEnable,"SauceNAO",false,"启用SauceNAO"));
+        sauceNAOList.put(GroupControlId.Edit_SauceNAOApiKey,new Control(GroupControlType.Edit, GroupControlId.CheckBox_SFLoliconKey,"SauceNAO Key","","SauceNAO Api Key"));
+        confNew.put("SauceNAO",sauceNAOList);
         //
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
         rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));

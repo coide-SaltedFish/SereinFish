@@ -38,6 +38,9 @@ public enum GroupControlId {
     CheckBox_wikiEnable,
     CheckBox_wikiMcEnable,//mc wiki开关
     CheckBox_wikiBaiduEnable,//baidu 查询开关
+    //SauceNAO
+    CheckBox_SauceNAOEnable,//启用SauceNAO
+    Edit_SauceNAOApiKey,//key
 
     //
     CheckBox_RCON,//rcon功能
