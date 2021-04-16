@@ -5,9 +5,13 @@ import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
+import com.icecreamqaq.yuq.controller.ContextSession;
+import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.entity.GroupNotice;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
+import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import sereinfish.bot.authority.AuthorityManagement;
@@ -26,7 +30,9 @@ import java.util.regex.Pattern;
  * 消息相关命令处理
  */
 @GroupController
-public class MsgController {
+public class MsgController extends QQController {
+    int maxTime = 25 * 1000;
+
     /**
      * 权限检查
      */
@@ -73,35 +79,18 @@ public class MsgController {
         return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage();
     }
 
-    //消息放大术
-//
-//    @Action("\\[.!！]大\\")
-//    public Message bigImage(Group group, Message message){
-//        GroupHistoryMsg groupHistoryMsg = null;
-//
-//        if(message.getReply() == null){
-//            throw new SkipMe();
-//        }
-//
-//        try {
-//            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),message.getReply().getId());
-//            if (groupHistoryMsg == null){
-//                return MyYuQ.getMif().text("找不到该消息").toMessage();
-//            }
-//        } catch (SQLException e) {
-//            SfLog.getInstance().e(this.getClass(),e);
-//            return MyYuQ.getMif().text("操作失败：" + e.getMessage()).toMessage();
-//        }
-//        Message hMsg = Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
-//
-//        for (MessageItem messageItem : hMsg.getBody()){
-//            String msg_str = messageItem.toPath();
-//            if (Pattern.matches("img_\\{.*}.jpg",msg_str)){
-//                String uuid = msg_str.split("img_\\{|\\}.jpg")[1].replace("-","");
-//                return XmlMsg.getBigImageMsg(uuid);
-//            }
-//        }
-//
-//        return MyYuQ.getMif().text("未发现图片").toMessage();
-//    }
+    @Action("\\[.!！]公告\\")
+    public Message testGG(Group group, ContextSession session){
+        GroupNotice groupNotice = new GroupNotice();
+        try {
+            reply("输入公告内容");
+            Message m1 = session.waitNextMessage(maxTime);
+            groupNotice.setText(Message.Companion.toCodeString(m1));
+            group.getNotices().add(groupNotice);
+            return MyYuQ.getMif().text("wanc").toMessage();
+        }catch (WaitNextMessageTimeoutException e){
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("超时：" + maxTime).toMessage();
+        }
+    }
 }

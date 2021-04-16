@@ -42,6 +42,10 @@ public enum GroupControlId {
     CheckBox_SauceNAOEnable,//启用SauceNAO
     Edit_SauceNAOApiKey,//key
 
+    //Bili
+    CheckBox_BiliEnable,//启用bili相关命令
+    CheckBox_BiliBvExplain,//将bv号解析
+
     //
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能

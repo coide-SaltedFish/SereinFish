@@ -1,5 +1,6 @@
 package sereinfish.bot.file.image;
 
+import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.mlog.SfLog;
 
@@ -151,4 +152,11 @@ public class ImageHandle {
         return bimage;
     }
 
+    /**
+     * 消息转图片
+     * @return
+     */
+    public BufferedImage messageToImage(Message message){
+        return null;
+    }
 }

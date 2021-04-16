@@ -19,6 +19,7 @@ import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.sauceNAO.SauceNaoAPI;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.account.AccountManager;
 import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
@@ -88,6 +89,21 @@ public class InitEvent {
         //初始化群配置管理器
         GroupConfManager.init();
         SfLog.getInstance().d(this.getClass(),"群配置管理器初始化完成");
+
+        //初始化账号管理器
+        try {
+            AccountManager.init();
+            SfLog.getInstance().d(this.getClass(),"账号管理器初始化完成");
+        } catch (IllegalModeException e) {
+            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
+            System.exit(-1);
+        } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
+            System.exit(-1);
+        } catch (ClassNotFoundException e) {
+            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
+            System.exit(-1);
+        }
 
         //初始化群消息记录管理器
         try {

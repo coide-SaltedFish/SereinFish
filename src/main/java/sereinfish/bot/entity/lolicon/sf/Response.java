@@ -75,6 +75,7 @@ public class Response {
         }
 
         public String getMd5() {
+            md5 = md5.replace("-","").toUpperCase();
             return md5;
         }
 

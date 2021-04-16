@@ -70,7 +70,7 @@ public class OnGroupMessageEvent {
         }else {
             RepeaterManager.getInstance().add(event.getGroup().getId(),event.getMessage());
             //自动回复
-            if (conf.isDataBaseEnable()){
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_AutoReply).getValue() && conf.isDataBaseEnable()){
                 try {
                     ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
                     String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));

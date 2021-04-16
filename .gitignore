@@ -18,7 +18,6 @@
 .gradle/
 bot.jar
 gradle/
-src/main/java/sereinfish/bot/controller/privatem/
 start.bat
 !/bot.jar
 !/start.bat
@@ -28,3 +27,4 @@ start.bat
 /build/tmp/compileJava/source-classes-mapping.txt
 build/classes/
 build/generated/
+/pwd.txt

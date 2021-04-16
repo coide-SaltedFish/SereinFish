@@ -1,8 +1,6 @@
 package sereinfish.bot.ui.tray;
 
-import com.icecreamqaq.yuq.mirai.YuQMiraiStart;
 import sereinfish.bot.ui.frame.MainFrame;
-import tornadofx.App;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

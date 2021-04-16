@@ -4,12 +4,16 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageItemFactory;
+import kotlin.Result;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.FileHandle;
@@ -18,6 +22,7 @@ import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.OkHttpUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,6 +30,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @GroupController
@@ -142,6 +148,16 @@ public class ImageController extends QQController {
     public Message mo_2(){
         final Member sender = this.sender;//线程安全
         return getRua(sender.getId());
+    }
+
+    @Action("\\[.!！]读懂世界\\")
+    public Message readTheWorld(){
+        try {
+            return MyYuQ.getMif().imageByInputStream(OkHttpUtils.getByteStream("http://api.03c3.cn/zb/")).toMessage();
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("在读世界时出现了一点错误").toMessage();
+        }
     }
 
     /**

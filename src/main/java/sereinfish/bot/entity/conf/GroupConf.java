@@ -120,6 +120,11 @@ public class GroupConf {
         sauceNAOList.put(GroupControlId.CheckBox_SauceNAOEnable,new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_SauceNAOEnable,"SauceNAO",false,"启用SauceNAO"));
         sauceNAOList.put(GroupControlId.Edit_SauceNAOApiKey,new Control(GroupControlType.Edit, GroupControlId.CheckBox_SFLoliconKey,"SauceNAO Key","","SauceNAO Api Key"));
         confNew.put("SauceNAO",sauceNAOList);
+        //Bili
+        Map<GroupControlId,Control> biliList = new LinkedHashMap<>();//
+        biliList.put(GroupControlId.CheckBox_BiliEnable, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_BiliEnable,"启用", false, "启用哔哩哔哩相关功能"));
+        biliList.put(GroupControlId.CheckBox_BiliBvExplain, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_BiliBvExplain,"BV号解析", false, "启用哔哩哔哩BV号解析功能"));
+        confNew.put("Bili",biliList);
         //
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
         rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
