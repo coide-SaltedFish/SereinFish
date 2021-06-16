@@ -49,4 +49,7 @@ public enum GroupControlId {
     //
     CheckBox_RCON,//rcon功能
     CheckBox_Ping,//ping功能
+
+    //消息
+    CheckBox_LongMsgToImageEnable,//长文本转图片发送
 }

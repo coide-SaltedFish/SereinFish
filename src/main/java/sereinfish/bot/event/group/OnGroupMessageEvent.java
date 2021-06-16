@@ -3,10 +3,14 @@ package sereinfish.bot.event.group;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageItem;
+import com.icecreamqaq.yuq.message.Text;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
@@ -18,10 +22,16 @@ import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
+import javax.imageio.ImageIO;
+import javax.xml.crypto.Data;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -75,7 +85,11 @@ public class OnGroupMessageEvent {
                     ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
                     String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
                     if (str != null){
-                        event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
+                        try{
+                            event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
+                        }catch (SendMessageFailedByCancel e){
+                            SfLog.getInstance().e(this.getClass(),"消息发送取消");
+                        }
                         SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
                     }
                 } catch (SQLException e) {
@@ -102,18 +116,62 @@ public class OnGroupMessageEvent {
     }
 
     /**
+     * bot发送消息事件
+     * @param event
+     */
+    @Event
+    public void sendMessageEvent(SendMessageEvent event){
+        //是否转图片
+        Contact contact = event.getSendTo();
+        if (contact instanceof Group){
+            Group group = (Group) contact;
+            GroupConf conf = GroupConfManager.getInstance().get(group.getId());
+            if ((Boolean) conf.getControl(GroupControlId.CheckBox_LongMsgToImageEnable).getValue()){
+                //判断消息是否过长
+                int length = 0;
+                Message message = event.getMessage();
+                for (MessageItem item:message.getBody()){
+                    if (item instanceof Text){
+                        Text text = (Text) item;
+                        length += text.getText().length();
+                    }
+                }
+                if (length >= 350){
+                    //取消发送
+                    event.setCancel(true);
+                    event.getSendTo().sendMessage(MyYuQ.getMif().text("消息过长，正在处理").toMessage());
+                    File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+                    try {
+                        ImageIO.write(ImageHandle.messageToImage(event.getMessage()), "png", imageFile);
+                    } catch (IOException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                        event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+                    }
+                    event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
+                }
+            }
+        }
+    }
+
+    /**
      * bot发送的消息记录
      * @param event
      */
     @Event
-    public void sendMessageEvent(SendMessageEvent.Post event){
+    public void sendMessagePostEvent(SendMessageEvent.Post event){
         Message message = event.getMessage();
         message.setSource(event.getMessageSource());
         //检查消息是否发送成功
         if (event.getMessageSource().getId() < 0){
             event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
-            //TODO:转图片发送
-            event.getSendTo().sendMessage(MyYuQ.getMif().text("//TODO:消息转图片").toMessage());
+            File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+            try {
+                ImageIO.write(ImageHandle.messageToImage(event.getMessage()), "png", imageFile);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+            }
+            event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
             return;
         }
 
@@ -129,7 +187,7 @@ public class OnGroupMessageEvent {
      * @param event
      */
     @Event
-    public void groupMemberJoinEvent(GroupMemberJoinEvent event){//群功能启用判断
+    public void groupMemberJoinEvent(GroupMemberJoinEvent.Join event){//群功能启用判断
         GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
@@ -140,11 +198,19 @@ public class OnGroupMessageEvent {
         if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_JoinGroupTip).getValue()){
             String tip = (String) conf.getControl(GroupControlId.Edit_JoinGroupTip).getValue();
             if (!tip.trim().equals("")){
+                SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
                 event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
                 return;
             }
         }
 
+    }
+
+    @Event
+    public void g(GroupMemberJoinEvent.Invite invite){
+        //TODO:进群邀请事件
+        System.out.println(invite.getInviter().getId());
+        System.out.println(invite.getMember().getId());
     }
 
     /**
@@ -313,5 +379,11 @@ public class OnGroupMessageEvent {
         }else {
             SfLog.getInstance().d(this.getClass(),"自动同意入群未开启");
         }
+    }
+
+    @Event
+    public void clickBotEvent(ClickBotEvent event){
+        String msgs[] = {"唔","干嘛","rua","唉呀","哼"};
+        event.getOperator().sendMessage(MyYuQ.getMif().text(msgs[MyYuQ.getRandom(0, msgs.length - 1)]).toMessage());
     }
 }

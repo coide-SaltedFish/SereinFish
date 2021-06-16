@@ -130,7 +130,9 @@ public class GroupConf {
         rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
         confNew.put("RCON",rconList);
         //
-
+        Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();
+        msgToolList.put(GroupControlId.CheckBox_LongMsgToImageEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LongMsgToImageEnable,"启用长文本转图片功能",false,"bot在发送长文本时将自动把消息转换为图片发送"));
+        confNew.put("消息",msgToolList);
         return confNew;
     }
 

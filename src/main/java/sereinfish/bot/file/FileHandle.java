@@ -23,6 +23,9 @@ public class FileHandle {
 
     public static File groupDataPath = new File(dataPath,"data/group/");//群数据文件路径
 
+    public static File msgToImageTemplate = new File(configPath,"MessageTemplate.conf");//消息转图片模板
+    public static File msgToImageTemplateTemp = new File(configPath,"MessageTemplateTemp");//消息转图片模板临时缓存
+
     /**
      * 写入文件
      * @param file
