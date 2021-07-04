@@ -42,9 +42,7 @@ public class GroupConf {
             if (confMaps.containsKey(entry.getKey())){//如果第一层在旧控件中已包含
 
                 for (Map.Entry<GroupControlId,Control> entryValue:entry.getValue().entrySet()){//遍历第二层
-
                     if (!confMaps.get(entry.getKey()).containsKey(entryValue.getKey())){//如果第二层未包含
-
                         confMaps.get(entry.getKey()).put(entryValue.getKey(), entryValue.getValue());//
                     }
                 }
@@ -107,7 +105,7 @@ public class GroupConf {
         setuList.put(GroupControlId.CheckBox_LoliconLocalImage, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconLocalImage,"本地模式",false,"额度用完后使用缓存的图片"));
         setuList.put(GroupControlId.CheckBox_LoliconMD5Image, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconMD5Image,"MD5发送模式",false,"有效加快发送速度且能避免mirai的5000ms异常"));
         setuList.put(GroupControlId.Edit_SetuKey, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"API KEY","","修改API KEY"));
-        setuList.put(GroupControlId.Button_jumpLolicon, new Control(GroupControlType.Button, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
+        setuList.put(GroupControlId.Button_jumpLolicon, new Control(GroupControlType.WebLink, GroupControlId.Button_jumpLolicon, "Lolicon", "https://api.lolicon.app/#/setu?id=telegram-bot/", "跳转到Lolicon"));
         setuList.put(GroupControlId.CheckBox_SFLoliconEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用SF加速",false,"启用SFLoliconAPI"));
         setuList.put(GroupControlId.CheckBox_SFLoliconKey, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"向SF加速服务器上传Key",false,"向SF加速服务器上传Key"));
         setuList.put(GroupControlId.Edit_SFLoliconApi, new Control(GroupControlType.Edit,GroupControlId.Edit_SetuKey,"SF服务器api","","SF服务器api"));
@@ -136,6 +134,7 @@ public class GroupConf {
         Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();
         msgToolList.put(GroupControlId.CheckBox_LongMsgToImageEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LongMsgToImageEnable,"启用长文本转图片功能",false,"bot在发送长文本时将自动把消息转换为图片发送"));
         msgToolList.put(GroupControlId.ComBox_FontSelect, new Control(GroupControlType.Font_ComboBox, GroupControlId.ComBox_FontSelect, "文本转图片字体", "黑体", "文本转图片时的文本字体"));
+        msgToolList.put(GroupControlId.Edit_Small_Plain_MsgToImageWatermark, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_MsgToImageWatermark, "水印内容", "SereinFish Bot", "在生成图片时添加的水印"));
         confNew.put("消息",msgToolList);
         return confNew;
     }

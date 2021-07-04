@@ -3,6 +3,7 @@ package sereinfish.bot.ui.panel;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.entity.conf.*;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.ui.context.ConfContext;
 import sereinfish.bot.ui.frame.EditFrame;
 import sereinfish.bot.ui.frame.database.select.SelectDataBaseFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
@@ -24,7 +25,7 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
-    public static final int NOW_V = 1;
+    public static final int NOW_V = 2;
 
     private GroupConf conf;
     private JPanel contentPane;
@@ -63,89 +64,7 @@ public class GroupConfPanel extends JPanel {
             //解析组件
             for (Map.Entry<GroupControlId, GroupConf.Control> entry1:entry.getValue().entrySet()){
                 GroupConf.Control control = entry1.getValue();
-                //如果是单选框
-                if (control.getType() == GroupControlType.CheckBox){
-                    JCheckBox checkBox = new JCheckBox(control.getName());
-                    checkBox.setToolTipText(control.getTip());//设置提示
-                    checkBox.setSelected((Boolean) control.getValue());//设置值
-                    //设置监听
-                    checkBox.addChangeListener(new ChangeListener() {
-                        @Override
-                        public void stateChanged(ChangeEvent e) {
-                            control.setValue(checkBox.isSelected());
-                            GroupConfManager.getInstance().put(conf);
-                        }
-                    });
-                    panel.add(checkBox);
-                }else if (control.getType() == GroupControlType.Edit){
-                    //如果是编辑框
-                    JButton button = new JButton(control.getName());
-                    button.setToolTipText(control.getTip());
 
-                    button.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            EditFrame editFrame = new EditFrame(control.getName(), new EditFrame.EditListener() {
-                                @Override
-                                public void save(EditFrame editFrame, String text) {
-                                    control.setValue(text);
-                                    GroupConfManager.getInstance().put(conf);
-                                    editFrame.close();
-                                }
-
-                                @Override
-                                public void cancel(EditFrame editFrame) {
-                                    editFrame.close();
-                                }
-                            });
-                            editFrame.setText((String) control.getValue());
-                            editFrame.setVisible(true);
-                        }
-                    });
-                    panel.add(button);
-                }else if (control.getType() == GroupControlType.Button){
-                    //按钮
-                    JButton button = new JButton(control.getName());
-                    button.setToolTipText(control.getTip());
-                    button.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent event) {
-                            //放着先
-                            Desktop desktop=Desktop.getDesktop();
-                            String url = (String) control.getValue();
-                            try {
-                                desktop.browse(new URI(url));
-                            } catch (IOException e) {
-                                SfLog.getInstance().e(this.getClass(), url, e);
-                            } catch (URISyntaxException e) {
-                                SfLog.getInstance().e(this.getClass(), url, e);
-                            }
-                        }
-                    });
-                    panel.add(button);
-                }else if(control.getType() == GroupControlType.Font_ComboBox){
-                    //字体选择下拉框
-                    JComboBox comboBox = new JComboBox();
-                    comboBox.setToolTipText(control.getTip());
-
-                    GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                    String[] fonts = graphicsEnvironment.getAvailableFontFamilyNames();
-                    for (String font:fonts){
-                        comboBox.addItem(font);
-                    }
-                    comboBox.setSelectedItem(control.getValue());
-                    //设置点击事件
-                    comboBox.addItemListener(new ItemListener() {
-                        @Override
-                        public void itemStateChanged(ItemEvent e) {
-                            if (e.getStateChange() == ItemEvent.SELECTED){
-                                control.setValue(e.getItem());
-                                GroupConfManager.getInstance().put(conf);
-                            }
-                        }
-                    });
-                    panel.add(comboBox);
-                }
             }
             contentPane.add(panel);
         }
@@ -221,7 +140,6 @@ public class GroupConfPanel extends JPanel {
         JButton btn_rcon = new JButton("RCON");
         comboBox_panel.add(btn_rcon);
         btn_rcon.setToolTipText("点击选择此群RCON");
-
 
         return comboBox_panel;
     }
