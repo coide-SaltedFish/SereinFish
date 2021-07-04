@@ -5,12 +5,11 @@ import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.net.rcon.RconConf_s;
+import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.ui.panel.GroupConfPanel;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ public class GroupConf {
     private long group;//所属群
     private boolean isEnable = false;//是否启用群
     private DataBaseConfig dataBaseConfig;//数据库
-    private RconConf_s rcon;//RCON
+    private RconConf rcon;//RCON
 
     private Map<String, Map<GroupControlId,Control>> confMaps = new LinkedHashMap<>();//控件开关列表
 
@@ -38,14 +37,18 @@ public class GroupConf {
     public void update(){
         Map<String, Map<GroupControlId,Control>> newMap = getConfMap();
         //添加新的
-        for (Map.Entry<String, Map<GroupControlId,Control>> entry:newMap.entrySet()){
-            if (confMaps.containsKey(entry.getKey())){
-                for (Map.Entry<GroupControlId,Control> entryValue:entry.getValue().entrySet()){
-                    if (!entry.getValue().containsKey(entryValue.getKey())){
-                        entry.getValue().put(entryValue.getKey(),entryValue.getValue());
+        for (Map.Entry<String, Map<GroupControlId,Control>> entry:newMap.entrySet()){//遍历新控件第一层
+
+            if (confMaps.containsKey(entry.getKey())){//如果第一层在旧控件中已包含
+
+                for (Map.Entry<GroupControlId,Control> entryValue:entry.getValue().entrySet()){//遍历第二层
+
+                    if (!confMaps.get(entry.getKey()).containsKey(entryValue.getKey())){//如果第二层未包含
+
+                        confMaps.get(entry.getKey()).put(entryValue.getKey(), entryValue.getValue());//
                     }
                 }
-            }else {
+            }else {//如果第一层未包含
                 confMaps.put(entry.getKey(), entry.getValue());
             }
         }
@@ -132,6 +135,7 @@ public class GroupConf {
         //
         Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();
         msgToolList.put(GroupControlId.CheckBox_LongMsgToImageEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LongMsgToImageEnable,"启用长文本转图片功能",false,"bot在发送长文本时将自动把消息转换为图片发送"));
+        msgToolList.put(GroupControlId.ComBox_FontSelect, new Control(GroupControlType.Font_ComboBox, GroupControlId.ComBox_FontSelect, "文本转图片字体", "黑体", "文本转图片时的文本字体"));
         confNew.put("消息",msgToolList);
         return confNew;
     }
@@ -255,11 +259,11 @@ public class GroupConf {
         return confMaps;
     }
 
-    public RconConf_s getRcon() {
+    public RconConf getRcon() {
         return rcon;
     }
 
-    public void setRcon(RconConf_s rcon) {
+    public void setRcon(RconConf rcon) {
         this.rcon = rcon;
     }
 

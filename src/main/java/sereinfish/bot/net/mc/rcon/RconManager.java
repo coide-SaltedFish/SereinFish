@@ -1,6 +1,6 @@
-package sereinfish.bot.net.rcon;
+package sereinfish.bot.net.mc.rcon;
 
-import sereinfish.bot.net.rcon.ex.AuthenticationException;
+import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -33,7 +33,7 @@ public class RconManager {
      * @param conf_s
      * @return
      */
-    public Rcon link(RconConf_s conf_s) throws IOException, AuthenticationException {
+    public Rcon link(RconConf conf_s) throws IOException, AuthenticationException {
         Rcon rcon = new Rcon(conf_s);
         rcons.put(conf_s.getID(),rcon);
         return rcon;

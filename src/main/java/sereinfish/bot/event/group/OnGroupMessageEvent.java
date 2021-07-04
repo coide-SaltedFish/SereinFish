@@ -142,7 +142,7 @@ public class OnGroupMessageEvent {
                     event.getSendTo().sendMessage(MyYuQ.getMif().text("消息过长，正在处理").toMessage());
                     File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
                     try {
-                        ImageIO.write(ImageHandle.messageToImage(event.getMessage()), "png", imageFile);
+                        ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
                     } catch (IOException e) {
                         SfLog.getInstance().e(this.getClass(),e);
                         event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
@@ -163,16 +163,22 @@ public class OnGroupMessageEvent {
         message.setSource(event.getMessageSource());
         //检查消息是否发送成功
         if (event.getMessageSource().getId() < 0){
-            event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
-            File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
-            try {
-                ImageIO.write(ImageHandle.messageToImage(event.getMessage()), "png", imageFile);
-            } catch (IOException e) {
-                SfLog.getInstance().e(this.getClass(),e);
-                event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+            Contact contact = event.getSendTo();
+            if (contact instanceof Group){
+                Group group = (Group) contact;
+                GroupConf conf = GroupConfManager.getInstance().get(group.getId());
+
+                event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
+                File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+                try {
+                    ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
+                } catch (IOException e) {
+                    SfLog.getInstance().e(this.getClass(),e);
+                    event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+                }
+                event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
+                return;
             }
-            event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
-            return;
         }
 
         //消息记录

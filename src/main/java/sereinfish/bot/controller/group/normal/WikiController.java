@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
+import sereinfish.bot.entity.xmlEx.XmlMsg;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -43,8 +44,8 @@ public class WikiController {
             SfLog.getInstance().e(this.getClass(),"[" + key + "] 查询失败",e);
             return MyYuQ.getMif().text("[" + key + "] 查询失败").toMessage();
         }
-        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("Wiki：" + key,key + " - Minecraft Wiki，最详细的官方我的世界百科",
-                "https://images.wikia.com/minecraft_zh_gamepedia/images/b/bc/Wiki.png",url)).toMessage();
+        return MyYuQ.getMif().xmlEx(0, XmlMsg.getUrlCard("[Wiki：" + key + "]",url, "https://images.wikia.com/minecraft_zh_gamepedia/images/b/bc/Wiki.png",
+                "Wiki：" + key,key + " - Minecraft Wiki，最详细的官方我的世界百科")).toMessage();
     }
 
     @Action("\\[!！.]百度\\ {key}")
@@ -61,8 +62,8 @@ public class WikiController {
             SfLog.getInstance().e(this.getClass(),"[" + key + "] 查询失败",e);
             return MyYuQ.getMif().text("[" + key + "] 查询失败").toMessage();
         }
-        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard("百度-" + key,key + "_百度一下，你就知道",
-                "https://www.baidu.com/img/bd_logo1.png",url)).toMessage();
+        return MyYuQ.getMif().xmlEx(0,XmlMsg.getUrlCard("[百度-" + key + "]",url, "https://www.baidu.com/img/bd_logo1.png",
+                "百度-" + key,key + "_百度一下，你就知道")).toMessage();
     }
 
 }

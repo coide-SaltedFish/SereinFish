@@ -20,6 +20,8 @@ import sereinfish.bot.utils.Result;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * bilibili 相关
@@ -47,6 +49,13 @@ public class BiliController {
         }
 
         String bv = message.getBody().get(0).toPath();
+
+        Pattern pattern = Pattern.compile("^BV.*(?=\n?)");
+        Matcher matcher = pattern.matcher(bv);
+        if (matcher.find()) {
+            bv = matcher.group(0);
+        }
+
         Result<Map<String, String>> result = bvToAv(bv);
         if (result.getCode() == 200){
             Map<String, String> map = result.getData();
@@ -70,7 +79,7 @@ public class BiliController {
     }
 
     public Result<Map<String, String>> bvToAv(String bv) throws IOException {
-        if (bv.length() != 12) return Result.failure("不合格的bv号", null);
+        if (bv.length() != 12) return Result.failure("欸，这个不认识呢：" + bv, null);
         JSONObject jsonObject = OkHttpUtils.getJson("https://api.bilibili.com/x/web-interface/view?bvid=" + bv);
         Integer code = jsonObject.getInteger("code");
         if (code == 0){
@@ -83,7 +92,7 @@ public class BiliController {
             map.put("aid", dataJsonObject.getString("aid"));
             map.put("url", "https://www.bilibili.com/video/av" + dataJsonObject.getString("aid"));
             return Result.success(map);
-        }else if (code == -404) return Result.failure("没有找到该BV号！！", null);
+        }else if (code == -404) return Result.failure("エラー発生", null);
         else return Result.failure(jsonObject.getString("message"), null);
     }
 }

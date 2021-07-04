@@ -67,6 +67,16 @@ public class CacheManager {
                 SfLog.getInstance().e(CacheManager.class,"群头像缓存获取失败：" + group);
             }
         }
+        return getGroupNetHeadImage(group);
+    }
+
+    /**
+     * 从网络获取群头像
+     * @param group
+     * @return
+     */
+    public static Image getGroupNetHeadImage(long group){
+        File file = new File(FileHandle.groupHeadCachePath,group + "");
         //从网络获取
         try {
             Image image = NetHandle.getImage(new URL("https://p.qlogo.cn/gh/" + group + "/" + group + "/640"));
@@ -101,6 +111,16 @@ public class CacheManager {
                 SfLog.getInstance().e(CacheManager.class,"头像缓存获取失败：" + qq);
             }
         }
+        return getMemberNetHeadImage(qq);
+    }
+
+    /**
+     * 从网络获取头像文件
+     * @param qq
+     * @return
+     */
+    public static Image getMemberNetHeadImage(long qq){
+        File file = new File(FileHandle.memberHeadCachePath,qq + "");
         //从网络获取
         try {
             Image image = NetHandle.getImage(new URL("http://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"));

@@ -196,9 +196,9 @@ public class MsgDBController extends QQController {
 
         for (MessageItem messageItem : msg.getBody()){
             String msg_str = messageItem.toPath();
-            if (Pattern.matches("img_\\{[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}}\\..{3}",msg_str)){
+            if (Pattern.matches("img_[A-Za-z0-9]{8}[A-Za-z0-9]{4}[A-Za-z0-9]{4}[A-Za-z0-9]{4}[A-Za-z0-9]{12}\\..{3}",msg_str)){
                 flag = false;
-                String uuid = msg_str.split("img_\\{|}\\.")[1].replace("-","");
+                String uuid = msg_str.split("img_|\\.")[1];
                 return MyYuQ.getMif().text("http://gchat.qpic.cn/gchatpic_new/0/-0-" + uuid + "/0").toMessage();
             }
         }

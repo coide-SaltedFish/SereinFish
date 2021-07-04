@@ -52,4 +52,5 @@ public enum GroupControlId {
 
     //消息
     CheckBox_LongMsgToImageEnable,//长文本转图片发送
+    ComBox_FontSelect,//长文本转图片字体选择
 }

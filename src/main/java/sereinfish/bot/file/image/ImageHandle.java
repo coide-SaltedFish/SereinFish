@@ -10,6 +10,8 @@ import gui.ava.html.renderer.ImageRendererImpl;
 import org.xhtmlrenderer.swing.Java2DRenderer;
 
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
@@ -171,10 +173,10 @@ public class ImageHandle {
      * @param message
      * @return
      */
-    public static BufferedImage messageToImage(Message message){
+    public static BufferedImage messageToImage(Message message, GroupConf conf){
         Color bgColor = Color.decode("#EEEEEE");//背景颜色
         Color paintColor = Color.decode("#212121");//画笔颜色
-        String mFont = "微软雅黑";
+        String mFont = (String) conf.getControl(GroupControlId.ComBox_FontSelect).getValue();
         int fontSize = 36;
         int margin = 64;//生成图像边距
         int maxWidth = 1080;//最大图片宽度大小

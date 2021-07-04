@@ -1,4 +1,4 @@
-package sereinfish.bot.net.rcon.ex;
+package sereinfish.bot.net.mc.rcon.ex;
 
 import java.io.IOException;
 

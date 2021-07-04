@@ -1,13 +1,13 @@
-package sereinfish.bot.net.rcon;
+package sereinfish.bot.net.mc.rcon;
 
 import sereinfish.bot.myYuq.MyYuQ;
 
-public class RconConf_s {
+public class RconConf {
     String ip;
     int port;
     String password;
 
-    public RconConf_s(String ip, int port, String password) {
+    public RconConf(String ip, int port, String password) {
         this.ip = ip;
         this.port = port;
         this.password = password;

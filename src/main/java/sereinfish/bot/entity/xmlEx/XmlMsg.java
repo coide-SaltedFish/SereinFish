@@ -15,4 +15,12 @@ public class XmlMsg {
                 " minWidth=\"300\" minHeight=\"300\" maxWidth=\"550\" maxHeight=\"999\" /&&&gt&&&&&&lt&&&/item&&&gt&&&&&&lt&&&source name=\"" +
                 "\" icon=\"\" action=\"\" appid=\"-1\" /&&&gt&&&&&&lt&&&/msg&&&gt&&&>");
     }
+
+    public static String getUrlCard(String brief, String url, String cover, String title, String summary){
+        String msg = "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID=\"33\" templateID=\"123\" action=\"web\" " +
+                "brief=\"" + brief + "\" sourceMsgId=\"0\" url=\"" + url + "\" flag=\"8\" adverSign=\"0\" multiMsgFlag=\"0\">" +
+                "<item layout=\"2\" advertiser_id=\"0\" aid=\"0\"><picture cover=\"" + cover + "\" w=\"0\" h=\"0\" />" +
+                "<title>" + title + "</title><summary>" + summary + "</summary></item><source name=\"\" icon=\"\" action=\"\" appid=\"-1\" /></msg>";
+        return msg;
+    }
 }

@@ -67,7 +67,11 @@ public class RepeaterManager {
                 if (!entry.getValue().isRepeater && entry.getValue().num >= n){
                     entry.getValue().isRepeater = true;
                     if (MyYuQ.getYuQ().getGroups().containsKey(entry.getKey())){
-                        MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                        if(!entry.getValue().msg.contains("<Rain:NoImpl:NoImpl>")){
+                            MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode(entry.getValue().msg));
+                        }else {
+                            MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode("啪唧，打断（混乱"));
+                        }
                     }
                 }
             }

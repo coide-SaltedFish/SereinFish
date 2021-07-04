@@ -41,4 +41,26 @@ public class JsonMsg {
         msg += "],\"emphasis_keyword\":\"\"}},\"text\":\"\",\"sourceAd\":\"\"}";
         return msg;
     }
+
+    public static String getNoticeList(String prompt, String title, String iconUrl, String[][] data){
+        String d = "";
+        boolean flag = false;
+        for (String[] da:data){
+            if (flag){
+                d += ",{\"title\":\"" + da[0] + "\",\"value\":\"" + da[1] + "\"}";
+            }else {
+                flag = true;
+                d += "{\"title\":\"" + da[0] + "\",\"value\":\"" + da[1] + "\"}";
+            }
+        }
+
+        String msg = "{\"app\":\"com.tencent.miniapp\",\"desc\":\"\",\"view\":\"notification\",\"ver\":\"0.0.0.1\"," +
+                "\"prompt\":\"" + prompt + "\",\"appID\":\"\",\"sourceName\":\"\",\"actionData\":\"\",\"actionData_A\":\"\"," +
+                "\"sourceUrl\":\"\",\"meta\":{\"notification\":{\"appInfo\":{\"appName\":\"" + title + "\",\"appType\":4," +
+                "\"appid\":3220014955,\"iconUrl\":\"" + iconUrl + "\"}," +
+                "\"data\":[" + d + "]," +
+                "\"emphasis_keyword\":\"\"}},\"text\":\"\",\"sourceAd\":\"\",\"extra\":\"\"}";
+
+        return msg;
+    }
 }

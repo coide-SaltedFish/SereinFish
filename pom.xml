@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>SereinFish_bot</artifactId>
+    <artifactId>SereinFish_bot_art</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -19,8 +19,8 @@
     <dependencies>
         <dependency>
             <groupId>com.IceCreamQAQ.YuQ</groupId>
-            <artifactId>YuQ-Mirai</artifactId>
-            <version>0.1.0.0-DEV14</version>
+            <artifactId>YuQ-ArtQQ</artifactId>
+            <version>0.0.6.10-R44</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
@@ -66,6 +66,24 @@
             <version>4.9.1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/gui.ava/html2image -->
+        <dependency>
+            <groupId>gui.ava</groupId>
+            <artifactId>html2image</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/dnsjava/dnsjava -->
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>core-renderer</artifactId>
+            <version>R8</version>
+        </dependency>
 
         <!--        <dependency>-->
 <!--            <groupId>com.IceCreamQAQ.Yu</groupId>-->

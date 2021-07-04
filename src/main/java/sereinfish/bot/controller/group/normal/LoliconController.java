@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.annotation.PrivateController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.entity.GroupNotice;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -68,8 +69,8 @@ public class LoliconController {
         }
     }
 
-    @Action("\\img_\\{B407F708-A2C6-A506-3420-98DF7CAC4A57\\}\\")
-    @Synonym({"\\[!！.]setu\\", "\\[!！.]色图\\","\\img_\\{04923170-2ACB-5E94-ECCD-953F46E6CAB9\\}\\"})
+    @Action("\\img_B407F708A2C6A506342098DF7CAC4A57\\")
+    @Synonym({"\\[!！.]setu\\", "\\[!！.]色图\\","\\img_049231702ACB5E94ECCD953F46E6CAB9\\"})
     public void getST(){
         //判断是否启用Sf
         if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
@@ -79,7 +80,7 @@ public class LoliconController {
         }
     }
 
-    @Action("\\img_\\{7CF98559-280F-D216-C5C4-8AA3D22A8815\\}\\")
+    @Action("\\img_7CF98559280FD216C5C48AA3D22A8815\\")
     @QMsg(mastAtBot = true)
     public void getST_2(){
         //判断是否启用Sf
@@ -169,19 +170,19 @@ public class LoliconController {
             num = Integer.valueOf(strNum);
         }catch (Exception e){
             if (MyYuQ.getRandom(0,100) % 2 == 0){
-                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{5D6083D0-459F-5596-CB99-5088E949B71D}.jpg>");
+                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>");
             }else {
-                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:{53AF664A-B93A-AFF6-2906-32025A1B2787}.jpg>");
+                return Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:53AF664AB93AAFF6290632025A1B2787.jpg>");
             }
         }
 
         if (num > max){
             num = max;
-            sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"),false);
+            sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"),false);
         }
 
         if (num <= 0){
-            return Message.Companion.toMessageByRainCode("<Rain:Image:{22C729AA-4F85-DE57-4605-FA0D19C6A6B7}.jpg>");
+            return Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>");
         }
         //判断是否启用Sf
         if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
@@ -202,7 +203,7 @@ public class LoliconController {
         }
     }
 
-    @Action("\\img_\\{8F2283DA-2199-823A-C507-B452F386D654\\}\\")
+    @Action("\\img_8F2283DA2199823AC507B452F386D654\\")
     @QMsg(mastAtBot = true)
     public Message enableR18(Member sender){
         if (isGroupMsg){
@@ -211,14 +212,14 @@ public class LoliconController {
                 conf.getControl(GroupControlId.CheckBox_SetuR18).setValue(true);
                 conf.getControl(GroupControlId.CheckBox_PlainAndR18).setValue(false);
                 GroupConfManager.getInstance().put(conf);
-                return Message.Companion.toMessageByRainCode("<Rain:Image:{241A6BB9-5CC0-2A98-CCE6-48BEE17148D0}.jpg>");
+                return Message.Companion.toMessageByRainCode("<Rain:Image:241A6BB95CC02A98CCE648BEE17148D0.jpg>");
             }
         }
         throw new DoNone();
     }
 
-    @Action("\\img_\\{982776A6-AA3D-D49A-9DE4-57F8EABE4EB0\\}\\")
-    @Synonym("\\img_\\{AE8B71A4-EB5E-5DF1-05E9-EEA61CE6152D\\}\\")
+    @Action("\\img_982776A6AA3DD49A9DE457F8EABE4EB0\\")
+    @Synonym("\\img_AE8B71A4EB5E5DF105E9EEA61CE6152D\\")
     @QMsg(mastAtBot = true)
     public Message enableNoR18(Member sender){
         if (isGroupMsg){
@@ -227,7 +228,7 @@ public class LoliconController {
                 conf.getControl(GroupControlId.CheckBox_SetuR18).setValue(false);
                 conf.getControl(GroupControlId.CheckBox_PlainAndR18).setValue(false);
                 GroupConfManager.getInstance().put(conf);
-                return Message.Companion.toMessageByRainCode("<Rain:Image:{2098B7EC-BFDC-0C09-2816-EE006E24DB05}.jpg>");
+                return Message.Companion.toMessageByRainCode("<Rain:Image:2098B7ECBFDC0C092816EE006E24DB05.jpg>");
             }
         }
         throw new DoNone();
@@ -264,7 +265,7 @@ public class LoliconController {
             Lolicon lolicon = LoliconManager.getLolicon(request);
             if (lolicon.getCode() == Lolicon.SUCCESS){
                 if (lolicon.getQuota() == 0){
-                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:{2B15CC31-8393-68DA-A35C-8F314661FF13}.jpg>"),false);
+                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>"),false);
                 }else {
                     boolean isR18 = false;
                     Message reMsg = new Message();
@@ -279,11 +280,7 @@ public class LoliconController {
                         if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
                             try {
                                 StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
-                                stringBuilderMd5.insert(20,"-");
-                                stringBuilderMd5.insert(16,"-");
-                                stringBuilderMd5.insert(12,"-");
-                                stringBuilderMd5.insert(8,"-");
-                                sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5 + "}.mirai>"),setu.isR18());
+                                sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5 + ".jpg>"),setu.isR18());
                             } catch (IOException e) {
                                 SfLog.getInstance().e(LoliconManager.class,e);
                             }
@@ -336,7 +333,7 @@ public class LoliconController {
             if (response.getCode() == 0){
                 //消息发送
                 for (Response.Setu setu:response.getList()){
-                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:{" + setu.getMd5() + "}.mirai>"),setu.isR18());
+                    sendMessage(Message.Companion.toMessageByRainCode("<Rain:Image:" + setu.getMd5() + ".jpg>"),setu.isR18());
                 }
             }else {
                 sendMessage(MyYuQ.getMif().text("错误:" + response.getMsg()).toMessage(),false);

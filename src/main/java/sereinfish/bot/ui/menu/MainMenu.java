@@ -21,6 +21,7 @@ public class MainMenu extends JMenuBar {
     public MainMenu build(){
         add(getFileMenu());//文件
         add(getDataBaseMenu());//数据库
+        add(getAuthorityMenu());//权限
         return this;
     }
 
@@ -60,6 +61,25 @@ public class MainMenu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new SignInDataBaseFrame("连接到新的数据库").build().setVisible(true);
+            }
+        });
+
+        return menu;
+    }
+
+    /**
+     * 权限
+     * @return
+     */
+    public JMenu getAuthorityMenu(){
+        JMenu menu = new JMenu("权限");
+
+        /*********权限**********/
+        JMenuItem menuItem_authorityManager = new JMenuItem("权限管理器");
+        menu.add(menuItem_authorityManager);
+        menuItem_authorityManager.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
             }
         });
 

@@ -1,6 +1,6 @@
-package sereinfish.bot.net.rcon;
+package sereinfish.bot.net.mc.rcon;
 
-import sereinfish.bot.net.rcon.ex.AuthenticationException;
+import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -14,7 +14,7 @@ public class Rcon {
 
 	private int requestId;
 	private Socket socket;
-	private RconConf_s config;
+	private RconConf config;
 
 	private Charset charset;
 
@@ -26,7 +26,7 @@ public class Rcon {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public Rcon(RconConf_s config) throws IOException, AuthenticationException {
+	public Rcon(RconConf config) throws IOException, AuthenticationException {
 		// Default charset is utf8
 		this.charset = Charset.forName("UTF-8");
 		this.config = config;
@@ -39,7 +39,7 @@ public class Rcon {
      *
      * @return 这个Rcon对应配置文件
      */
-    public RconConf_s getConfig() {
+    public RconConf getConfig() {
         return config;
     }
 

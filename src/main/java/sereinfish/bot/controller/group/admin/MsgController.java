@@ -16,13 +16,24 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.entity.xmlEx.XmlMsg;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.performance.MyPerformance;
 
+import javax.imageio.ImageIO;
+import java.awt.image.renderable.RenderableImage;
+import java.awt.image.renderable.RenderableImageOp;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -79,6 +90,11 @@ public class MsgController extends QQController {
         return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage();
     }
 
+    @Action("\\[!！.]json2\\ {iconUrl}")
+    public Message jsonTest_1(String iconUrl){
+        return MyYuQ.getMif().jsonEx(JsonMsg.getNoticeList("appName","标题",iconUrl,new String[][]{{"标题一","123"},{"123","123"}})).toMessage();
+    }
+
     @Action("\\[.!！]公告\\")
     public Message testGG(Group group, ContextSession session){
         GroupNotice groupNotice = new GroupNotice();
@@ -91,6 +107,26 @@ public class MsgController extends QQController {
         }catch (WaitNextMessageTimeoutException e){
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("超时：" + maxTime).toMessage();
+        }
+    }
+
+    @Action("\\[.!！]消息转图片\\")
+    public Message testMsgImage(ContextSession session, Group group){
+        try {
+            File imageFile = new File(FileHandle.imageCachePath,"msg_temp");//文件缓存路径
+            reply("输入要转换的消息");
+            Message m1 = session.waitNextMessage(maxTime);
+            reply("请稍后");
+            GroupConf conf = GroupConfManager.getInstance().get(group.getId());
+            ImageIO.write(ImageHandle.messageToImage(m1, conf), "png", imageFile);
+
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }catch (WaitNextMessageTimeoutException e){
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("超时：" + maxTime).toMessage();
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("转换失败:" + e.getMessage()).toMessage();
         }
     }
 }

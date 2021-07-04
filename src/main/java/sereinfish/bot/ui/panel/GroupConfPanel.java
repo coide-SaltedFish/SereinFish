@@ -13,6 +13,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,7 +24,7 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
-    public static final int NOW_V = 5;
+    public static final int NOW_V = 1;
 
     private GroupConf conf;
     private JPanel contentPane;
@@ -33,9 +35,11 @@ public class GroupConfPanel extends JPanel {
         setLayout(new BorderLayout());
         add(new JScrollPane(contentPane));
 
-        if (conf.getV() < NOW_V){
+        if (conf.getV() != NOW_V){
+            SfLog.getInstance().d(this.getClass(), "群[" + conf.getGroup() + "]配置界面控件版本更新：" + conf.getV() + " to " + NOW_V);
             conf.update();
             conf.setV(NOW_V);
+            GroupConfManager.getInstance().put(conf);
         }
         build();
     }
@@ -119,6 +123,28 @@ public class GroupConfPanel extends JPanel {
                         }
                     });
                     panel.add(button);
+                }else if(control.getType() == GroupControlType.Font_ComboBox){
+                    //字体选择下拉框
+                    JComboBox comboBox = new JComboBox();
+                    comboBox.setToolTipText(control.getTip());
+
+                    GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                    String[] fonts = graphicsEnvironment.getAvailableFontFamilyNames();
+                    for (String font:fonts){
+                        comboBox.addItem(font);
+                    }
+                    comboBox.setSelectedItem(control.getValue());
+                    //设置点击事件
+                    comboBox.addItemListener(new ItemListener() {
+                        @Override
+                        public void itemStateChanged(ItemEvent e) {
+                            if (e.getStateChange() == ItemEvent.SELECTED){
+                                control.setValue(e.getItem());
+                                GroupConfManager.getInstance().put(conf);
+                            }
+                        }
+                    });
+                    panel.add(comboBox);
                 }
             }
             contentPane.add(panel);

@@ -1,6 +1,6 @@
-package sereinfish.bot.net.rcon;
+package sereinfish.bot.net.mc.rcon;
 
-import sereinfish.bot.net.rcon.ex.MalformedPacketException;
+import sereinfish.bot.net.mc.rcon.ex.MalformedPacketException;
 
 import java.io.DataInputStream;
 import java.io.EOFException;

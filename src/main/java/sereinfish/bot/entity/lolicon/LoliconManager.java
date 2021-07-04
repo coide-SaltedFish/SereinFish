@@ -11,6 +11,7 @@ import sereinfish.bot.entity.lolicon.sf.Response;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.OkHttpUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -31,26 +32,8 @@ public class LoliconManager {
      */
     public static void download(String urlString, File file) throws Exception {
         SfLog.getInstance().d(LoliconManager.class,"开始图片下载：" + urlString);
-        // 构造URL
-        URL url = new URL(urlString);
-        // 打开连接
-        URLConnection con = url.openConnection();
-        con.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-        // 输入流
-        InputStream is = con.getInputStream();
-        // 1K的数据缓冲
-        byte[] bs = new byte[1024];
-        // 读取到的数据长度
-        int len;
-        // 输出的文件流
-        OutputStream os = new FileOutputStream(file);
-        // 开始读取
-        while ((len = is.read(bs)) != -1) {
-            os.write(bs, 0, len);
-        }
-        // 完毕，关闭所有链接
-        os.close();
-        is.close();
+        byte[] data = OkHttpUtils.downloadBytes(urlString);
+        new FileOutputStream(file).write(data);
     }
 
     /**
@@ -58,16 +41,7 @@ public class LoliconManager {
      * @return
      */
     public synchronized static Lolicon getLolicon(Lolicon.Request request) throws IOException {
-        URL url = new URL(request.getUrl());
-        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-        //设置超时间为3秒
-        conn.setConnectTimeout(5*1000);
-        conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-        //得到输入流
-        InputStream inputStream = conn.getInputStream();
-        String res = readInputStream(inputStream);
-        inputStream.close();
-        conn.disconnect();
+        String res = OkHttpUtils.getJson(request.getUrl()).toJSONString();
         Lolicon lolicon = MyYuQ.toClass(res,Lolicon.class);
         return lolicon;
     }
@@ -77,16 +51,7 @@ public class LoliconManager {
      * @return
      */
     public synchronized static Response getSFLolicon(Request request, boolean isRe) throws IOException {
-        URL url = new URL(request.getUrl());
-        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-        //设置超时间为3秒
-        conn.setConnectTimeout(5*1000);
-        conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-        //得到输入流
-        InputStream inputStream = conn.getInputStream();
-        String res = readInputStream(inputStream);
-        inputStream.close();
-        conn.disconnect();
+        String res = OkHttpUtils.getStr(request.getUrl());
         try{
             Response response = MyYuQ.toClass(res,Response.class);
             return response;
@@ -99,23 +64,6 @@ public class LoliconManager {
                 return null;
             }
         }
-    }
-
-    /**
-     * 从输入流中获取字符串
-     * @param inputStream
-     * @return
-     * @throws IOException
-     */
-    public static String readInputStream(InputStream inputStream) throws IOException {
-        byte[] buffer = new byte[1024];
-        int len = 0;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        while((len = inputStream.read(buffer)) != -1) {
-            bos.write(buffer, 0, len);
-        }
-        bos.close();
-        return new String(bos.toByteArray(),"utf-8");
     }
 
     /**
@@ -157,11 +105,7 @@ public class LoliconManager {
                             if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
                                 try {
                                     StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
-                                    stringBuilderMd5.insert(20,"-");
-                                    stringBuilderMd5.insert(16,"-");
-                                    stringBuilderMd5.insert(12,"-");
-                                    stringBuilderMd5.insert(8,"-");
-                                    return Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+                                    return Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5.toString().toUpperCase() + ".jpg>");
                                 } catch (IOException e) {
                                     SfLog.getInstance().e(LoliconManager.class,e);
                                 }
@@ -199,11 +143,7 @@ public class LoliconManager {
                         if ((Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
                             try {
                                 StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
-                                stringBuilderMd5.insert(20,"-");
-                                stringBuilderMd5.insert(16,"-");
-                                stringBuilderMd5.insert(12,"-");
-                                stringBuilderMd5.insert(8,"-");
-                                return Message.Companion.toMessageByRainCode("<Rain:Image:{" + stringBuilderMd5.toString() + "}.mirai>");
+                                return Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5.toString().toUpperCase() + ".jpg>");
                             } catch (IOException e) {
                                 SfLog.getInstance().e(LoliconManager.class,e);
                             }
