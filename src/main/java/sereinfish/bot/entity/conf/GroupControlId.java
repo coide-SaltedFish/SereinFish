@@ -54,4 +54,6 @@ public enum GroupControlId {
     CheckBox_LongMsgToImageEnable,//长文本转图片发送
     ComBox_FontSelect,//长文本转图片字体选择
     Edit_Small_Plain_MsgToImageWatermark,//水印内容
+    Edit_IntNum_Margins,//页边距
+    Edit_IntNum_FontSize,//字体大小
 }

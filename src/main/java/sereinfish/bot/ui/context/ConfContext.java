@@ -5,14 +5,16 @@ import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlType;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.EditFrame;
-import sereinfish.bot.ui.layout.VFlowLayout;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -38,6 +40,9 @@ public class ConfContext {
         }else if(control.getType() == GroupControlType.Edit_Small_Plain){
             //简单输入框
             component = ConfContext.EditSmallPlain(conf, control);
+        }else if(control.getType() == GroupControlType.Edit_IntNum){
+            //整数输入框
+            component = ConfContext.getEditIntNum(conf, control);
         }
 
         return component;
@@ -109,7 +114,6 @@ public class ConfContext {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                //放着先
                 Desktop desktop=Desktop.getDesktop();
                 String url = (String) control.getValue();
                 try {
@@ -221,6 +225,103 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
+        JTextField textField = new JTextField();
+        textField.setColumns(10);
+        textField.setToolTipText(control.getTip());
+        textField.setDocument(new NumberTextField(9));
+
+        Object object = control.getValue();
+        try{
+            if (object instanceof Double){
+                double dVar = Double.valueOf((Double) object);
+                int var = (int) dVar;
+                textField.setText(var + "");
+            }else if(object instanceof Integer){
+                int var = (int) object;
+                textField.setText(var + "");
+            }
+        }catch (Exception e){
+            panel.setBorder(BorderFactory.createTitledBorder("[数据源错误]" + control.getName()));
+            textField.setText(0 + "");
+        }
+
+        //保存事件
+        textField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyChar()==KeyEvent.VK_ENTER ){
+                    //保存内容
+                    String text = textField.getText();
+                    int var = 0;
+
+                    try{
+                        var = Integer.valueOf(text);
+                        control.setValue(var);
+                        GroupConfManager.getInstance().put(conf);
+                        panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+                        panel.requestFocus();
+                    }catch (Exception e1){
+                        panel.setBorder(BorderFactory.createTitledBorder("[输入错误]" + control.getName()));
+                    }
+                }
+            }
+        });
+
+        //内容变化事件
+        Document document = textField.getDocument();
+        document.addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                changedUpdate(e);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                changedUpdate(e);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                if (textField.getText().equals(control.getValue())){
+                    panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+                }else {
+                    panel.setBorder(BorderFactory.createTitledBorder("*" + control.getName()));
+                }
+            }
+        });
+
+        panel.add(textField);
         return panel;
+    }
+
+    /**
+     * 只能输入数字与字母工具类
+     */
+    public static class NumberTextField extends PlainDocument {
+
+        private int limit;
+        public NumberTextField(int limit) {
+            super();
+            this.limit = limit;
+        }
+        public void insertString
+                (int offset, String str, AttributeSet attr)
+                throws BadLocationException {
+            if (str == null){
+                return;
+            }
+            if ((getLength() + str.length()) <= limit) {
+
+                char[] upper = str.toCharArray();
+                int length=0;
+                for (int i = 0; i < upper.length; i++) {
+                    //限制在0-9
+                    if (upper[i]>='0' && upper[i]<='9'){
+                        upper[length++] = upper[i];
+                    }
+                }
+                super.insertString(offset, new String(upper,0,length), attr);
+            }
+        }
     }
 }

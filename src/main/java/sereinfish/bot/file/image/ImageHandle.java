@@ -177,8 +177,8 @@ public class ImageHandle {
         Color bgColor = Color.decode("#EEEEEE");//背景颜色
         Color paintColor = Color.decode("#212121");//画笔颜色
         String mFont = (String) conf.getControl(GroupControlId.ComBox_FontSelect).getValue();
-        int fontSize = 36;
-        int margin = 64;//生成图像边距
+        int fontSize = (int) (double) conf.getControl(GroupControlId.Edit_IntNum_FontSize).getValue();//文本大小
+        int margin = (int) ((double) conf.getControl(GroupControlId.Edit_IntNum_Margins).getValue());//生成图像边距
         int maxWidth = 1080;//最大图片宽度大小
         int maxLineWidth = maxWidth - (margin * 2);//最大行宽
         int lineMaxWidth = 0;//最大文字宽度
@@ -289,15 +289,17 @@ public class ImageHandle {
         graphics2D.drawImage(bufferedOldImage, margin, margin, null);
         //加个水印
         Font font = new Font(mFont,Font.PLAIN,22);
-        String watermark = "by:SereinFish Bot";
+        String watermark = (String) conf.getControl(GroupControlId.Edit_Small_Plain_MsgToImageWatermark).getValue();
         FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
         int wlen = 0;
         for (int i = 0; i < watermark.length(); i++){
             wlen += metrics.charWidth(watermark.charAt(i));
         }
-        graphics2D.setFont(font);
-        graphics2D.setPaint(paintColor);
-        graphics2D.drawString(watermark, lineMaxWidth + (margin * 2) - wlen - 28, lineHeight + (margin * 2) - metrics.getAscent() - 8);
+        if(wlen < lineMaxWidth / 2){
+            graphics2D.setFont(font);
+            graphics2D.setPaint(paintColor);
+            graphics2D.drawString(watermark, lineMaxWidth + (margin * 2) - wlen - 28, lineHeight + (margin * 2) - metrics.getAscent() - 8);
+        }
 
         graphics2D.dispose();
         bufferedOldImage = bufferedImage;

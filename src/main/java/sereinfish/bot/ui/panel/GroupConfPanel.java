@@ -25,7 +25,7 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
-    public static final int NOW_V = 2;
+    public static final int NOW_V = 4;
 
     private GroupConf conf;
     private JPanel contentPane;
@@ -64,7 +64,10 @@ public class GroupConfPanel extends JPanel {
             //解析组件
             for (Map.Entry<GroupControlId, GroupConf.Control> entry1:entry.getValue().entrySet()){
                 GroupConf.Control control = entry1.getValue();
-
+                Component component = ConfContext.getContext(conf, control);
+                if(component != null){
+                    panel.add(component);
+                }
             }
             contentPane.add(panel);
         }

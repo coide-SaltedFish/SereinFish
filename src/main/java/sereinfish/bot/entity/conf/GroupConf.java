@@ -134,7 +134,9 @@ public class GroupConf {
         Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();
         msgToolList.put(GroupControlId.CheckBox_LongMsgToImageEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LongMsgToImageEnable,"启用长文本转图片功能",false,"bot在发送长文本时将自动把消息转换为图片发送"));
         msgToolList.put(GroupControlId.ComBox_FontSelect, new Control(GroupControlType.Font_ComboBox, GroupControlId.ComBox_FontSelect, "文本转图片字体", "黑体", "文本转图片时的文本字体"));
-        msgToolList.put(GroupControlId.Edit_Small_Plain_MsgToImageWatermark, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_MsgToImageWatermark, "水印内容", "SereinFish Bot", "在生成图片时添加的水印"));
+        msgToolList.put(GroupControlId.Edit_Small_Plain_MsgToImageWatermark, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_MsgToImageWatermark, "水印内容", "by:SereinFish Bot", "在生成图片时添加的水印"));
+        msgToolList.put(GroupControlId.Edit_IntNum_Margins, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_Margins, "页边距", (int) 64, "生成图片文字的页边距"));
+        msgToolList.put(GroupControlId.Edit_IntNum_FontSize, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_FontSize, "字体大小", (int) 36, "生成字体的大小"));
         confNew.put("消息",msgToolList);
         return confNew;
     }
