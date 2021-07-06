@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 群组配置
@@ -51,11 +52,14 @@ public class GroupConf {
             }
         }
         //去掉旧的
-        for (Map.Entry<String, Map<GroupControlId,Control>> entry:confMaps.entrySet()){
+        Map<String, Map<GroupControlId,Control>> map = new ConcurrentHashMap<>();
+        map.putAll(confMaps);
+        for (Map.Entry<String, Map<GroupControlId,Control>> entry:map.entrySet()){
             if (!newMap.containsKey(entry.getKey())){
-                confMaps.remove(entry.getKey());
+                map.remove(entry.getKey());
             }
         }
+        confMaps = map;
     }
 
     /**
@@ -137,7 +141,12 @@ public class GroupConf {
         msgToolList.put(GroupControlId.Edit_Small_Plain_MsgToImageWatermark, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_MsgToImageWatermark, "水印内容", "by:SereinFish Bot", "在生成图片时添加的水印"));
         msgToolList.put(GroupControlId.Edit_IntNum_Margins, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_Margins, "页边距", (int) 64, "生成图片文字的页边距"));
         msgToolList.put(GroupControlId.Edit_IntNum_FontSize, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_FontSize, "字体大小", (int) 36, "生成字体的大小"));
-        confNew.put("消息",msgToolList);
+        confNew.put("消息转图片",msgToolList);
+        //
+        Map<GroupControlId,Control> floodTheScreenList = new LinkedHashMap<>();
+        
+        confNew.put("刷屏控制", floodTheScreenList);
+
         return confNew;
     }
 

@@ -173,6 +173,7 @@ public class ConfContext {
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
         JTextField textField = new JTextField();
+        textField.setColumns(25);
         textField.setToolTipText(control.getTip());
         textField.setText(control.getValue().toString());
         //保存事件

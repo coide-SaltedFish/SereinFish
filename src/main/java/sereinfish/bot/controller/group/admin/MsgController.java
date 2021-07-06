@@ -22,18 +22,19 @@ import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.entity.xmlEx.XmlMsg;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.performance.MyPerformance;
+import sun.misc.BASE64Decoder;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.awt.image.renderable.RenderableImageOp;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -127,6 +128,40 @@ public class MsgController extends QQController {
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("转换失败:" + e.getMessage()).toMessage();
+        }
+    }
+
+    @Action("\\[.！!]base64转图片\\")
+    public Message base64ToImage(ContextSession session){
+        try {
+            File imageFile = new File(FileHandle.imageCachePath,"base64ToImage_temp");//文件缓存路径
+            reply("输入要转换的消息");
+            Message m1 = session.waitNextMessage();
+            reply("请稍后");
+
+            BufferedImage image = ImageHandle.base64ToImage(Message.Companion.firstString(m1));
+            ImageIO.write(image, "png", imageFile);
+
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }catch (WaitNextMessageTimeoutException e){
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("超时：" + maxTime).toMessage();
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("转换失败:" + e.getMessage()).toMessage();
+        }
+    }
+
+    @Action("\\[.！!]玩家头像\\ {uuid}")
+    public Message getMcPlayerHeadImage(String uuid){
+        File imageFile = new File(FileHandle.imageCachePath,"mcPlayerHeadImage_temp");//文件缓存路径
+        try {
+            BufferedImage image = NetHandle.getMcPlayerHeadImage(uuid, 90);
+            ImageIO.write(image, "png", imageFile);
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("获取失败:" + e.getMessage()).toMessage();
         }
     }
 }

@@ -100,6 +100,8 @@ public class OnGroupMessageEvent {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 }
             }
+            //刷屏检测
+
         }
     }
 

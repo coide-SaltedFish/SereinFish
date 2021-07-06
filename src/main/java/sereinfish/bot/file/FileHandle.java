@@ -26,6 +26,10 @@ public class FileHandle {
     public static File msgToImageTemplate = new File(configPath,"MessageTemplate.conf");//消息转图片模板
     public static File msgToImageTemplateTemp = new File(configPath,"MessageTemplateTemp");//消息转图片模板临时缓存
 
+    public static File mcPath = new File(configPath, "mc/");//mc文件夹
+    public static File mcDefaultFontFile = new File(mcPath, "font/Unifont-mono.ttf");//mc默认字体
+    public static File mcDirtFile = new File(mcPath, "dirt.png");//土方块材质
+
     /**
      * 写入文件
      * @param file

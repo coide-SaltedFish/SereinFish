@@ -17,11 +17,16 @@ import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sun.font.FontDesignMetrics;
+import sun.misc.BASE64Decoder;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 
@@ -307,73 +312,74 @@ public class ImageHandle {
     }
 
     /**
-     * 消息转图片
-     * 已弃用
+     * base64转图片
+     * @param base64
      * @return
      */
-    public static BufferedImage messageToHtmlImage(Message message){
-        return null;
+    public static BufferedImage base64ToImage(String base64) throws IOException {
+        BASE64Decoder decoder = new BASE64Decoder();
+        if (base64.startsWith("data:image/png;base64,")){
+            base64 = base64.substring("data:image/png;base64,".length());
+        }
+        byte[] bytes = decoder.decodeBuffer(base64);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        BufferedImage image = ImageIO.read(byteArrayInputStream);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        if (image == null){
+            throw new FileNotFoundException("图片为null");
+        }
+        ImageIO.write(image, "png", byteArrayOutputStream);
 
-//        //判断模板是否存在
-//        if (!FileHandle.msgToImageTemplate.exists() || !FileHandle.msgToImageTemplate.isFile()){
-//            try {
-//                FileHandle.msgToImageTemplate.createNewFile();
-//                FileHandle.write(FileHandle.msgToImageTemplate,"<!DOCTYPE html>\n" +
-//                        "<html>\n" +
-//                        "<head> \n" +
-//                        "<meta charset=\"utf-8\"> \n" +
-//                        "<title>SereinFish</title> \n" +
-//                        "</head>\n" +
-//                        "<body>\n" +
-//                        "#Msg#\n" +
-//                        "</body>\n" +
-//                        "</html>");
-//            } catch (IOException e) {
-//                SfLog.getInstance().e(ImageHandle.class,e);
-//                //获取失败，返回一个错误图片
-//                BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
-//                bufferedImage.createGraphics().drawString("在生成消息图片时发生了错误：" + e.getMessage(),0,0);
-//                return bufferedImage;
-//            }
-//        }
-//        //html文件头
-//        String messageTemplate = "";
-//        try {
-//            messageTemplate = FileHandle.read(FileHandle.msgToImageTemplate);
-//        } catch (IOException e) {
-//            SfLog.getInstance().e(ImageHandle.class,e);
-//            //获取失败，返回一个错误图片
-//            BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
-//            bufferedImage.createGraphics().drawString("在生成消息图片时发生了错误：" + e.getMessage(),0,0);
-//            return bufferedImage;
-//        }
-//        String[] messageTemplates = messageTemplate.split("#Msg#");
-//        if (messageTemplates.length != 2){
-//            //获取失败，返回一个错误图片
-//            BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
-//            bufferedImage.createGraphics().drawString("消息模板错误",0,0);
-//            return bufferedImage;
-//        }
-//        String msg = messageTemplates[0];
-//        for(MessageItem item:message.getBody()){
-//            if (item instanceof Text){
-//                String text = ((Text) item).getText();
-//                text = text.replace("\n", "<br>");
-//
-//                msg += "<p>" + text + "</p>";
-//            }else if (item instanceof com.icecreamqaq.yuq.message.Image){
-//                msg += "<img src=\"" + ((com.icecreamqaq.yuq.message.Image) item).getUrl() + " alt=\"图像加载失败\">";
-//            }else {
-//                msg += "<p>" + item.toPath() + "</p>";
-//            }
-//        }
-//        msg += messageTemplates[1];
-//
-//        HtmlParser htmlParser = new HtmlParserImpl();
-//        htmlParser.loadHtml(msg);
-//
-//        ImageRenderer imageRenderer = new ImageRendererImpl(htmlParser);
-//        imageRenderer.setWidth(1080);
-//        return imageRenderer.getBufferedImage();
+        return image;
+    }
+
+    /**
+     * 裁剪图片
+     * @param image
+     * @param x
+     * @param y
+     * @param endX
+     * @param endY
+     * @return
+     */
+    public static BufferedImage crop(BufferedImage image, int x, int y, int endX, int endY){
+        if (x > image.getWidth()){
+            x = image.getWidth();
+        }
+        if (y > image.getHeight()){
+            y = image.getHeight();
+        }
+        if (endX > image.getWidth()){
+            endX = image.getWidth();
+        }
+        if (endY > image.getHeight()){
+            endY = image.getHeight();
+        }
+
+        if (x <= -1) {
+            x = 0;
+        }
+        if (y <= -1) {
+            y = 0;
+        }
+        if (endX <= -1) {
+            endX = image.getWidth() - 1;
+        }
+        if (endY <= -1) {
+            endY = image.getHeight() - 1;
+        }
+
+        int width = Math.abs(endX - x);
+        int height = Math.abs(endY - y);
+
+        BufferedImage bufferedImage = new BufferedImage(width, height, image.getType());
+        for (int iy = y; iy < endY; iy++) {
+            for (int ix = x; ix < endX; ix++) {
+                int rgb = image.getRGB(ix, iy);
+                bufferedImage.setRGB(ix - x, iy - y, rgb);
+            }
+        }
+
+        return bufferedImage;
     }
 }

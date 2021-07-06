@@ -1,10 +1,12 @@
 package sereinfish.bot.file;
 
 import sereinfish.bot.entity.mc.GamerInfo;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +24,7 @@ public class NetHandle {
      * @param url
      * @return
      */
-    public synchronized static Image getImage(URL url) throws IOException {
+    public synchronized static BufferedImage getImage(URL url) throws IOException {
         return ImageIO.read(url);
     }
 
@@ -44,6 +46,46 @@ public class NetHandle {
         String res = readInputStream(inputStream);
         GamerInfo gamerInfo = MyYuQ.toClass(res,GamerInfo.class);
         return gamerInfo;
+    }
+
+    /**
+     * 通过uuid得到玩家皮肤
+     * @param uuid
+     * @return
+     */
+    public synchronized static BufferedImage getMcPlayerSkin(String uuid) throws IOException {
+        GamerInfo gamerInfo = getGameInfo(uuid);
+        String textures = "";
+        for (GamerInfo.Properties properties : gamerInfo.getProperties()){
+            if (properties.getName().equals("textures")){
+                textures = properties.getValue().substring(0, properties.getValue().length());
+            }
+        }
+        return getImage(new URL(GamerInfo.getValue(textures).getTextures().getSKIN().getUrl()));
+    }
+
+    /**
+     * 通过uuid获得玩家头像
+     * @param uuid
+     * @return
+     */
+    public synchronized static BufferedImage getMcPlayerHeadImage(String uuid, int w) throws IOException {
+        BufferedImage bufferedImage = new BufferedImage(w, w, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D graphics2D = bufferedImage.createGraphics();
+        graphics2D.setBackground(Color.gray);
+        graphics2D.clearRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
+        graphics2D.dispose();
+
+        BufferedImage skinImage = getMcPlayerSkin(uuid);
+        //裁剪出头像
+        BufferedImage head = ImageHandle.crop(skinImage, 8, 8, 16, 16);
+        BufferedImage face = ImageHandle.crop(skinImage, 40, 8, 48, 16);
+
+        graphics2D = bufferedImage.createGraphics();
+        graphics2D.drawImage(head, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+        graphics2D.drawImage(face, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+
+        return bufferedImage;
     }
 
     /**

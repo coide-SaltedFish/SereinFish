@@ -21,10 +21,8 @@ public class AuthorityManagement {
 
     private static AuthorityManagement authorityManagement;//单例模式
     private AuthorityList authorityList;//权限列表类
-    SfLog sfLog;//日志
 
     private AuthorityManagement() throws IOException {
-        sfLog = SfLog.getInstance();
         readAuthorityList();//得到权限列表
     }
 
@@ -46,7 +44,7 @@ public class AuthorityManagement {
      */
     public boolean authorityCheck(Member member, int authority){
         if (member == null){
-            sfLog.w(this.getClass(),"无法获取发送者信息：null");
+            SfLog.getInstance().w(this.getClass(),"无法获取发送者信息：null");
             return false;
         }
         try {
@@ -118,7 +116,7 @@ public class AuthorityManagement {
     /**
      * 权限列表类
      */
-    public class AuthorityList{
+    public static class AuthorityList{
         Map<Long,Long> opList = new HashMap<>();//op列表
         Map<Long,Long> masterList = new HashMap<>();//拥有者列表
         Map<Long,Long> adminList = new HashMap<>();//管理员列表
@@ -143,7 +141,7 @@ public class AuthorityManagement {
                 AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
-                sfLog.e(this.getClass(),"op添加失败:" + id,e);
+                SfLog.getInstance().e(this.getClass(),"op添加失败:" + id,e);
                 return false;
             }
         }
@@ -154,7 +152,7 @@ public class AuthorityManagement {
          */
         public boolean deleteOP(long id){
             if (!isOP(id)){
-                sfLog.e(this.getClass(),"op不存在：" + id);
+                SfLog.getInstance().e(this.getClass(),"op不存在：" + id);
                 return false;
             }
             if (opList.remove(id,id)){
@@ -162,7 +160,7 @@ public class AuthorityManagement {
                     AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
-                    sfLog.e(this.getClass(),"op删除失败:" + id,e);
+                    SfLog.getInstance().e(this.getClass(),"op删除失败:" + id,e);
                     return false;
                 }
             }
@@ -189,7 +187,7 @@ public class AuthorityManagement {
                 AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
-                sfLog.e(this.getClass(),"拥有者添加失败：" + id,e);
+                SfLog.getInstance().e(this.getClass(),"拥有者添加失败：" + id,e);
                 return false;
             }
         }
@@ -201,7 +199,7 @@ public class AuthorityManagement {
          */
         public boolean deleteMaster(long id){
             if (!isMaster(id)){
-                sfLog.e(this.getClass(),"拥有者不存在：" + id);
+                SfLog.getInstance().e(this.getClass(),"拥有者不存在：" + id);
                 return false;
             }
             if(masterList.remove(id,id)){
@@ -209,7 +207,7 @@ public class AuthorityManagement {
                     AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
-                    sfLog.e(this.getClass(),"拥有者删除失败:" + id,e);
+                    SfLog.getInstance().e(this.getClass(),"拥有者删除失败:" + id,e);
                     return false;
                 }
             }
@@ -237,7 +235,7 @@ public class AuthorityManagement {
                 AuthorityManagement.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
-                sfLog.e(this.getClass(),"管理员添加失败：" + id,e);
+                SfLog.getInstance().e(this.getClass(),"管理员添加失败：" + id,e);
                 return false;
             }
         }
@@ -249,7 +247,7 @@ public class AuthorityManagement {
          */
         public boolean deleteAdmin(long id){
             if (!isAdmin(id)){
-                sfLog.e(this.getClass(),"管理员不存在：" + id);
+                SfLog.getInstance().e(this.getClass(),"管理员不存在：" + id);
                 return false;
             }
             if(adminList.remove(id,id)){
@@ -257,7 +255,7 @@ public class AuthorityManagement {
                     AuthorityManagement.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
-                    sfLog.e(this.getClass(),"管理员删除失败:" + id,e);
+                    SfLog.getInstance().e(this.getClass(),"管理员删除失败:" + id,e);
                     return false;
                 }
             }
