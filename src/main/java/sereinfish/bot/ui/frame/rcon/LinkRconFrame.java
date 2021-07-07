@@ -57,8 +57,8 @@ public class LinkRconFrame extends JFrame {
         button_link = new JButton("连接");
         button_cancel = new JButton("取消");
 
-        panel_btn.add(button_link);
         panel_btn.add(button_cancel);
+        panel_btn.add(button_link);
 
         //连接按钮
         button_link.addActionListener(new ActionListener() {
