@@ -111,7 +111,7 @@ public class RconManager {
     }
 
     @Getter
-    static class Conf{
+    public static class Conf{
         public ArrayList<RconConf> rconConfs = new ArrayList<>();
 
         public Conf(){}

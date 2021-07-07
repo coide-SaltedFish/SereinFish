@@ -2,6 +2,7 @@ package sereinfish.bot.ui.menu;
 
 import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
+import sereinfish.bot.ui.frame.rcon.RconListFrame;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -96,12 +97,22 @@ public class MainMenu extends JMenuBar {
         JMenu menu = new JMenu("Rcon");
 
         /*********Rcon**********/
-        JMenuItem menuItem_linkRcon = new JMenuItem("连接到Rcon");
+        JMenuItem menuItem_linkRcon = new JMenuItem("添加Rcon");
         menu.add(menuItem_linkRcon);
         menuItem_linkRcon.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new LinkRconFrame();
+            }
+        });
+
+
+        JMenuItem menuItem_rconList = new JMenuItem("Rcon列表");
+        menu.add(menuItem_rconList);
+        menuItem_rconList.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new RconListFrame();
             }
         });
 

@@ -1,5 +1,6 @@
 package sereinfish.bot.net.mc.rcon;
 
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class Rcon {
 		this.config = config;
 
 		// Connect to host
-		this.connect(config.getIp(), config.getPort(), config.getPassword().getBytes());
+		this.connect();
 	}
 
     /**
@@ -45,15 +46,15 @@ public class Rcon {
 
     /**
 	 * 连接到rcon服务器
-	 * 
-	 * @param host Rcon server address
-	 * @param port Rcon server port
-	 * @param password Rcon server password
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public void connect(String host, int port, byte[] password) throws IOException, AuthenticationException {
+	public void connect() throws IOException, AuthenticationException {
+		String host = config.getIp();
+		int port = config.getPort();
+		byte[] password = config.getPassword().getBytes();
+
 		if(host == null || host.trim().isEmpty()) {
 			throw new IllegalArgumentException("Host can't be null or empty");
 		}

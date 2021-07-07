@@ -1,6 +1,7 @@
 package sereinfish.bot.ui.frame.rcon;
 
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.net.mc.rcon.Rcon;
 import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.net.mc.rcon.RconManager;
 import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
@@ -16,10 +17,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class LinkRconFrame extends JFrame {
     private JPanel contentPane;//最底层面板
 
+    private JTextField textField_name;
     private JTextField textField_ip;
     private JTextField textField_port;
     private JPasswordField passwordField;
@@ -45,6 +49,7 @@ public class LinkRconFrame extends JFrame {
         JPanel panel_btn = new JPanel(flowLayout);//按钮控件部分
         contentPane.add(panel_btn,BorderLayout.SOUTH);
 
+        panel_input.add(getNamePanel());
         panel_input.add(getIpPanel());
         panel_input.add(getPasWPanel());
         panel_input.add(getPortPanel());
@@ -59,38 +64,63 @@ public class LinkRconFrame extends JFrame {
         button_link.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String ip = textField_ip.getText();
+                button_link.setEnabled(false);
+                button_link.setText("连接中");
+
+                String name = textField_name.getText();
+                String addr = textField_ip.getText();
                 String portStr = textField_port.getText();
                 String passW = new String(passwordField.getPassword());
                 //验证合法性
-                if (ip.equals("")){
-                    new TipDialog(LinkRconFrame.this,"错误","IP不能为空",true);
+                if (addr.equals("")){
+                    new TipDialog(LinkRconFrame.this,"错误","地址不能为空",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                     return;
                 }
 
                 if (passW.equals("")){
                     new TipDialog(LinkRconFrame.this,"错误","密码不能为空",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                     return;
                 }
                 if (portStr.equals("")){
                     new TipDialog(LinkRconFrame.this,"错误","端口不能为空",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                     return;
                 }
                 try{
+                    InetAddress inetAddress = InetAddress.getByName(addr);
+                    String ip = inetAddress.getHostAddress();
                     int port = Integer.valueOf(portStr);
-                    RconManager.getInstance().link(new RconConf(ip, port, passW));
-                    new TipDialog(LinkRconFrame.this,"提示","连接成功",true);
+                    SfLog.getInstance().d(this.getClass(),"Rcon连接>>地址:" + ip + " 端口：" + port);
+                    Rcon rcon = RconManager.getInstance().link(new RconConf(name, ip, port, passW));
+                    rcon.disconnect();
+                    new TipDialog(LinkRconFrame.this,"提示","成功，连接可用",true);
                     LinkRconFrame.this.dispose();
                 }catch (NumberFormatException e1){
                     SfLog.getInstance().e(this.getClass(), e1);
                     new TipDialog(LinkRconFrame.this,"错误","端口类型错误",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                     return;
+                }catch (UnknownHostException e1){
+                    SfLog.getInstance().e(this.getClass(), e1);
+                    new TipDialog(LinkRconFrame.this,"错误","未知的Host：" + addr,true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                 } catch (IOException ioException) {
                     SfLog.getInstance().e(this.getClass(), ioException);
                     new TipDialog(LinkRconFrame.this,"提示","连接失败，IO异常",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                 } catch (AuthenticationException authenticationException) {
                     SfLog.getInstance().e(this.getClass(), authenticationException);
                     new TipDialog(LinkRconFrame.this,"提示","连接失败，身份验证异常",true);
+                    button_link.setEnabled(true);
+                    button_link.setText("连接");
                 }
 
             }
@@ -119,14 +149,32 @@ public class LinkRconFrame extends JFrame {
     }
 
     /**
+     * 名称输入框
+     * @return
+     */
+    private JPanel getNamePanel(){
+        textField_name = new JTextField();
+        JPanel panelAccount = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("名称：");
+
+        VFlowLayout flowLayout = new VFlowLayout();
+        flowLayout.setHorizontalFill(true);
+        JPanel panel = new JPanel(flowLayout);
+        panel.add(textField_name);
+
+        panelAccount.add(label,BorderLayout.WEST);
+        panelAccount.add(panel,BorderLayout.CENTER);
+        return panelAccount;
+    }
+
+    /**
      * IP输入框
      * @return
      */
     private JPanel getIpPanel(){
         textField_ip = new JTextField();
-        textField_ip.setDocument(new IPTextField(16));
         JPanel panelAccount = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("IP：");
+        JLabel label = new JLabel("地址：");
 
         VFlowLayout flowLayout = new VFlowLayout();
         flowLayout.setHorizontalFill(true);

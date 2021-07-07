@@ -1,43 +1,20 @@
 package sereinfish.bot.net.mc.rcon;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import sereinfish.bot.myYuq.MyYuQ;
 
+@AllArgsConstructor
+@Getter
+@Setter
 public class RconConf {
-    String ip;
-    int port;
-    String password;
-
-    public RconConf(String ip, int port, String password) {
-        this.ip = ip;
-        this.port = port;
-        this.password = password;
-    }
+    private String name;
+    private String ip;
+    private int port;
+    private String password;
 
     public String getID(){
         return MyYuQ.stringToMD5(ip+password+port);
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }
