@@ -30,6 +30,8 @@ public class FileHandle {
     public static File mcDefaultFontFile = new File(mcPath, "font/Unifont-mono.ttf");//mc默认字体
     public static File mcDirtFile = new File(mcPath, "dirt.png");//土方块材质
 
+    public static File rconConfFile = new File(mcPath, "rcon/conf.json");//rcon配置文件
+
     /**
      * 写入文件
      * @param file

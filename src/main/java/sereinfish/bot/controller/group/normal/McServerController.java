@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 @GroupController
 public class McServerController {
 
-    @Action("\\[.!！][Pp]ing\\ {addr}")
+    @Action("\\[.!！][Ss]tate\\ {addr}")
     public Message ping(Group group, String addr) throws IOException {
         group.sendMessage(MyYuQ.getMif().text("信息获取中，请稍后").toMessage());
 

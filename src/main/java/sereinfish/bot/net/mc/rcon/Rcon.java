@@ -26,7 +26,7 @@ public class Rcon {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public Rcon(RconConf config) throws IOException, AuthenticationException {
+	public  Rcon(RconConf config) throws IOException, AuthenticationException {
 		// Default charset is utf8
 		this.charset = Charset.forName("UTF-8");
 		this.config = config;

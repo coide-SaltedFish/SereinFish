@@ -1,6 +1,7 @@
 package sereinfish.bot.ui.menu;
 
 import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
+import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -22,6 +23,7 @@ public class MainMenu extends JMenuBar {
         add(getFileMenu());//文件
         add(getDataBaseMenu());//数据库
         add(getAuthorityMenu());//权限
+        add(getRconMenu());//Rcon
         return this;
     }
 
@@ -80,6 +82,26 @@ public class MainMenu extends JMenuBar {
         menuItem_authorityManager.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        return menu;
+    }
+
+    /**
+     * Rcon相关
+     * @return
+     */
+    public JMenu getRconMenu(){
+        JMenu menu = new JMenu("Rcon");
+
+        /*********Rcon**********/
+        JMenuItem menuItem_linkRcon = new JMenuItem("连接到Rcon");
+        menu.add(menuItem_linkRcon);
+        menuItem_linkRcon.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new LinkRconFrame();
             }
         });
 
