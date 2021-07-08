@@ -144,7 +144,7 @@ public class ImageHandle {
      * @param image
      * @return
      */
-    public static BufferedImage toBufferedImage(Image image) {
+    public static BufferedImage imageToBufferedImage(Image image) {
         if (image instanceof BufferedImage) {
             return (BufferedImage)image;
         }

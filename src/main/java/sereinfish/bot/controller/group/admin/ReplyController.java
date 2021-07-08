@@ -29,24 +29,16 @@ import java.util.ArrayList;
 
 @GroupController
 public class ReplyController extends QQController {
-    private Group group;
-    private Member sender;
-    private Message message;
-    private DataBase dataBase;
-    private GroupConf conf;
-
     private int maxTime = 25000;
     int page_num = 4;//一页的记录数
     /**
      * 权限检查
      */
     @Before
-    public void before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
-        this.group = group;
-        this.sender = sender;
-        this.message = message;
+    public DataBase before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
+        DataBase dataBase;
 
-        conf = GroupConfManager.getInstance().get(group.getId());
+        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
         if (!conf.isEnable()){
             throw new DoNone();
         }
@@ -71,11 +63,12 @@ public class ReplyController extends QQController {
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
+        return dataBase;
     }
 
     @Action("\\[!！.]添加问答\\")
     @Synonym({"\\[!！.]问答添加\\"})
-    public Message addReply(ContextSession session){
+    public Message addReply(Member sender, DataBase dataBase, Group group, ContextSession session){
         try{
             reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
             String key = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
@@ -103,7 +96,7 @@ public class ReplyController extends QQController {
 
     @Action("\\[!！.]问答添加\\ 问{key}答{re}")
     @Synonym("\\[!！.]添加问答\\ 问{key}答{re}")
-    public Message addReply(Message message, String key,String re){
+    public Message addReply(DataBase dataBase, Group group, Member sender, Message message, String key,String re){
         String msg = Message.Companion.toCodeString(message);
         String msgInfo = msg.substring(msg.indexOf(" 问"));
         key = msgInfo.substring(2,msgInfo.indexOf("答"));
@@ -129,7 +122,7 @@ public class ReplyController extends QQController {
 
     @Action("\\[!！.]问答查询\\ {page} \"{key}\"")
     @Synonym("\\[!！.]问答查询\\ {page} {key}")
-    public Message queryReply(int page, String key){
+    public Message queryReply(DataBase dataBase, Group group, int page, String key){
         if (page < 1){
             return MyYuQ.getMif().text("不合法的页数：" + page).toMessage();
         }
@@ -164,7 +157,7 @@ public class ReplyController extends QQController {
 
     @Action("\\[!！.]问答查询\\ \"{key}\"")
     @Synonym("\\[!！.]问答查询\\ {key}")
-    public Message queryReply(String key){
+    public Message queryReply(DataBase dataBase, Group group, String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
             ArrayList<Reply> replies = replyDao.query(key, group.getId());
@@ -190,7 +183,7 @@ public class ReplyController extends QQController {
     }
 
     @Action("\\[!！.]问答删除\\ {id}")
-    public Message delete(String id){
+    public Message delete(DataBase dataBase, String id){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
             if (replyDao.isExistId(id)){

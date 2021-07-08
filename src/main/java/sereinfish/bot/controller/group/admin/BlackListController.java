@@ -31,22 +31,15 @@ import java.util.Date;
  */
 @GroupController
 public class BlackListController {
-    private Group group;
-    private Member sender;
-    private Message message;
-    private DataBase dataBase;
-    private GroupConf conf;
-
     private int maxTime = 25000;
     private int page_num = 5;
     /**
      * 权限检查
      */
     @Before
-    public void before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
-        this.group = group;
-        this.sender = sender;
-        this.message = message;
+    public DataBase before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
+        GroupConf conf;
+        DataBase dataBase;
 
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
@@ -68,6 +61,7 @@ public class BlackListController {
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
+        return dataBase;
     }
 
     /**
@@ -77,7 +71,7 @@ public class BlackListController {
      */
     @Action("\\[.!！]黑名单添加\\ {qq} \"{remake}\"")
     @Synonym({"\\[.!！]加黑\\ {qq} \"{remake}\""})
-    public Message add(long qq, String remake){
+    public Message add(Group group, DataBase dataBase, long qq, String remake){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             //判断是否已存在
@@ -102,7 +96,7 @@ public class BlackListController {
      */
     @Action("\\[.!！]黑名单删除\\ {qq}")
     @Synonym({"\\[.!！]删黑\\ {qq}"})
-    public Message delete(long qq){
+    public Message delete(DataBase dataBase, Group group, long qq){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             //判断是否已存在
@@ -123,7 +117,7 @@ public class BlackListController {
      */
     @Action("\\[.!！]本群黑名单\\ {page}")
     @Synonym("\\[.!！]黑名单\\ {page}")
-    public Message query(int page){
+    public Message query(DataBase dataBase, Group group, int page){
         if (page < 1){
             return MyYuQ.getMif().text("页面错误：" + page).toMessage();
         }
@@ -156,7 +150,7 @@ public class BlackListController {
      */
     @Action("\\[.!！]本群黑名单\\")
     @Synonym("\\[.!！]黑名单\\")
-    public Message query(){
+    public Message query(DataBase dataBase, Group group){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
             ArrayList<BlackList> lists = blackListDao.query(group.getId());

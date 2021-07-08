@@ -24,20 +24,12 @@ import java.util.ArrayList;
 @GroupController
 //TODO：支持私聊
 public class SwitchController {
-    private Group group;
-    private Member sender;
-    private Message message;
-    private GroupConf conf;
 
     /**
      * 权限检查
      */
     @Before
-    public void before(Group group, Member sender, Message message){
-        this.group = group;
-        this.sender = sender;
-        this.message = message;
-
+    public GroupConf before(Group group, Member sender){
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.ADMIN)) { //权限检查
 //            Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
 //            msg.setReply(message.getSource());
@@ -45,29 +37,29 @@ public class SwitchController {
             throw new DoNone();
         }
 
-        conf = GroupConfManager.getInstance().get(group.getId());
+        return GroupConfManager.getInstance().get(group.getId());
     }
 
     @Action("\\[Bb]ot\\ {state}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message enableBot(boolean  state){
+    public Message enableBot(GroupConf groupConf, Member sender, boolean  state){
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.MASTER)) { //权限检查
             throw new DoNone();
         }
-        conf.setEnable(state);
-        GroupConfManager.getInstance().put(conf);
+        groupConf.setEnable(state);
+        GroupConfManager.getInstance().put(groupConf);
         return MyYuQ.getMif().text("Bot启用：" + state).toMessage();
     }
 
     @Action("开关控制 {groupName} {name} {state}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message switchController(String groupName, String name, boolean state){
-        GroupConf.Control control = conf.getControl(groupName,name);
+    public Message switchController(GroupConf groupConf , String groupName, String name, boolean state){
+        GroupConf.Control control = groupConf.getControl(groupName,name);
         if (control == null){
             return MyYuQ.getMif().text("[" + groupName + "][" + name + "]未找到").toMessage();
         }else {
             if (control.getValue() instanceof Boolean){
-                if(conf.setControlValue(groupName, name, state)){
+                if(groupConf.setControlValue(groupName, name, state)){
                     return MyYuQ.getMif().text("成功,[" + groupName + "]->[" + name + "]设置为[" + state + "]").toMessage();
                 }else {
                     return MyYuQ.getMif().text("失败：[" + groupName + "]->[" + name + "]设置为[" + state + "]").toMessage();
@@ -82,8 +74,8 @@ public class SwitchController {
     @Action("开关控制 ?")
     @Synonym("开关控制 ？")
     @QMsg(mastAtBot = true, reply = true)
-    public Message switchControllerGroupNameHelp(){
-        ArrayList<String> l = conf.getGroupNames();
+    public Message switchControllerGroupNameHelp(GroupConf groupConf){
+        ArrayList<String> l = groupConf.getGroupNames();
         int line = 6;
         int page = 1;
         int maxPage = l.size() / line + 1;
@@ -100,7 +92,7 @@ public class SwitchController {
     @Action("开关控制 ? {pageStr}")
     @Synonym("开关控制 ？ {pageStr}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message switchControllerGroupNameHelp(String pageStr){
+    public Message switchControllerGroupNameHelp(GroupConf groupConf, String pageStr){
         int page;
         try {
             page = Integer.valueOf(pageStr);
@@ -108,7 +100,7 @@ public class SwitchController {
             return Message.Companion.toMessageByRainCode("页数错误：" + pageStr);
         }
 
-        ArrayList<String> l = conf.getGroupNames();
+        ArrayList<String> l = groupConf.getGroupNames();
         int line = 6;
         int maxPage = l.size() / line + 1;
 
@@ -131,8 +123,8 @@ public class SwitchController {
     @Action("开关控制 {groupName} ?")
     @Synonym("开关控制 {groupName} ？")
     @QMsg(mastAtBot = true, reply = true)
-    public Message switchControllerHelp(String groupName){
-        ArrayList<String> l = conf.getGroupControlNames(groupName);
+    public Message switchControllerHelp(GroupConf groupConf, String groupName){
+        ArrayList<String> l = groupConf.getGroupControlNames(groupName);
         if (l == null){
             return MyYuQ.getMif().text("未找到开关组：" + groupName).toMessage();
         }
@@ -154,7 +146,7 @@ public class SwitchController {
     @Action("开关控制 {groupName} ? {pageStr}")
     @Synonym("开关控制 {groupName} ？ {pageStr}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message switchControllerHelp(String groupName, String pageStr){
+    public Message switchControllerHelp(GroupConf groupConf, String groupName, String pageStr){
         int page;
         try {
             page = Integer.valueOf(pageStr);
@@ -162,7 +154,7 @@ public class SwitchController {
             return Message.Companion.toMessageByRainCode("页数错误：" + pageStr);
         }
 
-        ArrayList<String> l = conf.getGroupControlNames(groupName);
+        ArrayList<String> l = groupConf.getGroupControlNames(groupName);
         if (l == null){
             return MyYuQ.getMif().text("未找到开关组：" + groupName).toMessage();
         }

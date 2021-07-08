@@ -31,9 +31,6 @@ import java.util.regex.Pattern;
  */
 @GroupController
 public class MsgDBController extends QQController {
-    private Group group;
-    private Member sender;
-    private Message message;
 
     private int maxTime = 15000;
 
@@ -42,10 +39,6 @@ public class MsgDBController extends QQController {
      */
     @Before
     public void before(Group group, Member sender, Message message){
-        this.group = group;
-        this.sender = sender;
-        this.message = message;
-
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
 
@@ -55,7 +48,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]读消息\\")
-    public Message readMsg(Message message){
+    public Message readMsg(Group group, Message message){
         GroupHistoryMsg groupHistoryMsg = null;
 
         if(message.getReply() == null){
@@ -90,7 +83,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]查消息\\ {id}")
-    public Message readMsg(int id){
+    public Message readMsg(Group group, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),id);
@@ -105,7 +98,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]查消息\\ {qq} {id}")
-    public Message readMsg(long qq, int id){
+    public Message readMsg(Group group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,id);
@@ -174,7 +167,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]发消息\\ {qq} {id}")
-    public Message sendMsg(long qq, int id){
+    public Message sendMsg(Group group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
             groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(),qq,id);
@@ -189,7 +182,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]图片url\\")
-    public Message getImageURL(Message message, ContextSession session){
+    public Message getImageURL(ContextSession session){
         reply("请发送图片");
         Message msg = session.waitNextMessage(maxTime);
         boolean flag = true;
@@ -210,7 +203,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\[!！.]最近消息\\ {qq}")
-    public Message newMsg(long qq){
+    public Message newMsg(Group group, long qq){
         GroupHistoryMsg groupHistoryMsg = null;
         try{
            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().queryLast(group.getId(), qq);

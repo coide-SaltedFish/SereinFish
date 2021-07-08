@@ -2,6 +2,7 @@ package sereinfish.bot.ui.tray;
 
 import sereinfish.bot.ui.frame.MainFrame;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,11 +48,23 @@ public class AppTray {
      * @return
      */
     public AppTray buildMenu() throws UnsupportedEncodingException {
+        //使用JDialog 作为JPopupMenu载体
+        JDialog popWindow = new JDialog();
+        popWindow.setUndecorated(true);
+        //popWindow作为JPopupMenu载体不需要多大的size
+        popWindow.setSize(1, 1);
+
         // 创建弹出菜单
-        PopupMenu popupMenu = new PopupMenu();
+        JPopupMenu popupMenu = new JPopupMenu(){
+            @Override
+            public void firePopupMenuWillBecomeInvisible() {
+                popWindow.setVisible(false);
+            }
+        };
+        popupMenu.setSize(100, 30);
 
         /******主界面*******/
-        MenuItem mainUI_menu = new MenuItem("打开主界面");
+        JMenuItem mainUI_menu = new JMenuItem("打开主界面");
         mainUI_menu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -64,7 +77,7 @@ public class AppTray {
         popupMenu.addSeparator();
 
         /********退出********/
-        MenuItem exit_menu = new MenuItem("退出");
+        JMenuItem exit_menu = new JMenuItem("退出");
         exit_menu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -73,8 +86,22 @@ public class AppTray {
         });
         popupMenu.add(exit_menu);
 
-        // 为托盘图标加弹出菜弹
-        trayIcon.setPopupMenu(popupMenu);
+        // 为托盘图标加鼠标事件监听
+        trayIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getClickCount() == 2){
+                    MainFrame.getMainFrame().setVisible(true);
+                }
+
+                if (e.getButton() == 3 && e.isPopupTrigger()) {
+                    //右键点击弹出JPopupMenu绑定的载体以及JPopupMenu
+                    popWindow.setLocation(e.getX() + 5, e.getY() - 5 - 30);
+                    popWindow.setVisible(true);
+                    popupMenu.show(popWindow, 0, 0);
+                }
+            }
+        });
         return appTray;
     }
 

@@ -6,6 +6,7 @@ import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.ui.tray.AppTray;
 import sun.font.FontDesignMetrics;
 import sun.misc.BASE64Decoder;
 
@@ -172,7 +173,8 @@ public class ServerListPing {
         Font font = null;
         //字体
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT, FileHandle.mcDefaultFontFile);
+
+            font = Font.createFont(Font.TRUETYPE_FONT, new File(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDefaultFontFile).toURI()));
         } catch (Exception e) {
             SfLog.getInstance().e(ServerListPing.class, "默认字体加载失败", e);
             font = new Font("宋体", Font.PLAIN, 24);
@@ -182,9 +184,9 @@ public class ServerListPing {
         int dirtWidth = 1920  / 12;
         BufferedImage dirtImage = null;
         try {
-            dirtImage = ImageIO.read(FileHandle.mcDirtFile);
-        } catch (IOException e) {
-            SfLog.getInstance().e(ServerListPing.class, "材质丢失：" + FileHandle.mcDirtFile);
+            dirtImage = ImageHandle.imageToBufferedImage(Toolkit.getDefaultToolkit().getImage(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDirtFile)));
+        } catch (Exception e) {
+            SfLog.getInstance().e(ServerListPing.class, "材质丢失：" + ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDirtFile).getPath());
             dirtImage = new BufferedImage(dirtWidth, dirtWidth, BufferedImage.TYPE_4BYTE_ABGR);
             Graphics2D graphics2D = dirtImage.createGraphics();
             graphics2D.setBackground(defaultColor);

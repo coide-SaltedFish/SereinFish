@@ -35,20 +35,14 @@ import java.util.regex.Pattern;
 
 @GroupController
 public class ImageController extends QQController {
-    private Member sender;
-    private Group group;
-    private GroupConf conf;
-
     private int paIndex = 16;
 
     private int maxTime = 15000;
 
     @Before
-    public void before(Member sender, Group group){
-        this.sender = sender;
-        this.group = group;
+    public GroupConf before(Group group){
 
-        conf = GroupConfManager.getInstance().get(group.getId());
+        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
         if (!conf.isEnable()){
             throw new DoNone();
         }
@@ -56,6 +50,8 @@ public class ImageController extends QQController {
         if (!FileHandle.imageCachePath.exists() || FileHandle.imageCachePath.isFile()){
             FileHandle.imageCachePath.mkdirs();
         }
+
+        return conf;
     }
 
     /**
@@ -63,7 +59,7 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("丢 {member}")
-    public Message diuAt(long member){
+    public Message diuAt(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
@@ -75,9 +71,7 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("\\.?丢.?\\")
-    public Message diu(){
-        final Member sender = this.sender;
-
+    public Message diu(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 60){
             throw new DoNone();
@@ -88,7 +82,7 @@ public class ImageController extends QQController {
 
 
     @Action("爬 {member}")
-    public Message pa(long member){
+    public Message pa(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
@@ -101,7 +95,7 @@ public class ImageController extends QQController {
     }
 
     @Action("爬")
-    public Message pa_2(){
+    public Message pa_2(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 60){
             throw new DoNone();
@@ -118,7 +112,7 @@ public class ImageController extends QQController {
 
     @Action("嚼 {member}")
     @Synonym({"恰 {member}"})
-    public Message jiao(long member){
+    public Message jiao(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
@@ -127,7 +121,7 @@ public class ImageController extends QQController {
 
     @Action("mua {member}")
     @Synonym({"mua {member}"})
-    public Message mua(long member){
+    public Message mua(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
@@ -136,7 +130,7 @@ public class ImageController extends QQController {
 
     @Action("摸 {member}")
     @Synonym({"rua {member}"})
-    public Message mo(long member){
+    public Message mo(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
         }
@@ -145,8 +139,7 @@ public class ImageController extends QQController {
 
     @Action("摸")
     @Synonym({"rua"})
-    public Message mo_2(){
-        final Member sender = this.sender;//线程安全
+    public Message mo_2(Member sender){
         return getRua(sender.getId());
     }
 

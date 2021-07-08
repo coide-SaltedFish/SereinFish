@@ -1,5 +1,7 @@
 package sereinfish.bot.ui.menu;
 
+import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.ui.frame.authority.AuthorityManagerFrame;
 import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
 import sereinfish.bot.ui.frame.rcon.RconListFrame;
@@ -83,6 +85,7 @@ public class MainMenu extends JMenuBar {
         menuItem_authorityManager.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                new AuthorityManagerFrame();
             }
         });
 
