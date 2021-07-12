@@ -60,7 +60,7 @@ public class MsgController extends QQController {
         return group;
     }
 
-    @Action("\\[!！.]版本\\")
+    @Action("\\[!！.]版本$\\")
     @QMsg(reply = true)
     public Message version(){
         return MyYuQ.getMif().text(MyYuQ.getVersionInfo()).toMessage();
@@ -86,32 +86,7 @@ public class MsgController extends QQController {
         return MyYuQ.getMif().text(str.toString()).toMessage();
     }
 
-    @Action("\\[!！.]json\\ \"{title}\"\"{desc}\"\"{preview}\"\"{jumpUrl}\"")
-    public Message jsonTest(String title, String desc, String preview, String jumpUrl){
-        return MyYuQ.getMif().jsonEx(JsonMsg.getUrlCard(title, desc, preview, jumpUrl)).toMessage();
-    }
-
-    @Action("\\[!！.]json2\\ {iconUrl}")
-    public Message jsonTest_1(String iconUrl){
-        return MyYuQ.getMif().jsonEx(JsonMsg.getNoticeList("appName","标题",iconUrl,new String[][]{{"标题一","123"},{"123","123"}})).toMessage();
-    }
-
-    @Action("\\[.!！]公告\\")
-    public Message testGG(Group group, ContextSession session){
-        GroupNotice groupNotice = new GroupNotice();
-        try {
-            reply("输入公告内容");
-            Message m1 = session.waitNextMessage(maxTime);
-            groupNotice.setText(Message.Companion.toCodeString(m1));
-            group.getNotices().add(groupNotice);
-            return MyYuQ.getMif().text("wanc").toMessage();
-        }catch (WaitNextMessageTimeoutException e){
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("超时：" + maxTime).toMessage();
-        }
-    }
-
-    @Action("\\[.!！]消息转图片\\")
+    @Action("\\[.!！]消息转图片$\\")
     public Message testMsgImage(ContextSession session, Group group){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"msg_temp");//文件缓存路径
@@ -131,7 +106,7 @@ public class MsgController extends QQController {
         }
     }
 
-    @Action("\\[.！!]base64转图片\\")
+    @Action("\\[.！!]base64转图片$\\")
     public Message base64ToImage(ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"base64ToImage_temp");//文件缓存路径
@@ -152,7 +127,7 @@ public class MsgController extends QQController {
         }
     }
 
-    @Action("\\[.！!]玩家头像\\ {uuid}")
+    @Action("\\[.！!]玩家头像$\\ {uuid}")
     public Message getMcPlayerHeadImage(String uuid){
         File imageFile = new File(FileHandle.imageCachePath,"mcPlayerHeadImage_temp");//文件缓存路径
         try {

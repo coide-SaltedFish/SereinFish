@@ -40,7 +40,7 @@ public class SwitchController {
         return GroupConfManager.getInstance().get(group.getId());
     }
 
-    @Action("\\[Bb]ot\\ {state}")
+    @Action("\\[Bb]ot$\\ {state}")
     @QMsg(mastAtBot = true, reply = true)
     public Message enableBot(GroupConf groupConf, Member sender, boolean  state){
         if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.MASTER)) { //权限检查

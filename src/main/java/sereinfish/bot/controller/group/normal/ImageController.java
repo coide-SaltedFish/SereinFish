@@ -143,7 +143,7 @@ public class ImageController extends QQController {
         return getRua(sender.getId());
     }
 
-    @Action("\\[.!！]读懂世界\\")
+    @Action("\\[.!！]读懂世界$\\")
     public Message readTheWorld(){
         try {
             return MyYuQ.getMif().imageByInputStream(OkHttpUtils.getByteStream("http://api.03c3.cn/zb/")).toMessage();

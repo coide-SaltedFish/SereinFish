@@ -30,7 +30,7 @@ public class WikiController {
         }
     }
 
-    @Action("\\[!！.]wiki\\ {key}")
+    @Action("\\[!！.]wiki$\\ {key}")
     public Message mcWiki(Group group, String key){
         //检查是否启用
         if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiMcEnable).getValue()){
@@ -48,7 +48,7 @@ public class WikiController {
                 "Wiki：" + key,key + " - Minecraft Wiki，最详细的官方我的世界百科")).toMessage();
     }
 
-    @Action("\\[!！.]百度\\ {key}")
+    @Action("\\[!！.]百度$\\ {key}")
     public Message baidu(Group group, String key){
         //检查是否启用
         if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiBaiduEnable).getValue()){

@@ -38,7 +38,7 @@ public class SauceNAOController extends QQController {
         }
     }
 
-    @Action("\\[.!！]图片搜索\\")
+    @Action("\\[.!！]图片搜索$\\")
     public Message SauceNAO(Group group, ContextSession session){
         GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
@@ -72,7 +72,7 @@ public class SauceNAOController extends QQController {
         return MyYuQ.getMif().text(sauceNAO.toString()).toMessage();
     }
 
-    @Action("\\[.!！]搜图\\ {img}")
+    @Action("\\[.!！]搜图$\\ {img}")
     public Message SauceNAO_1(Group group, Image img){
         GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 

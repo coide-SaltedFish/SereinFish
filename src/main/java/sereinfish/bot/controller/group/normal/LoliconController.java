@@ -58,7 +58,7 @@ public class LoliconController {
     }
 
     @Action("\\img_B407F708A2C6A506342098DF7CAC4A57\\")
-    @Synonym({"\\[!！.]setu\\", "\\[!！.]色图\\","\\img_049231702ACB5E94ECCD953F46E6CAB9\\"})
+    @Synonym({"\\[!！.]setu$\\", "\\[!！.]色图$\\","\\img_049231702ACB5E94ECCD953F46E6CAB9\\"})
     public void getST(MySender mySender){
         //判断是否启用Sf
         if (mySender.getContact() instanceof Group){

@@ -36,8 +36,7 @@ import java.net.SocketException;
  * mc服务器相关指令
  */
 @GroupController
-public class McServerController extends QQController {
-    private int maxTime = 15000;
+public class McServerController {
 
     @Before
     public GroupConf before(Group group){
@@ -45,7 +44,8 @@ public class McServerController extends QQController {
     }
 
 
-    @Action("\\[.!！][Ss]tate\\ {addr}")
+    @Action("\\[.!！][Ss]tate$\\ {addr}")
+    @Synonym("\\[.!！][Ss]tate$\\")
     public Message ping(GroupConf groupConf, Group group, String addr) throws IOException {
         //前置检查
         if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
@@ -55,66 +55,12 @@ public class McServerController extends QQController {
         }else {
             throw new DoNone();
         }
-
-        group.sendMessage(MyYuQ.getMif().text("信息获取中，请稍后").toMessage());
-
-        File file = new File(FileHandle.imageCachePath,"serverState_temp");
-        ServerListPing serverListPing = new ServerListPing();
-        try {
-            //仅SRV解析
-            Lookup lookup = new Lookup("_minecraft._tcp." + addr, Type.SRV);
-            Record[] records = lookup.run();
-
-            if (lookup.getResult() != Lookup.SUCCESSFUL){
-                return Message.Companion.toMessageByRainCode("地址 " + addr + " 解析失败：" + getLookupResultName(lookup.getResult()));
+        if (addr.matches("([.!！][Ss]tate)")){
+            if (((String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue()).equals("")){
+                return MyYuQ.getMif().text("错误，地址尚未配置，请使用 state {addr} 命令").toMessage();
+            }else {
+                addr = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue();
             }
-            SRVRecord srv = (SRVRecord) records[0];
-            String hostname = srv.getTarget().toString().replaceFirst("\\.$", "");
-            InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  srv.getPort());
-
-            serverListPing.setAddress(inetSocketAddress);
-
-            ServerListPing.StatusResponse response = serverListPing.fetchData();
-            //得到Rcon
-            Rcon rcon = null;
-            if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-                RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
-                if (rconConf != null){
-                    rcon = RconManager.getInstance().getRcon(rconConf.getID());
-                }
-            }
-
-            BufferedImage stateImage = null;
-            try {
-                stateImage = ServerListPing.getServerInfoImage(response, rcon);
-            } catch (Exception e) {
-                SfLog.getInstance().e(this.getClass(), e);
-                return MyYuQ.getMif().text("服务器信息获取失败：" + e.getMessage()).toMessage();
-            }
-            ImageIO.write(stateImage, "PNG", file);
-
-            return MyYuQ.getMif().imageByFile(file).toMessage();
-        } catch (TextParseException e) {
-            SfLog.getInstance().e(this.getClass(), e);
-            return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());
-        }
-    }
-
-    @Action("\\[.!！][Ss]tate\\")
-    public Message state(GroupConf groupConf, Group group) throws IOException {
-        //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_McServerState).getValue()){
-                throw new DoNone();
-            }
-        }else {
-            throw new DoNone();
-        }
-        String addr = "";
-        if (((String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue()).equals("")){
-            return MyYuQ.getMif().text("错误，地址尚未配置，请使用 state {addr} 命令").toMessage();
-        }else {
-            addr = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue();
         }
 
         group.sendMessage(MyYuQ.getMif().text("信息获取中，请稍后").toMessage());
@@ -158,83 +104,6 @@ public class McServerController extends QQController {
         } catch (TextParseException e) {
             SfLog.getInstance().e(this.getClass(), e);
             return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());
-        }catch (SocketException e){
-            SfLog.getInstance().e(this.getClass(), e);
-            return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());
-        }
-    }
-
-    @Action("\\[.!！][rR][cC][Ee]\\ {var}")
-    public String rconCmdExecute(GroupConf groupConf, String var){
-        //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRconCMD).getValue()){
-                throw new DoNone();
-            }
-        }else {
-            throw new DoNone();
-        }
-        //得到Rcon
-        Rcon rcon = null;
-        if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-            RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
-            if (rconConf != null){
-                rcon = RconManager.getInstance().getRcon(rconConf.getID());
-            }
-        }
-        //命令执行
-        if (rcon != null){
-            try {
-                return "命令返回值如下：\n" + rcon.cmd(var).replaceAll("(§.)", "");
-            } catch (IOException e) {
-                return "命令执行失败：\n" + e.getMessage();
-            } catch (AuthenticationException e) {
-                return "Rcon连接异常：\n" + e.getMessage();
-            }
-        }
-        return "本群Rcon未连接";
-    }
-
-    /**
-     * 长命令执行
-     * @param groupConf
-     * @return
-     */
-    @Action("\\[.!！][rR][cC][Ee][Ss]\\")
-    public String rconsCmdExecute(ContextSession session, Member sender, GroupConf groupConf){
-        //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRconCMD).getValue()){
-                throw new DoNone();
-            }
-        }else {
-            throw new DoNone();
-        }
-        reply(MyYuQ.getMif().at(sender).plus(MyYuQ.getMif().text("请输入命令")));
-
-        try{
-            String reMsg = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
-            //得到Rcon
-            Rcon rcon = null;
-            if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-                RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
-                if (rconConf != null){
-                    rcon = RconManager.getInstance().getRcon(rconConf.getID());
-                }
-            }
-            //命令执行
-            if (rcon != null){
-                try {
-                    return "命令返回值如下：\n" + rcon.cmd(reMsg).replaceAll("(§.)", "");
-                } catch (IOException e) {
-                    return "命令执行失败：\n" + e.getMessage();
-                } catch (AuthenticationException e) {
-                    return "Rcon连接异常：\n" + e.getMessage();
-                }
-            }
-            return "本群Rcon未连接";
-        }catch (WaitNextMessageTimeoutException e) {
-            return "已超时取消";
         }
     }
 

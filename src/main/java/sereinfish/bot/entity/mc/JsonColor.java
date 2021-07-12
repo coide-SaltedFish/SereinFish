@@ -53,7 +53,14 @@ public class JsonColor {
         if (colorMap.containsKey(name)){
             return Color.decode(colorMap.get(name));
         }else {
-            return Color.WHITE;
+            if (name.startsWith("#")){
+                try {
+                    return Color.decode(name);
+                }catch (Exception e){
+                    return Color.WHITE;
+                }
+            }
         }
+        return Color.WHITE;
     }
 }
