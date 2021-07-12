@@ -26,10 +26,12 @@ public class FileHandle {
     public static File msgToImageTemplate = new File(configPath,"MessageTemplate.conf");//消息转图片模板
     public static File msgToImageTemplateTemp = new File(configPath,"MessageTemplateTemp");//消息转图片模板临时缓存
 
-    public static File mcResPath = new File(configPath, "mc/");//mc文件夹
     public static String mcResDefaultFontFile = "mc/gui/font/Unifont-mono.ttf";//mc默认字体
-    public static String mcResDirtFile = "mc/gui/dirt.png";//土方块材质
+    public static String mcResOptionsBackgroundFile = "mc/gui/texture/options_background.png";//土方块背景材质
+    public static String mcResInitFile = "mc/gui/texture/init.png";//土方块背景材质
+    public static String mcResServerStateFrameImageFile = "mc/gui/texture/window.png";//边框材质
 
+    public static File mcResPath = new File(configPath, "mc/");//mc文件夹
     public static File rconConfFile = new File(mcResPath, "rcon/conf.json");//rcon配置文件
 
     /**

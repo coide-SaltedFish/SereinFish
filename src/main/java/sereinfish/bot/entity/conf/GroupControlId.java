@@ -47,9 +47,11 @@ public enum GroupControlId {
     CheckBox_BiliBvExplain,//将bv号解析
 
     //
-    CheckBox_RCON,//rcon功能
-    CheckBox_Ping,//ping功能
-
+    SelectRcon,//rcon选择
+    CheckBox_EnableRcon,//rcon功能开关
+    CheckBox_EnableRconCMD,//rcon命令开关
+    CheckBox_McServerState,//ping功能
+    Edit_Small_Plain_McServerAddr,//默认服务器地址
     //消息
     CheckBox_LongMsgToImageEnable,//长文本转图片发送
     ComBox_FontSelect,//长文本转图片字体选择

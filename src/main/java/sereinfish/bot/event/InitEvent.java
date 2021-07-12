@@ -14,6 +14,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.account.AccountManager;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
@@ -110,6 +111,10 @@ public class InitEvent {
             SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
             System.exit(-1);
         }
+        //初始化MC颜色映射表
+        JsonColor.initColorMap();
+        SfLog.getInstance().d(this.getClass(),"MC颜色映射表初始化完成");
+
         //初始化复读管理器
         RepeaterManager.init();
         SfLog.getInstance().d(this.getClass(),"复读管理器初始化完成");

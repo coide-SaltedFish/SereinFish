@@ -4,7 +4,12 @@ import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlType;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.net.mc.rcon.Rcon;
+import sereinfish.bot.net.mc.rcon.RconConf;
+import sereinfish.bot.ui.dialog.FileChooseDialog;
 import sereinfish.bot.ui.frame.EditFrame;
+import sereinfish.bot.ui.frame.rcon.SelectRconFrame;
 import sereinfish.bot.ui.textfield.plainDocument.NumberTextField;
 
 import javax.swing.*;
@@ -12,12 +17,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,6 +47,8 @@ public class ConfContext {
         }else if(control.getType() == GroupControlType.Edit_IntNum){
             //整数输入框
             component = ConfContext.getEditIntNum(conf, control);
+        }else if (control.getType() == GroupControlType.SelectRcon){
+            component = ConfContext.getRconSelect(conf, control);
         }
 
         return component;
@@ -144,17 +149,53 @@ public class ConfContext {
 
         GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] fonts = graphicsEnvironment.getAvailableFontFamilyNames();
+        boolean isSelect = false;
         for (String font:fonts){
+            if (font.equals(control.getValue())){
+                isSelect = true;
+            }
             comboBox.addItem(font);
         }
-        comboBox.setSelectedItem(control.getValue());
+        comboBox.addItem("选择字体文件");
+
+        if (!isSelect){
+            comboBox.addItem("文件：" + new File((String) control.getValue()).getName());
+        }
+        comboBox.setSelectedItem("文件：" + new File((String) control.getValue()).getName());
+
         //设置点击事件
         comboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED){
-                    control.setValue(e.getItem());
-                    GroupConfManager.getInstance().put(conf);
+                    Object selectItem = comboBox.getSelectedItem();
+
+                    if (e.getItem().equals("选择字体文件")){
+                        //弹出文件选择框
+                        new FileChooseDialog("选择字体文件", ".ttf(字体文件)", new FileChooseDialog.FileChooseListener() {
+                            @Override
+                            public void cancel() {
+
+                            }
+
+                            @Override
+                            public void option(File f) {
+                                comboBox.removeItem(selectItem);
+                                comboBox.addItem("文件：" + f.getName());
+                                comboBox.setSelectedItem("文件：" + f.getName());
+                                control.setValue(f.getAbsolutePath());
+                                GroupConfManager.getInstance().put(conf);
+                            }
+
+                            @Override
+                            public void error() {
+
+                            }
+                        }, "ttf");
+                    }else {
+                        control.setValue(e.getItem());
+                        GroupConfManager.getInstance().put(conf);
+                    }
                 }
             }
         });
@@ -293,6 +334,50 @@ public class ConfContext {
         });
 
         panel.add(textField);
+        return panel;
+    }
+
+
+    /**
+     * Rcon选择
+     * @param groupConf
+     * @param control
+     * @return
+     */
+    public static JPanel getRconSelect(GroupConf groupConf, GroupConf.Control control){
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+
+        JButton button = new JButton("选择");
+        panel.add(button);
+        button.setToolTipText(control.getTip());
+        if (control.getValue() != null){
+            RconConf rconConf = MyYuQ.toClass((String) control.getValue(), RconConf.class);
+            if (rconConf != null){
+                button.setText(rconConf.getName());
+            }
+        }
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new SelectRconFrame("选择Rcon", new SelectRconFrame.SelectListener() {
+                    @Override
+                    public void select(RconConf conf) {
+                        control.setValue(MyYuQ.toJson(conf, RconConf.class));
+                        GroupConfManager.getInstance().put(groupConf);
+                        button.setText(conf.getName());
+                    }
+
+                    @Override
+                    public void clean() {
+                        control.setValue("");
+                        GroupConfManager.getInstance().put(groupConf);
+                        button.setText("选择");
+                    }
+                });
+            }
+        });
         return panel;
     }
 

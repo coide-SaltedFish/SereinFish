@@ -100,7 +100,8 @@ public class Rcon {
 	 * 
 	 * @throws IOException
 	 */
-	public String command(String payload) throws IOException {
+	private String command(String payload) throws IOException, AuthenticationException {
+		connect();
 		if(payload == null || payload.trim().isEmpty()) {
 			throw new IllegalArgumentException("Payload can't be null or empty");
 		}
@@ -112,7 +113,27 @@ public class Rcon {
 		if (result.endsWith("\n")) {
 			return result.substring(0, result.length() - 1);
 		}
+		disconnect();
 		return result;
+	}
+
+	/**
+	 * rcon命令执行
+	 * @param payload
+	 * @return
+	 * @throws IOException
+	 * @throws AuthenticationException
+	 */
+	public String cmd(String payload) throws IOException, AuthenticationException {
+		try {
+			return command(payload);
+		} catch (IOException e) {
+			disconnect();
+			throw e;
+		} catch (AuthenticationException e) {
+			disconnect();
+			throw e;
+		}
 	}
 	
 	private RconPacket send(int type, byte[] payload) throws IOException {

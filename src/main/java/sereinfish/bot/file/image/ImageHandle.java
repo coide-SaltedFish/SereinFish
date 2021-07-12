@@ -24,11 +24,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.awt.image.DataBuffer;
+import java.io.*;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * 一些图像处理方法
@@ -152,7 +151,7 @@ public class ImageHandle {
         BufferedImage bimage = null;
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         try {
-            int transparency = Transparency.OPAQUE;
+            int transparency = Transparency.TRANSLUCENT;
             GraphicsDevice gs = ge.getDefaultScreenDevice();
             GraphicsConfiguration gc = gs.getDefaultConfiguration();
             bimage = gc.createCompatibleImage(
@@ -162,7 +161,7 @@ public class ImageHandle {
         }
 
         if (bimage == null) {
-            int type = BufferedImage.TYPE_INT_RGB;
+            int type = BufferedImage.TYPE_4BYTE_ABGR;
             bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
         }
         Graphics g = bimage.createGraphics();
@@ -190,11 +189,29 @@ public class ImageHandle {
         int lineHeight = 0;//行高
 
         BufferedImage bufferedOldImage = null;
+        //设置字体
+        GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] fonts = graphicsEnvironment.getAvailableFontFamilyNames();
+        //判断字体是否是文件
+        Font font = new Font(fonts[0],Font.PLAIN,fontSize);
+        if(Arrays.asList(fonts).contains(mFont)){
+            font = new Font(mFont,Font.PLAIN,fontSize);
+        }else {
+            try {
+                font = Font.createFont(Font.TRUETYPE_FONT, new File(mFont));
+                font = font.deriveFont(Font.PLAIN, fontSize * 1.0f);
+            } catch (FontFormatException e) {
+                SfLog.getInstance().e(ImageHandle.class, e);
+            } catch (IOException e) {
+                SfLog.getInstance().e(ImageHandle.class, e);
+            }
+        }
 
         //解析消息数据
         for (MessageItem item:message.getBody()){
+
+
             if (item instanceof Text){
-                Font font = new Font(mFont,Font.PLAIN,fontSize);
                 Text text = (Text) item;
                 String str = text.getText();
                 //计算位置并开始绘制图像
@@ -293,7 +310,7 @@ public class ImageHandle {
         graphics2D.clearRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
         graphics2D.drawImage(bufferedOldImage, margin, margin, null);
         //加个水印
-        Font font = new Font(mFont,Font.PLAIN,22);
+        font = font.deriveFont(22f);
         String watermark = (String) conf.getControl(GroupControlId.Edit_Small_Plain_MsgToImageWatermark).getValue();
         FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
         int wlen = 0;
@@ -377,6 +394,63 @@ public class ImageHandle {
             for (int ix = x; ix < endX; ix++) {
                 int rgb = image.getRGB(ix, iy);
                 bufferedImage.setRGB(ix - x, iy - y, rgb);
+            }
+        }
+
+        return bufferedImage;
+    }
+
+    /**
+     * 图片填充拉伸
+     * @param image
+     * @param w
+     * @param h
+     * @return
+     */
+    public static BufferedImage picturesStretch9(BufferedImage image, int w, int h){
+        if (w < image.getWidth()){
+            w = image.getWidth();
+        }
+        if (h < image.getHeight()){
+            h = image.getHeight();
+        }
+
+        BufferedImage bufferedImage = new BufferedImage(w, h, image.getType());
+
+        int halfX = image.getWidth() / 2;
+        int halfY = image.getHeight() / 2;
+
+        //横向拉伸
+        int resX = 0;//原图坐标
+        int resY = 0;//
+        for (int y = 0; y < h; y++){
+            resX = 0;
+            //Y轴填充区域
+            if (y >= halfY && y <= h - halfY){
+                for (int x = 0; x < w; x++){
+                    //X轴填充区域
+                    if (x >= halfX && x <= w - halfX){
+                        int rgb = image.getRGB(halfX, halfY);
+                        bufferedImage.setRGB(x, y, rgb);
+                    }else {
+                        int rgb = image.getRGB(resX, halfY);
+                        bufferedImage.setRGB(x, y, rgb);
+                        resX++;
+                    }
+                }
+            }else {
+                for (int x = 0; x < w; x++){
+                    //X轴填充区域
+                    if (x >= halfX && x <= w - halfX){
+                        int rgb = image.getRGB(halfX, resY);
+                        bufferedImage.setRGB(x, y, rgb);
+                    }else {
+                        int rgb = image.getRGB(resX, resY);
+                        bufferedImage.setRGB(x, y, rgb);
+                        resX++;
+                    }
+                }
+                resY++;
             }
         }
 

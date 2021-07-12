@@ -25,7 +25,7 @@ import java.util.Map;
  * 群配置面板
  */
 public class GroupConfPanel extends JPanel {
-    public static final int NOW_V = 5;
+    public static final int NOW_V = 8;
 
     private GroupConf conf;
     private JPanel contentPane;
@@ -139,10 +139,6 @@ public class GroupConfPanel extends JPanel {
                 });
             }
         });
-
-        JButton btn_rcon = new JButton("RCON");
-        comboBox_panel.add(btn_rcon);
-        btn_rcon.setToolTipText("点击选择此群RCON");
 
         return comboBox_panel;
     }

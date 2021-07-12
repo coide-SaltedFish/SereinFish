@@ -23,6 +23,18 @@ import java.net.UnknownHostException;
 public class LinkRconFrame extends JFrame {
     private JPanel contentPane;//最底层面板
 
+    private LinkRconListener linkRconListener = new LinkRconListener() {
+        @Override
+        public void success() {
+
+        }
+
+        @Override
+        public void cancel() {
+
+        }
+    };
+
     private JTextField textField_name;
     private JTextField textField_ip;
     private JTextField textField_port;
@@ -31,7 +43,16 @@ public class LinkRconFrame extends JFrame {
     private JButton button_link;
     private JButton button_cancel;
 
+    public LinkRconFrame(LinkRconListener linkRconListener){
+        this.linkRconListener = linkRconListener;
+        build();
+    }
+
     public LinkRconFrame(){
+        build();
+    }
+
+    private void build(){
         setTitle("连接到Rcon");
         setBounds(100, 100, 315, 320);
         setLocationRelativeTo(null);
@@ -99,6 +120,7 @@ public class LinkRconFrame extends JFrame {
                     Rcon rcon = RconManager.getInstance().link(new RconConf(name, ip, port, passW));
                     rcon.disconnect();
                     new TipDialog(LinkRconFrame.this,"提示","成功，连接可用",true);
+                    linkRconListener.success();
                     LinkRconFrame.this.dispose();
                 }catch (NumberFormatException e1){
                     SfLog.getInstance().e(this.getClass(), e1);
@@ -131,6 +153,7 @@ public class LinkRconFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
+                linkRconListener.cancel();
                 dispose();
             }
         });
@@ -223,5 +246,10 @@ public class LinkRconFrame extends JFrame {
         panelAccount.add(label,BorderLayout.WEST);
         panelAccount.add(panel,BorderLayout.CENTER);
         return panelAccount;
+    }
+
+    public interface LinkRconListener{
+        public void success();
+        public void cancel();
     }
 }

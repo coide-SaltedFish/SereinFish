@@ -130,10 +130,14 @@ public class GroupConf {
         biliList.put(GroupControlId.CheckBox_BiliEnable, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_BiliEnable,"启用", false, "启用哔哩哔哩相关功能"));
         biliList.put(GroupControlId.CheckBox_BiliBvExplain, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_BiliBvExplain,"BV号解析", false, "启用哔哩哔哩BV号解析功能"));
         confNew.put("Bili",biliList);
-        //
+        //Rcon
         Map<GroupControlId,Control> rconList = new LinkedHashMap<>();
-        rconList.put(GroupControlId.CheckBox_RCON, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_RCON,"启用RCON",false,"启用rcon相关功能"));
-        confNew.put("RCON",rconList);
+        rconList.put(GroupControlId.CheckBox_EnableRcon, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_EnableRcon,"启用RCON",false,"启用rcon相关功能"));
+        rconList.put(GroupControlId.SelectRcon, new Control(GroupControlType.SelectRcon, GroupControlId.SelectRcon, "Rcon选择", null, "选择此群Rcon"));
+        rconList.put(GroupControlId.CheckBox_EnableRconCMD, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_EnableRconCMD, "启用rcon命令", false, "启用后可使用QQ执行rcon命令"));
+        rconList.put(GroupControlId.CheckBox_McServerState, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_McServerState, "启用state命令", false, "启用后可在QQ群获取服务器状态"));
+        rconList.put(GroupControlId.Edit_Small_Plain_McServerAddr, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_McServerAddr, "服务器地址", "", "默认使用的Mc服务器地址"));
+        confNew.put("Rcon功能",rconList);
         //
         Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();
         msgToolList.put(GroupControlId.CheckBox_LongMsgToImageEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LongMsgToImageEnable,"启用长文本转图片功能",false,"bot在发送长文本时将自动把消息转换为图片发送"));

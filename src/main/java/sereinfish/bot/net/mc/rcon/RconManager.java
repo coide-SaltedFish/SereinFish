@@ -87,6 +87,17 @@ public class RconManager {
     }
 
     /**
+     * 删除记录
+     * @param id
+     * @return
+     */
+    public void delete(String id){
+        rcons.remove(id);
+        saveConf();
+        loadConf();
+    }
+
+    /**
      * 写入RCON配置列表
      * @param configs
      */

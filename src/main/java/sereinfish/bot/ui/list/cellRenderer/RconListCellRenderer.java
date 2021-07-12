@@ -30,16 +30,23 @@ public class RconListCellRenderer implements ListCellRenderer {
         JPanel jPanel = new JPanel(new BorderLayout());
         //名称
         JPanel panel_name = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel_name.setOpaque(false);
+        JLabel label_name = new JLabel();
+        label_name.setOpaque(false);
         if (rconConf.getName().equals("")){
-            panel_name.add(new JLabel("未命名"));
+            label_name.setText("未命名");
         }else {
-            panel_name.add(new JLabel(rconConf.getName()));
+            label_name.setText(rconConf.getName());
         }
+        panel_name.add(label_name);
         jPanel.add(panel_name, BorderLayout.CENTER);
 
         //地址端口
         JPanel panel_addr = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panel_addr.add(new JLabel(rconConf.getIp() + ":" + rconConf.getPort()));
+        panel_addr.setOpaque(false);
+        JLabel label_addr = new JLabel(rconConf.getIp() + ":" + rconConf.getPort());
+        label_addr.setOpaque(false);
+        panel_addr.add(label_addr);
         jPanel.add(panel_addr, BorderLayout.SOUTH);
 
         //选中颜色设置

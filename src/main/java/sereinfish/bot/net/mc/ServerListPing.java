@@ -2,10 +2,13 @@ package sereinfish.bot.net.mc;
  
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.net.mc.rcon.Rcon;
+import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.ui.tray.AppTray;
 import sun.font.FontDesignMetrics;
 import sun.misc.BASE64Decoder;
@@ -157,7 +160,13 @@ public class ServerListPing {
         inputStream.close();
         socket.close();
 
-        response.favicon = response.favicon.substring(0, response.favicon.length() - 1);//截掉后面的=
+        if (response != null){
+            if (response.favicon != null && !response.favicon.equals("")){
+                response.favicon = response.favicon.substring(0, response.favicon.length() - 1);//截掉后面的=
+            }else {
+                response.favicon = "";
+            }
+        }
         return response;
     }
 
@@ -166,140 +175,257 @@ public class ServerListPing {
      * @param statusResponse
      * @return
      */
-    public static BufferedImage getServerInfoImage(StatusResponse statusResponse){
-        Color defaultColor = Color.decode("#EEEEEE");//背景颜色
-        Color shadeColor = new Color(0, 0, 0, 60);
-
-        Font font = null;
-        //字体
+    public static BufferedImage getServerInfoImage(StatusResponse statusResponse, Rcon rcon) throws Exception{
         try {
+            Color defaultColor = Color.decode("#EEEEEE");//背景颜色
+            Color shadeColor = new Color(0, 0, 0, 60);
 
-            font = Font.createFont(Font.TRUETYPE_FONT, new File(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDefaultFontFile).toURI()));
-        } catch (Exception e) {
-            SfLog.getInstance().e(ServerListPing.class, "默认字体加载失败", e);
-            font = new Font("宋体", Font.PLAIN, 24);
-        }
+            int serverInfoH = 235;//服务器信息235高，服务器图标203高
+            int serverHeadH = 203;
 
-        //读取泥土材质
-        int dirtWidth = 1920  / 12;
-        BufferedImage dirtImage = null;
-        try {
-            dirtImage = ImageHandle.imageToBufferedImage(Toolkit.getDefaultToolkit().getImage(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDirtFile)));
-        } catch (Exception e) {
-            SfLog.getInstance().e(ServerListPing.class, "材质丢失：" + ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDirtFile).getPath());
-            dirtImage = new BufferedImage(dirtWidth, dirtWidth, BufferedImage.TYPE_4BYTE_ABGR);
-            Graphics2D graphics2D = dirtImage.createGraphics();
-            graphics2D.setBackground(defaultColor);
-            graphics2D.clearRect(0, 0, dirtImage.getWidth(), dirtImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
-            graphics2D.dispose();
-        }
+            int barWidth = 8;//服务器信息边框宽度
 
-        //计算宽高
-        int width = 1920;
-        //服务器信息235高，服务器图标203高
-        //延迟图标在y25，x-20
-        //名字x262，y24
-        //描述x237，y93
-        //人数：-100，相对延迟图标20
+            //计算宽高
+            int width = 1920;
 
-        //玩家信息一条90 间隔10
+            //延迟图标在y25，x-20
+            //名字x262，y24
+            //描述x237，y93
+            //人数：-100，相对延迟图标20
 
-        //tps信息高125
-        int height = 235 + 10 + (10 + 90) * statusResponse.players.online + 125;
-        //生成底图
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D graphics2D = bufferedImage.createGraphics();
-        //绘制底色
-        for(int j = 0; j < height; j += dirtWidth){
-            for (int i = 0; i < width; i += dirtWidth){
-                graphics2D.drawImage(dirtImage, i, j, dirtWidth, dirtWidth, null);
+            //玩家信息一条90 间隔10
+
+            //tps信息高125
+            int height = 235 //服务器信息
+                    + 10 + (10 + 90) * statusResponse.players.online //玩家信息
+                    + 27 //边框高度
+                    ;
+            int tpsHeight = 126;
+            if (rcon != null){
+                height += + tpsHeight; //tps,mpts
             }
-        }
-        //调整底色颜色
-        for(int j = 0; j < bufferedImage.getHeight(); j++){
-            for (int i = 0; i < bufferedImage.getWidth(); i++){
-                int rgb = bufferedImage.getRGB(i, j);
 
-                int black = 70;
+            int windowWidth = width - 18;
 
-                int red = ((rgb >> 16) & 0xff) - black - 30;
-                int green = ((rgb >> 8) & 0xff) - black - 20;
-                int blue = (rgb & 0xff) - black;
-
-                if (red < 0) red = 0;
-                if (green < 0) green = 0;
-                if (blue < 0) blue = 0;
-
-                bufferedImage.setRGB(i, j, new Color(red, green, blue).getRGB());
-            }
-        }
-
-        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
-        //绘制服务器头像
-        BufferedImage serverHeadImage = new BufferedImage(203, 203, BufferedImage.TYPE_4BYTE_ABGR);
-        try {
-            BufferedImage bi1 = ImageHandle.base64ToImage(statusResponse.favicon);
-            Graphics2D GSI = serverHeadImage.createGraphics();
-            GSI.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
-            GSI.drawImage(bi1, 0, 0, 203, 203, null);
-            GSI.dispose();
-        } catch (IOException e) {
-            Graphics2D GSI = serverHeadImage.createGraphics();
-            GSI.setBackground(defaultColor);
-            GSI.clearRect(0, 0, dirtImage.getWidth(), dirtImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
-            GSI.dispose();
-        }
-        graphics2D.drawImage(serverHeadImage, 16, 16, serverHeadImage.getWidth(), serverHeadImage.getHeight(), null);//服务器头像
-        //绘制服务器名字
-        graphics2D.setPaint(Color.WHITE);
-        font = font.deriveFont(Font.PLAIN, 72f);
-        graphics2D.setFont(font);
-        FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
-        int serverNameHeight = metrics.getAscent();
-        graphics2D.drawString(statusResponse.getVersion().getName(), 262, 16 + serverNameHeight);//服务器名称
-
-        //绘制延迟
-        font = font.deriveFont(Font.PLAIN, 52f);
-        graphics2D.setFont(font);
-        if(statusResponse.getDelay() >= 120){
-            graphics2D.setPaint(Color.RED);
-        }else if (statusResponse.getDelay() >= 80){
-            graphics2D.setPaint(Color.ORANGE);
-        }else {
-            graphics2D.setPaint(Color.GREEN);
-        }
-
-        String msStr = ((int) statusResponse.getDelay()) + "ms";//延迟文本
-        int msStrLen = metrics.stringWidth(msStr);
-        graphics2D.drawString(msStr, bufferedImage.getWidth() - 32 - msStrLen, 16 + metrics.getAscent() + (metrics.getAscent() - serverNameHeight));//绘制延迟
-
-        //绘制人数
-        graphics2D.setPaint(Color.WHITE);
-        String playerNumStr = statusResponse.getPlayers().getOnline() + "/" + statusResponse.getPlayers().getMax();//人数文本
-        graphics2D.drawString(playerNumStr, bufferedImage.getWidth() - 32 - msStrLen - metrics.stringWidth(playerNumStr) - 10, 16 + metrics.getAscent() + (metrics.getAscent() - serverNameHeight));//绘制人数
-        //TODO:绘制服务器描述
-        //绘制玩家列表
-        graphics2D.setPaint(Color.WHITE);
-        font = font.deriveFont(Font.BOLD, 62f);
-        metrics = FontDesignMetrics.getMetrics(font);
-        graphics2D.setFont(font);
-        int startY = 235 + 10;
-        int startX = 32;
-        for(Player player:statusResponse.getPlayers().getSample()){
-            BufferedImage playerHeadImage = null;
+            Font font = null;
+            //字体
             try {
-                playerHeadImage = NetHandle.getMcPlayerHeadImage(player.id, 90);
-            } catch (IOException e) {
-                SfLog.getInstance().e(ServerListPing.class, e);
+                font = Font.createFont(Font.TRUETYPE_FONT, ServerListPing.class.getClassLoader().getResourceAsStream(FileHandle.mcResDefaultFontFile));
+            } catch (Exception e) {
+                SfLog.getInstance().e(ServerListPing.class, "默认字体加载失败：" + ServerListPing.class.getClassLoader().getResource(FileHandle.mcResDefaultFontFile), e);
+                font = new Font("宋体", Font.PLAIN, 24);
             }
-            graphics2D.drawImage(playerHeadImage, startX, startY, null);//绘制头像
-            graphics2D.drawString(player.name, startX + 90 + 10, startY + (90 - metrics.getAscent() / 2));
 
-            startY += 100;
+            //读取背景材质
+            int dirtWidth = 1920  / 12;
+            BufferedImage dirtImage = null;
+            try {
+                dirtImage = ImageHandle.imageToBufferedImage(Toolkit.getDefaultToolkit().getImage(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResOptionsBackgroundFile)));
+                BufferedImage initImage = ImageHandle.imageToBufferedImage(Toolkit.getDefaultToolkit().getImage(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResInitFile)));
+                Graphics2D graphics2D = dirtImage.createGraphics();
+                graphics2D.drawImage(initImage, 0, 0, dirtImage.getWidth(), dirtImage.getHeight(), null);
+                graphics2D.dispose();
+            } catch (Exception e) {
+                SfLog.getInstance().e(ServerListPing.class, "材质错误：" + ServerListPing.class.getClassLoader().getResource(FileHandle.mcResOptionsBackgroundFile).getPath());
+                dirtImage = new BufferedImage(dirtWidth, dirtWidth, BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics2D = dirtImage.createGraphics();
+                graphics2D.setBackground(defaultColor);
+                graphics2D.clearRect(0, 0, dirtImage.getWidth(), dirtImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
+                graphics2D.dispose();
+            }
+
+            //读取边框材质
+            BufferedImage windowImage = null;
+            try {
+                windowImage = ImageHandle.picturesStretch9(ImageHandle.imageToBufferedImage(Toolkit.getDefaultToolkit().getImage(ServerListPing.class.getClassLoader().getResource(FileHandle.mcResServerStateFrameImageFile))), width, height);
+            } catch (Exception e) {
+                SfLog.getInstance().e(ServerListPing.class, "材质错误：" + ServerListPing.class.getClassLoader().getResource(FileHandle.mcResServerStateFrameImageFile).getPath());
+                windowImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics2D = windowImage.createGraphics();
+                graphics2D.setBackground(defaultColor);
+                graphics2D.clearRect(0, 0, windowImage.getWidth(), windowImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
+                graphics2D.dispose();
+            }
+
+            int startY = 18;//开始Y轴坐标
+            int startX = 9;//边框X轴占用宽度
+
+            //生成底图
+            BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics2D graphics2D = bufferedImage.createGraphics();
+
+            for(int j = 0; j < height; j += dirtWidth){
+                for (int i = 0; i < width; i += dirtWidth){
+                    graphics2D.drawImage(dirtImage, i, j, dirtWidth, dirtWidth, null);
+                }
+            }
+            //绘制边框
+            graphics2D.drawImage(windowImage,0, 0, windowImage.getWidth(), windowImage.getHeight(), null);
+
+            //graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+            //绘制服务器头像
+            int sHeadStartX = startX + 16;
+            int sHeadStartY = startY + 16;
+
+            //绘制服务器信息bar
+            graphics2D.setPaint(Color.BLACK);
+            graphics2D.fillRect(startX + 4, startY + 4, windowWidth - 8, serverInfoH - 8);
+            graphics2D.setStroke(new BasicStroke(6));
+            graphics2D.setPaint(Color.lightGray);
+            graphics2D.drawRect(startX + 4, startY + 4, windowWidth - 8, serverInfoH - 8);
+
+            BufferedImage serverHeadImage = new BufferedImage(203, 203, BufferedImage.TYPE_4BYTE_ABGR);
+            try {
+                BufferedImage bi1 = ImageHandle.base64ToImage(statusResponse.favicon);
+                Graphics2D GSI = serverHeadImage.createGraphics();
+                GSI.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+                GSI.drawImage(bi1, 0, 0, 203, 203, null);
+                GSI.dispose();
+            } catch (IOException e) {
+                Graphics2D GSI = serverHeadImage.createGraphics();
+                GSI.setBackground(defaultColor);
+                GSI.clearRect(0, 0, dirtImage.getWidth(), dirtImage.getHeight());//通过使用当前绘图表面的背景色进行填充来清除指定的矩形
+                GSI.dispose();
+            }
+            graphics2D.drawImage(serverHeadImage, sHeadStartX, sHeadStartY, serverHeadImage.getWidth(), serverHeadImage.getHeight(), null);//服务器头像
+            //绘制服务器名字
+            graphics2D.setPaint(Color.WHITE);
+            font = font.deriveFont(Font.PLAIN, 62f);
+            graphics2D.setFont(font);
+            FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
+            int serverNameHeight = metrics.getAscent();
+            graphics2D.drawString(statusResponse.getVersion().getName(), startX + 262, startY + serverNameHeight);//服务器名称
+
+            //绘制延迟
+            font = font.deriveFont(Font.PLAIN, 52f);
+            graphics2D.setFont(font);
+            if(statusResponse.getDelay() >= 120){
+                graphics2D.setPaint(Color.RED);
+            }else if (statusResponse.getDelay() >= 80){
+                graphics2D.setPaint(Color.ORANGE);
+            }else {
+                graphics2D.setPaint(Color.GREEN);
+            }
+
+            String msStr = ((int) statusResponse.getDelay()) + "ms";//延迟文本
+            int msStrLen = metrics.stringWidth(msStr);
+            int delayStartX = bufferedImage.getWidth() - startX - msStrLen;
+            int delayStartY = startY + metrics.getAscent() + (metrics.getAscent() - serverNameHeight);
+            graphics2D.drawString(msStr, delayStartX, delayStartY);//绘制延迟
+
+            //绘制人数
+            graphics2D.setPaint(Color.WHITE);
+            String playerNumStr = statusResponse.getPlayers().getOnline() + "/" + statusResponse.getPlayers().getMax();//人数文本
+            int playerNumStartX = delayStartX - metrics.stringWidth(playerNumStr);
+            int playerNumStartY = delayStartY;
+            graphics2D.drawString(playerNumStr, playerNumStartX, playerNumStartY);//绘制人数
+            //绘制服务器描述
+            int descriptionStartX = startX + 262;
+            int descriptionStartY = startY + serverNameHeight + 14;
+            graphics2D.setPaint(Color.WHITE);
+            font = font.deriveFont(52f);//设置字体大小
+            graphics2D.setFont(font);
+            metrics = FontDesignMetrics.getMetrics(font);
+            graphics2D.drawString(statusResponse.getDescription().getText(), descriptionStartX, descriptionStartY);
+            descriptionStartX += metrics.stringWidth(statusResponse.getDescription().getText());
+            for (Extra extra:statusResponse.getDescription().getExtra()){
+                graphics2D.setPaint(extra.getColor());//设置颜色
+                //设置字体样式
+                if (extra.getBold()){
+                   font = font.deriveFont(Font.BOLD);
+                }else {
+                   font = font.deriveFont(Font.PLAIN);
+                }
+                graphics2D.setFont(font);
+                metrics = FontDesignMetrics.getMetrics(font);
+                //绘制
+                if (extra.getText().contains("\n")){
+                    descriptionStartX = startX + 262;
+                    descriptionStartY += metrics.getAscent() + 14;
+                }
+                graphics2D.drawString(extra.getText(), descriptionStartX, descriptionStartY + metrics.getAscent());
+                //坐标计算
+                descriptionStartX += metrics.stringWidth(extra.getText());
+            }
+
+            //绘制玩家列表
+            int playerListBGStartX = startX + 4;//列表背景
+            int playerListBGStartY = startY + 235 + 4;
+            int playerListBGWidth = bufferedImage.getWidth() - playerListBGStartX * 2;
+            int playerListBGHeight = bufferedImage.getHeight() - playerListBGStartY - 9 - 8;
+
+            graphics2D.setPaint(JsonColor.getColor("black"));
+            graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.4f));
+            graphics2D.fillRect(playerListBGStartX, playerListBGStartY, playerListBGWidth, playerListBGHeight);
+            graphics2D.setPaint(Color.WHITE);
+
+            graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
+
+            int playerListStartY = playerListBGStartY + 10;
+            int playerListStartX = playerListBGStartX + 10;
+
+            graphics2D.setPaint(Color.WHITE);
+            font = font.deriveFont(Font.BOLD, 62f);
+            metrics = FontDesignMetrics.getMetrics(font);
+            graphics2D.setFont(font);
+            if (statusResponse.getPlayers() != null && statusResponse.getPlayers().getSample() != null){
+                for(Player player:statusResponse.getPlayers().getSample()){
+                    //绘制玩家item背景
+                    graphics2D.setPaint(JsonColor.getColor("dark_gray"));
+                    graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.3f));
+                    graphics2D.fillRect(playerListStartX, playerListStartY, width - playerListStartX * 2, 90);
+                    graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
+                    graphics2D.setPaint(Color.WHITE);
+                    BufferedImage playerHeadImage = null;
+                    try {
+                        playerHeadImage = NetHandle.getMcPlayerHeadImage(player.id, 90);
+                    } catch (IOException e) {
+                        SfLog.getInstance().e(ServerListPing.class, e);
+                    }
+                    graphics2D.drawImage(playerHeadImage, playerListStartX, playerListStartY, null);//绘制头像
+                    graphics2D.drawString(player.name, playerListStartX + 90 + 10, playerListStartY + (90 - metrics.getAscent() / 2));
+
+                    playerListStartY += 100;
+                }
+            }
+            //绘制tps和mspt
+            int tpsStartX = playerListStartX;
+            int tpsStartY = playerListStartY + 10 + (90 - metrics.getAscent() / 2);
+
+            String tps = "";
+            String mspt = "";
+            if (rcon != null){
+                try{
+                    tps = rcon.cmd("tps").split(":")[1];
+                }catch (Exception e){
+                    tps = "未知";
+                }
+                try {
+                    mspt = rcon.cmd("mspt").split(":")[1].split(",")[0].split("/")[2];
+                }catch (Exception e){
+                    mspt = "未知";
+                }
+            }
+            String info = "§fTPS:" + tps + "   §fMSPT:" + mspt;
+            //绘制
+            graphics2D.setPaint(Color.WHITE);
+            for (int i = 0; i < info.toCharArray().length; i++){
+                char ch = info.charAt(i);
+                if (ch == '§'){
+                    i++;
+                    graphics2D.setPaint(JsonColor.getColor(new String(new char[]{ch, info.charAt(i)})));
+                }else {
+                    metrics = FontDesignMetrics.getMetrics(font);
+                    graphics2D.drawString(new String(new char[]{ch}), tpsStartX, tpsStartY);
+                    tpsStartX += metrics.stringWidth(new String(new char[]{ch}));
+                }
+            }
+
+            graphics2D.dispose();
+            return bufferedImage;
+        }catch (Exception e){
+            throw e;
         }
-
-        graphics2D.dispose();
-        return bufferedImage;
     }
     
     
@@ -354,10 +480,26 @@ public class ServerListPing {
     }
 
     public class Extra{
+        private boolean bold;
         private String text = "";
+        private String color = "";
 
+        public boolean getBold(){
+            return bold;
+        }
         public String getText() {
             return text;
+        }
+
+        public Color getColor(){
+            //如果是哈希值颜色
+            if (color != null){
+                if (color.startsWith("#")){
+                    return Color.decode(color);
+                }
+                return JsonColor.getColor(color);
+            }
+            return Color.WHITE;
         }
     }
     
