@@ -218,7 +218,7 @@ public class LoliconController {
         return "失败，未实现功能";
     }
 
-    @Action("\\img_8F2283DA2199823AC507B452F386D654\\")
+    @Action("\\img_0E558CBAE41368A42DB812E7C1D9A172\\")
     @QMsg(mastAtBot = true)
     public Message enableR18(MySender mySender, Member sender){
         if (mySender.getContact() instanceof Group){
@@ -237,7 +237,7 @@ public class LoliconController {
     }
 
     @Action("\\img_982776A6AA3DD49A9DE457F8EABE4EB0\\")
-    @Synonym("\\img_AE8B71A4EB5E5DF105E9EEA61CE6152D\\")
+    @Synonym({"\\img_AE8B71A4EB5E5DF105E9EEA61CE6152D\\", "\\img_B112EE7AB6BB3C96A797B0AB5889BFCC\\"})
     @QMsg(mastAtBot = true)
     public Message enableNoR18(MySender mySender, Member sender){
         if (mySender.getContact() instanceof Group){

@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
@@ -55,12 +56,29 @@ public class McServerController {
         }else {
             throw new DoNone();
         }
+        //得到Rcon
+        Rcon rcon = null;
+        String name = "";
         if (addr.matches("([.!！][Ss]tate)")){
             if (((String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue()).equals("")){
                 return MyYuQ.getMif().text("错误，地址尚未配置，请使用 state {addr} 命令").toMessage();
             }else {
+                if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
+                    RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
+                    if (rconConf != null){
+                        rcon = RconManager.getInstance().getRcon(rconConf.getID());
+                    }
+                }
+
                 addr = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue();
+
+                name = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerName).getValue();
+                if (name.equals("")){
+                    name = addr;
+                }
             }
+        }else {
+            name = addr;
         }
 
         group.sendMessage(MyYuQ.getMif().text("信息获取中，请稍后").toMessage());
@@ -73,27 +91,35 @@ public class McServerController {
             Record[] records = lookup.run();
 
             if (lookup.getResult() != Lookup.SUCCESSFUL){
-                return Message.Companion.toMessageByRainCode("地址 " + addr + " 解析失败：" + getLookupResultName(lookup.getResult()));
-            }
-            SRVRecord srv = (SRVRecord) records[0];
-            String hostname = srv.getTarget().toString().replaceFirst("\\.$", "");
-            InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  srv.getPort());
-
-            serverListPing.setAddress(inetSocketAddress);
-
-            ServerListPing.StatusResponse response = serverListPing.fetchData();
-            //得到Rcon
-            Rcon rcon = null;
-            if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-                RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
-                if (rconConf != null){
-                    rcon = RconManager.getInstance().getRcon(rconConf.getID());
+                lookup = new Lookup(addr, Type.A);
+                records = lookup.run();
+                if (lookup.getResult() != Lookup.SUCCESSFUL){
+                    try {
+                        InetAddress inetAddress = InetAddress.getByName(addr);
+                        String hostname = inetAddress.getHostAddress();
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                        serverListPing.setAddress(inetSocketAddress);
+                    }catch (Exception e){
+                        SfLog.getInstance().e(this.getClass(), e);
+                        return Message.Companion.toMessageByRainCode("地址 " + addr + " 解析失败");
+                    }
+                }else {
+                    ARecord record = (ARecord) records[0];
+                    String hostname = record.getAddress().getHostAddress();
+                    InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                    serverListPing.setAddress(inetSocketAddress);
                 }
+            }else {
+                SRVRecord srv = (SRVRecord) records[0];
+                String hostname = srv.getTarget().toString().replaceFirst("\\.$", "");
+                InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  srv.getPort());
+                serverListPing.setAddress(inetSocketAddress);
             }
+            ServerListPing.StatusResponse response = serverListPing.fetchData();
 
             BufferedImage stateImage = null;
             try {
-                stateImage = ServerListPing.getServerInfoImage(response, rcon);
+                stateImage = ServerListPing.getServerInfoImage(name, response, rcon);
             } catch (Exception e) {
                 SfLog.getInstance().e(this.getClass(), e);
                 return MyYuQ.getMif().text("服务器信息获取失败：" + e.getMessage()).toMessage();
@@ -102,6 +128,9 @@ public class McServerController {
 
             return MyYuQ.getMif().imageByFile(file).toMessage();
         } catch (TextParseException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+            return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());
+        }catch (Exception e){
             SfLog.getInstance().e(this.getClass(), e);
             return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());
         }

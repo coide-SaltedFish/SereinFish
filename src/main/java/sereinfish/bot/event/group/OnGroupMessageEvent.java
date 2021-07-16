@@ -21,6 +21,7 @@ import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
@@ -187,7 +188,11 @@ public class OnGroupMessageEvent {
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
             event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
-        RepeaterManager.getInstance().add(event.getSendTo().getId(),message);
+        RepeaterManager.getInstance().add(event.getSendTo().getId(),message);//复读
+        if (event.getSendTo() instanceof Group){
+            Group group = (Group) event.getSendTo();
+            GroupReCallMessageManager.getInstance().add(group.getId(), event.getMessage());
+        }
     }
 
     /**

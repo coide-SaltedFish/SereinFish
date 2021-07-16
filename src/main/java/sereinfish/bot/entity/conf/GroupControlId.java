@@ -52,6 +52,7 @@ public enum GroupControlId {
     CheckBox_EnableRconCMD,//rcon命令开关
     CheckBox_McServerState,//ping功能
     Edit_Small_Plain_McServerAddr,//默认服务器地址
+    Edit_Small_Plain_McServerName,//默认服务器名字
     //消息
     CheckBox_LongMsgToImageEnable,//长文本转图片发送
     ComBox_FontSelect,//长文本转图片字体选择

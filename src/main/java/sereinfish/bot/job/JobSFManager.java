@@ -1,5 +1,6 @@
 package sereinfish.bot.job;
 
+import com.IceCreamQAQ.Yu.job.Job;
 import com.IceCreamQAQ.Yu.job.JobManager;
 
 import com.icecreamqaq.yuq.entity.Member;

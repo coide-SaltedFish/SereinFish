@@ -137,6 +137,7 @@ public class GroupConf {
         rconList.put(GroupControlId.CheckBox_EnableRconCMD, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_EnableRconCMD, "启用rcon命令", false, "启用后可使用QQ执行rcon命令"));
         rconList.put(GroupControlId.CheckBox_McServerState, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_McServerState, "启用state命令", false, "启用后可在QQ群获取服务器状态"));
         rconList.put(GroupControlId.Edit_Small_Plain_McServerAddr, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_McServerAddr, "服务器地址", "", "默认使用的Mc服务器地址"));
+        rconList.put(GroupControlId.Edit_Small_Plain_McServerName, new Control(GroupControlType.Edit_Small_Plain, GroupControlId.Edit_Small_Plain_McServerName, "服务器名称", "", "默认使用的Mc服务器名称"));
         confNew.put("Rcon功能",rconList);
         //
         Map<GroupControlId,Control> msgToolList = new LinkedHashMap<>();

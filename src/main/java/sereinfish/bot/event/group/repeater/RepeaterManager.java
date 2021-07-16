@@ -1,6 +1,7 @@
 package sereinfish.bot.event.group.repeater;
 
 import com.icecreamqaq.yuq.message.Message;
+import lombok.Getter;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
@@ -78,10 +79,11 @@ public class RepeaterManager {
         }
     }
 
+    @Getter
     class ReMsg{
-        public boolean isRepeater = false;
-        public String msg;
-        public int num;
+        private boolean isRepeater = false;
+        private String msg;
+        private int num;
 
         public ReMsg(String msg, int num) {
             this.msg = msg;

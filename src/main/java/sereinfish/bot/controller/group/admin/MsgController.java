@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.admin;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
@@ -21,6 +22,7 @@ import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.entity.xmlEx.XmlMsg;
+import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
@@ -137,6 +139,25 @@ public class MsgController extends QQController {
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("获取失败:" + e.getMessage()).toMessage();
+        }
+    }
+
+    @Action("撤回")
+    @Synonym({"reCall", "recall"})
+    @QMsg(mastAtBot = true)
+    public void recall(Group group){
+        Message message = GroupReCallMessageManager.getInstance().getRecentMsg(group.getId());
+        if (message != null){
+            message.recall();
+        }
+    }
+
+    @Action("撤回所有")
+    @Synonym({"reAllCall", "reallcall"})
+    @QMsg(mastAtBot = true)
+    public void reAllCall(Group group){
+        for (GroupReCallMessageManager.MsgInfo msgInfo:GroupReCallMessageManager.getInstance().getAllRecentMsg(group.getId())){
+            msgInfo.getMessage().recall();
         }
     }
 }

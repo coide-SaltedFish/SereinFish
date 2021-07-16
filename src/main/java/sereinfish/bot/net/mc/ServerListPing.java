@@ -175,7 +175,7 @@ public class ServerListPing {
      * @param statusResponse
      * @return
      */
-    public static BufferedImage getServerInfoImage(StatusResponse statusResponse, Rcon rcon) throws Exception{
+    public static BufferedImage getServerInfoImage(String name, StatusResponse statusResponse, Rcon rcon) throws Exception{
         try {
             Color defaultColor = Color.decode("#EEEEEE");//背景颜色
             Color shadeColor = new Color(0, 0, 0, 60);
@@ -294,7 +294,7 @@ public class ServerListPing {
             graphics2D.setFont(font);
             FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
             int serverNameHeight = metrics.getAscent();
-            graphics2D.drawString(statusResponse.getVersion().getName(), startX + 262, startY + serverNameHeight);//服务器名称
+            graphics2D.drawString(name, startX + 262, startY + serverNameHeight + 10);//服务器名称
 
             //绘制延迟
             font = font.deriveFont(Font.PLAIN, 52f);
@@ -320,32 +320,34 @@ public class ServerListPing {
             int playerNumStartY = delayStartY;
             graphics2D.drawString(playerNumStr, playerNumStartX, playerNumStartY);//绘制人数
             //绘制服务器描述
-            int descriptionStartX = startX + 262;
-            int descriptionStartY = startY + serverNameHeight + 14;
-            graphics2D.setPaint(Color.WHITE);
-            font = font.deriveFont(52f);//设置字体大小
-            graphics2D.setFont(font);
-            metrics = FontDesignMetrics.getMetrics(font);
-            graphics2D.drawString(statusResponse.getDescription().getText(), descriptionStartX, descriptionStartY);
-            descriptionStartX += metrics.stringWidth(statusResponse.getDescription().getText());
-            for (Extra extra:statusResponse.getDescription().getExtra()){
-                graphics2D.setPaint(extra.getColor());//设置颜色
-                //设置字体样式
-                if (extra.getBold()){
-                   font = font.deriveFont(Font.BOLD);
-                }else {
-                   font = font.deriveFont(Font.PLAIN);
-                }
+            if (statusResponse.getDescription() != null && statusResponse.getDescription().getExtra() != null){//null值检测
+                int descriptionStartX = startX + 262;
+                int descriptionStartY = startY + serverNameHeight + 14;
+                graphics2D.setPaint(Color.WHITE);
+                font = font.deriveFont(52f);//设置字体大小
                 graphics2D.setFont(font);
                 metrics = FontDesignMetrics.getMetrics(font);
-                //绘制
-                if (extra.getText().contains("\n")){
-                    descriptionStartX = startX + 262;
-                    descriptionStartY += metrics.getAscent() + 14;
+                graphics2D.drawString(statusResponse.getDescription().getText(), descriptionStartX, descriptionStartY);
+                descriptionStartX += metrics.stringWidth(statusResponse.getDescription().getText());
+                for (Extra extra:statusResponse.getDescription().getExtra()){
+                    graphics2D.setPaint(extra.getColor());//设置颜色
+                    //设置字体样式
+                    if (extra.getBold()){
+                        font = font.deriveFont(Font.BOLD);
+                    }else {
+                        font = font.deriveFont(Font.PLAIN);
+                    }
+                    graphics2D.setFont(font);
+                    metrics = FontDesignMetrics.getMetrics(font);
+                    //绘制
+                    if (extra.getText().contains("\n")){
+                        descriptionStartX = startX + 262;
+                        descriptionStartY += metrics.getAscent() + 14;
+                    }
+                    graphics2D.drawString(extra.getText(), descriptionStartX, descriptionStartY + metrics.getAscent());
+                    //坐标计算
+                    descriptionStartX += metrics.stringWidth(extra.getText());
                 }
-                graphics2D.drawString(extra.getText(), descriptionStartX, descriptionStartY + metrics.getAscent());
-                //坐标计算
-                descriptionStartX += metrics.stringWidth(extra.getText());
             }
 
             //绘制玩家列表
@@ -379,6 +381,13 @@ public class ServerListPing {
                     BufferedImage playerHeadImage = null;
                     try {
                         playerHeadImage = NetHandle.getMcPlayerHeadImage(player.id, 90);
+                        if (playerHeadImage == null){
+                            playerHeadImage = new BufferedImage(90, 90, BufferedImage.TYPE_4BYTE_ABGR);
+                            Graphics2D graphics2D_playerHead = playerHeadImage.createGraphics();
+                            graphics2D_playerHead.setPaint(Color.WHITE);
+                            graphics2D_playerHead.clearRect(0, 0, playerHeadImage.getWidth(), playerHeadImage.getHeight());
+                            graphics2D_playerHead.dispose();
+                        }
                     } catch (IOException e) {
                         SfLog.getInstance().e(ServerListPing.class, e);
                     }

@@ -56,10 +56,14 @@ public class NetHandle {
     public synchronized static BufferedImage getMcPlayerSkin(String uuid) throws IOException {
         GamerInfo gamerInfo = getGameInfo(uuid);
         String textures = "";
-        for (GamerInfo.Properties properties : gamerInfo.getProperties()){
-            if (properties.getName().equals("textures")){
-                textures = properties.getValue().substring(0, properties.getValue().length());
+        if (gamerInfo != null && gamerInfo.getProperties() != null){
+            for (GamerInfo.Properties properties : gamerInfo.getProperties()){
+                if (properties.getName().equals("textures")){
+                    textures = properties.getValue().substring(0, properties.getValue().length());
+                }
             }
+        }else {
+            return null;
         }
         return getImage(new URL(GamerInfo.getValue(textures).getTextures().getSKIN().getUrl()));
     }
@@ -77,6 +81,10 @@ public class NetHandle {
         graphics2D.dispose();
 
         BufferedImage skinImage = getMcPlayerSkin(uuid);
+
+        if (skinImage == null){
+            return null;
+        }
         //裁剪出头像
         BufferedImage head = ImageHandle.crop(skinImage, 8, 8, 16, 16);
         BufferedImage face = ImageHandle.crop(skinImage, 40, 8, 48, 16);

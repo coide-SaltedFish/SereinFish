@@ -118,6 +118,9 @@ public class InitEvent {
         //初始化复读管理器
         RepeaterManager.init();
         SfLog.getInstance().d(this.getClass(),"复读管理器初始化完成");
+        //初始化撤回管理器
+        GroupReCallMessageManager.init();
+        SfLog.getInstance().d(this.getClass(),"群消息撤回管理器初始化完成");
 
         //初始化定时任务管理器
         JobSFManager.init();
