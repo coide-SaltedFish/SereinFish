@@ -32,7 +32,7 @@ public class MyYuQ {
     public static boolean isEnable = false;//功能启用标志
     public static final String appName = "SereinFish Bot";
     public static final int version = 100378;
-    public static final String versionName = "v_0.0.39_ART";
+    public static final String versionName = "v_0.0.49_ART_LAST";
 
     private static MyYuQ myYuQ = null;//单例模式
     //
@@ -43,6 +43,9 @@ public class MyYuQ {
     private static RainBot rainBot;
     private static OkHttpClient okHttpClient;
     private static Web web;
+
+    //一些正则标签
+    public static final String FLAG_IMAGE = "img_[A-Za-z0-9]{8}[A-Za-z0-9]{4}[A-Za-z0-9]{4}[A-Za-z0-9]{4}[A-Za-z0-9]{12}\\..{3}";
 
     @Config("yu.scanPackages")
     Object scanPackages;

@@ -34,6 +34,7 @@ public class FileHandle {
     public static File mcResPath = new File(configPath, "mc/");//mc文件夹
     public static File rconConfFile = new File(mcResPath, "rcon/conf.json");//rcon配置文件
 
+    public static String JetBrainsMonoFontFile = "fonts/JetBrainsMono.ttc";//mc默认字体
     /**
      * 写入文件
      * @param file

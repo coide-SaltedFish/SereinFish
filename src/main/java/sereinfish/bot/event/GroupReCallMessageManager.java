@@ -6,6 +6,7 @@ import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.time.Time;
 
 import java.util.*;
 
@@ -13,7 +14,7 @@ import java.util.*;
  * 群消息撤回管理器
  */
 public class GroupReCallMessageManager {
-    private Map<Long, Queue<MsgInfo>> map = new LinkedHashMap<>();
+    private Map<Long, Stack<MsgInfo>> map = new LinkedHashMap<>();
 
     private static GroupReCallMessageManager reCallMessageManager;
 
@@ -22,7 +23,7 @@ public class GroupReCallMessageManager {
             @Override
             public void run() {
                 while (true){
-                    delete(1000 * 60 * 2);
+                    delete(1000 * 50 * 2);
                     sleep(1000);
                 }
             }
@@ -34,7 +35,7 @@ public class GroupReCallMessageManager {
                     SfLog.getInstance().e(this.getClass(),e);
                 }
             }
-        });
+        }).start();
     }
 
     public static GroupReCallMessageManager init(){
@@ -56,10 +57,10 @@ public class GroupReCallMessageManager {
      */
     public void add(long group, Message message){
         if (!map.containsKey(group)){
-            map.put(group, new LinkedList<>());
+            map.put(group, new Stack<>());
         }
-        for (Map.Entry<Long, Queue<MsgInfo>> entry:map.entrySet()){
-            entry.getValue().offer(new MsgInfo(new Date().getTime(), message));
+        for (Map.Entry<Long, Stack<MsgInfo>> entry:map.entrySet()){
+            entry.getValue().push(new MsgInfo(new Date().getTime(), message));
         }
     }
 
@@ -68,14 +69,14 @@ public class GroupReCallMessageManager {
      * @param group
      * @return
      */
-    public Message getRecentMsg(long group){
-        return map.get(group).poll().getMessage();
+    public MsgInfo getRecentMsg(long group){
+        return map.get(group).pop();
     }
 
-    public Queue<MsgInfo> getAllRecentMsg(long group){
-        Queue<MsgInfo> reQueue = map.get(group);
-        map.put(group, new LinkedList<>());
-        return reQueue;
+    public Stack<MsgInfo> getAllRecentMsg(long group){
+        Stack<MsgInfo> reStack = map.get(group);
+        map.put(group, new Stack<>());
+        return reStack;
     }
 
     /**
@@ -84,11 +85,11 @@ public class GroupReCallMessageManager {
      */
     public void delete(long t){
         long time = new Date().getTime();
-        for (Map.Entry<Long, Queue<MsgInfo>> entry:map.entrySet()){
-            Queue<MsgInfo> messageMap = entry.getValue();
+        for (Map.Entry<Long, Stack<MsgInfo>> entry:map.entrySet()){
+            Stack<MsgInfo> messageMap = entry.getValue();
             for (int i  = 0; i < messageMap.size(); i++){
                 if (messageMap.peek().getTime() <= time - t){
-                    messageMap.poll();
+                    MsgInfo msgInfo = messageMap.pop();
                 }
             }
         }

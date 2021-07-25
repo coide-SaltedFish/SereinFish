@@ -3,6 +3,7 @@ package sereinfish.bot.ui.panel.global.panel;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.ui.context.edit.TextAndImageEdit;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 public class GroupHistoryMsgPanel extends JPanel {
     private JLabel label_num = new JLabel("共有记录：0条");
     private JTable table;
-    private JTextPane textPane;
+    private TextAndImageEdit textPane;
     private DBTableModel<GroupHistoryMsg> msgDBTableModel;
     private RowSorter<DBTableModel<GroupHistoryMsg>> sorter;
 
@@ -37,7 +38,7 @@ public class GroupHistoryMsgPanel extends JPanel {
         table = new JTable();
         table.setRowHeight(23);
 
-        textPane = new JTextPane();
+        textPane = new TextAndImageEdit();
         setLayout(new BorderLayout());
 
         JSplitPane splitPane = new JSplitPane();

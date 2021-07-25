@@ -13,9 +13,14 @@ public class Time{
 	
 	
 	public static String dateToString(Date time,String style) {
-		Date date = new Date( );
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat (style);
 		return simpleDateFormat.format(time);
+	}
+
+	public static String dateToString(long time,String style) {
+		Date date = new Date();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat (style);
+		return simpleDateFormat.format(new Date(time));
 	}
 	
 	

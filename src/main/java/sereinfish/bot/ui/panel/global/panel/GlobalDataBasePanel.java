@@ -3,6 +3,7 @@ package sereinfish.bot.ui.panel.global.panel;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.ui.context.edit.SqlEdit;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.list.cellRenderer.DataBaseListCellRenderer;
 import sereinfish.bot.ui.list.model.DataBaseListModel;
@@ -252,7 +253,7 @@ public class GlobalDataBasePanel extends JPanel {
         //语句执行
         JPanel panel_exec = new JPanel(new BorderLayout());
         splitPane_panel_operation.setBottomComponent(panel_exec);
-        JTextPane textPane_sql = new JTextPane();
+        SqlEdit textPane_sql = new SqlEdit();
         panel_exec.add(new JScrollPane(textPane_sql),BorderLayout.CENTER);
         JButton btn_exec = new JButton("执行");
         btn_exec.addActionListener(new ActionListener() {

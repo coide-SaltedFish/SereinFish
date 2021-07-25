@@ -27,7 +27,7 @@ public class GroupPanel extends JTabbedPane {
         GroupConf conf = GroupConfManager.getInstance().get(group);
 
         add("群配置",new GroupConfPanel(conf));
-        add("定时任务", new JobPanel(conf));
+        add("计划任务", new JobPanel(conf));
         add("自动回复",new DBReplyPanel(conf));
         add("黑名单",new DBBlackPanel(conf));
     }

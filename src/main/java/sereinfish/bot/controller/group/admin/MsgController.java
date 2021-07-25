@@ -29,6 +29,7 @@ import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.performance.MyPerformance;
 import sun.misc.BASE64Decoder;
 
@@ -145,19 +146,33 @@ public class MsgController extends QQController {
     @Action("撤回")
     @Synonym({"reCall", "recall"})
     @QMsg(mastAtBot = true)
-    public void recall(Group group){
-        Message message = GroupReCallMessageManager.getInstance().getRecentMsg(group.getId());
-        if (message != null){
-            message.recall();
+    public String recall(Group group){
+        GroupReCallMessageManager.MsgInfo msgInfo = GroupReCallMessageManager.getInstance().getRecentMsg(group.getId());
+        if (msgInfo != null){
+            try {
+                SfLog.getInstance().d(this.getClass(), "消息撤回，发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME)  );
+                msgInfo.getMessage().recall();
+            }catch (Exception e){
+                SfLog.getInstance().e(this.getClass(), e);
+                return "异常：" + e.getMessage();
+            }
         }
+        throw new DoNone();
     }
 
     @Action("撤回所有")
     @Synonym({"reAllCall", "reallcall"})
     @QMsg(mastAtBot = true)
-    public void reAllCall(Group group){
-        for (GroupReCallMessageManager.MsgInfo msgInfo:GroupReCallMessageManager.getInstance().getAllRecentMsg(group.getId())){
-            msgInfo.getMessage().recall();
+    public String reAllCall(Group group){
+        try {
+            for (GroupReCallMessageManager.MsgInfo msgInfo:GroupReCallMessageManager.getInstance().getAllRecentMsg(group.getId())){
+                SfLog.getInstance().d(this.getClass(), "消息撤回，发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME));
+                msgInfo.getMessage().recall();
+            }
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), e);
+            return "异常：" + e.getMessage();
         }
+        throw new DoNone();
     }
 }
