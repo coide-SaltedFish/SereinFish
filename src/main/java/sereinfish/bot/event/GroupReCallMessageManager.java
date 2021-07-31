@@ -60,7 +60,9 @@ public class GroupReCallMessageManager {
             map.put(group, new Stack<>());
         }
         for (Map.Entry<Long, Stack<MsgInfo>> entry:map.entrySet()){
-            entry.getValue().push(new MsgInfo(new Date().getTime(), message));
+            if (entry.getKey() == group){
+                entry.getValue().push(new MsgInfo(new Date().getTime(), message));
+            }
         }
     }
 
