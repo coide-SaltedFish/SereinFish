@@ -59,11 +59,8 @@ public class GroupReCallMessageManager {
         if (!map.containsKey(group)){
             map.put(group, new Stack<>());
         }
-        for (Map.Entry<Long, Stack<MsgInfo>> entry:map.entrySet()){
-            if (entry.getKey() == group){
-                entry.getValue().push(new MsgInfo(new Date().getTime(), message));
-            }
-        }
+
+        map.get(group).push(new MsgInfo(new Date().getTime(), message));
     }
 
     /**
