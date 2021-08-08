@@ -197,7 +197,7 @@ public class ServerListPing {
 
             //tps信息高125
             int height = 235 //服务器信息
-                    + 10 + (10 + 90) * statusResponse.players.online //玩家信息
+                    + 10 + (10 + 90) * statusResponse.getPlayers().getSample().size() //玩家信息
                     + 27 //边框高度
                     ;
             int tpsHeight = 126;
@@ -380,14 +380,8 @@ public class ServerListPing {
                     graphics2D.setPaint(Color.WHITE);
                     BufferedImage playerHeadImage = null;
                     try {
+                        //获取玩家头像
                         playerHeadImage = NetHandle.getMcPlayerHeadImage(player.id, 90);
-                        if (playerHeadImage == null){
-                            playerHeadImage = new BufferedImage(90, 90, BufferedImage.TYPE_4BYTE_ABGR);
-                            Graphics2D graphics2D_playerHead = playerHeadImage.createGraphics();
-                            graphics2D_playerHead.setPaint(Color.WHITE);
-                            graphics2D_playerHead.clearRect(0, 0, playerHeadImage.getWidth(), playerHeadImage.getHeight());
-                            graphics2D_playerHead.dispose();
-                        }
                     } catch (IOException e) {
                         SfLog.getInstance().e(ServerListPing.class, e);
                     }
@@ -414,22 +408,22 @@ public class ServerListPing {
                 }catch (Exception e){
                     mspt = "未知";
                 }
-            }
-            String info = "§fTPS:" + tps + "   §fMSPT:" + mspt;
-            //绘制
-            graphics2D.setPaint(Color.WHITE);
-            for (int i = 0; i < info.toCharArray().length; i++){
-                char ch = info.charAt(i);
-                if (ch == '§'){
-                    i++;
-                    graphics2D.setPaint(JsonColor.getColor(new String(new char[]{ch, info.charAt(i)})));
-                }else {
-                    metrics = FontDesignMetrics.getMetrics(font);
-                    graphics2D.drawString(new String(new char[]{ch}), tpsStartX, tpsStartY);
-                    tpsStartX += metrics.stringWidth(new String(new char[]{ch}));
+
+                String info = "§fTPS:" + tps + "   §fMSPT:" + mspt;
+                //绘制
+                graphics2D.setPaint(Color.WHITE);
+                for (int i = 0; i < info.toCharArray().length; i++){
+                    char ch = info.charAt(i);
+                    if (ch == '§'){
+                        i++;
+                        graphics2D.setPaint(JsonColor.getColor(new String(new char[]{ch, info.charAt(i)})));
+                    }else {
+                        metrics = FontDesignMetrics.getMetrics(font);
+                        graphics2D.drawString(new String(new char[]{ch}), tpsStartX, tpsStartY);
+                        tpsStartX += metrics.stringWidth(new String(new char[]{ch}));
+                    }
                 }
             }
-
             graphics2D.dispose();
             return bufferedImage;
         }catch (Exception e){

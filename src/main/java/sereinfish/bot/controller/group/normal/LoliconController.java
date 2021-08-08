@@ -30,19 +30,25 @@ import sereinfish.bot.myYuq.MyYuQ;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.*;
 
 @GroupController
 @PrivateController
 public class LoliconController {
-    private int reCallTime = 25 * 1000;//撤回延时
-
     @Before
-    public MySender before(Contact group, Contact qq){
+    public MySender before(Contact group, Contact qq, Member sender, Message message){
         String apiKey = null;
         if (group != null){
             Group g = (Group) group;
 
             GroupConf conf = GroupConfManager.getInstance().get(g.getId());
+            //权限检查
+            int authority = (int) (double) conf.getControl(GroupControlId.AuthorityComboBox_Setu).getValue();
+            if (!AuthorityManagement.getInstance().authorityCheck(sender, authority)){
+                SfLog.getInstance().w(this.getClass(), "权限不足,所需权限（" + AuthorityManagement.getInstance().getAuthorityName(authority) + "）");
+                throw new DoNone();
+            }
+
             apiKey = (String) conf.getControl(GroupControlId.Edit_SetuKey).getValue();
             //检查群功能是否启用
             if (!(Boolean) conf.getControl(GroupControlId.CheckBox_SetuEnable).getValue()){
@@ -51,9 +57,18 @@ public class LoliconController {
             if (apiKey.trim().equals("")){
                 apiKey = null;
             }
-            return new MySender(group, apiKey);
+            int reCallTime = (int) (double) conf.getControl(GroupControlId.Edit_IntNum_SetuReCallTime).getValue();
+            if (reCallTime < 0){
+                reCallTime = 0;
+            }
+            if (reCallTime > 110){
+                reCallTime = 110;
+            }
+            reCallTime *= 1000;
+            boolean isMustReCall = (Boolean) conf.getControl(GroupControlId.CheckBox_SetuReCall).getValue();
+            return new MySender(group, message, apiKey, reCallTime, isMustReCall);
         }else {
-            return new MySender(qq, apiKey);
+            return new MySender(qq, message, apiKey, 25 * 1000, true);
         }
     }
 
@@ -66,7 +81,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),null,1);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),null,1);
             }
         }
     }
@@ -80,7 +95,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf, mySender.getApikey(), null,1);
+                getSFLoliconMsg(mySender, true,conf, mySender.getApikey(), null,1);
             }
         }
     }
@@ -94,7 +109,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),key,1);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),key,1);
             }
         }
     }
@@ -117,7 +132,7 @@ public class LoliconController {
 
         if (num > max){
             num = max;
-            sendMessage(mySender.getContact(), Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"),false);
+            sendMessage(mySender, Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:{62E2788A-2579-6250-0ECF-2401DD69A76B}.jpg>"),false);
         }
 
         if (num <= 0){
@@ -129,7 +144,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),key,num);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),key,num);
             }
         }
 
@@ -146,7 +161,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),key,1);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),key,1);
             }
         }
     }
@@ -161,7 +176,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),null,1);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),null,1);
             }
         }
     }
@@ -184,7 +199,7 @@ public class LoliconController {
 
         if (num > max){
             num = max;
-            sendMessage(mySender.getContact(), Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"),false);
+            sendMessage(mySender, Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"),false);
         }
 
         if (num <= 0){
@@ -196,7 +211,7 @@ public class LoliconController {
             GroupConf conf = GroupConfManager.getInstance().get(group.getId());
 
             if ((Boolean) conf.getControl(GroupControlId.CheckBox_SFLoliconEnable).getValue()){
-                getSFLoliconMsg(mySender.getContact(), true,conf,mySender.getApikey(),null,num);
+                getSFLoliconMsg(mySender, true,conf,mySender.getApikey(),null,num);
             }
         }
         throw new DoNone();
@@ -280,7 +295,7 @@ public class LoliconController {
      * @param num
      * @return
      */
-    public void getLoliconMsg(Contact contact, boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
+    public void getLoliconMsg(MySender mySender, boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
         //普通Lolicon
         Lolicon.Request request = LoliconManager.getRequest(isGroupMsg,conf,apiKey,keyWord, num);
         try {
@@ -288,7 +303,7 @@ public class LoliconController {
             Lolicon lolicon = LoliconManager.getLolicon(request);
             if (lolicon.getCode() == Lolicon.SUCCESS){
                 if (lolicon.getQuota() == 0){
-                    sendMessage(contact, Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>"),false);
+                    sendMessage(mySender, Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>"),false);
                 }else {
                     boolean isR18 = false;
                     Message reMsg = new Message();
@@ -303,21 +318,21 @@ public class LoliconController {
                         if (isGroupMsg && (Boolean) conf.getControl(GroupControlId.CheckBox_LoliconMD5Image).getValue()){
                             try {
                                 StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
-                                sendMessage(contact, Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5 + ".jpg>"),setu.isR18());
+                                sendMessage(mySender, Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5 + ".jpg>"),setu.isR18());
                             } catch (IOException e) {
                                 SfLog.getInstance().e(LoliconManager.class,e);
                             }
                         }else {
-                            sendMessage(contact, message,setu.isR18());
+                            sendMessage(mySender, message,setu.isR18());
                         }
                     }
                 }
             }else {
-                sendMessage(contact, LoliconManager.loliconErr(isGroupMsg,conf,lolicon,request),false);
+                sendMessage(mySender, LoliconManager.loliconErr(isGroupMsg,conf,lolicon,request),false);
             }
         } catch (IOException e) {
             SfLog.getInstance().e(LoliconManager.class,e);
-            sendMessage(contact, MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage(),false);
+            sendMessage(mySender, MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage(),false);
         }
     }
 
@@ -330,7 +345,7 @@ public class LoliconController {
      * @param num
      * @return
      */
-    public void getSFLoliconMsg(Contact contact, boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
+    public void getSFLoliconMsg(MySender mySender, boolean isGroupMsg, GroupConf conf, String apiKey, String keyWord, int num){
         //代理SF_Lolicon
         int r18 = Lolicon.NO_R18;
         if (isGroupMsg){
@@ -348,58 +363,44 @@ public class LoliconController {
             SfLog.getInstance().d(LoliconManager.class,"SF_Lolicon 获取中");
             Response response = LoliconManager.getSFLolicon(request, true);
             if (response == null){
-                sendMessage(contact, MyYuQ.getMif().text("SF加速线路获取失败, 转到Lolicon线路").toMessage(),false);
-                getLoliconMsg(contact, isGroupMsg, conf, apiKey, keyWord, num);
+                sendMessage(mySender, MyYuQ.getMif().text("SF加速线路获取失败, 转到Lolicon线路").toMessage(),false);
+                getLoliconMsg(mySender, isGroupMsg, conf, apiKey, keyWord, num);
                 return;
             }
 
             if (response.getCode() == 0){
                 //消息发送
                 for (Response.Setu setu:response.getList()){
-                    sendMessage(contact, Message.Companion.toMessageByRainCode("<Rain:Image:" + setu.getMd5() + ".jpg>"),setu.isR18());
+                    sendMessage(mySender, Message.Companion.toMessageByRainCode("<Rain:Image:" + setu.getMd5() + ".jpg>"),setu.isR18());
                 }
             }else {
-                sendMessage(contact, MyYuQ.getMif().text("错误:" + response.getMsg()).toMessage(),false);
+                sendMessage(mySender, MyYuQ.getMif().text("错误:" + response.getMsg()).toMessage(),false);
             }
         } catch (IOException e) {
             SfLog.getInstance().e(LoliconManager.class,e);
-            sendMessage(contact, MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage(),false);
+            sendMessage(mySender, MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage(),false);
         }
     }
 
     /**
      * 消息发送
-     * @param message
+     * @param mySender
      */
-    private void sendMessage(Contact contact, Message message, boolean isRecall){
-        if (contact instanceof Group){
-            Group group = (Group) contact;
-            GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-
-            if ((!(Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue()
-                    && !(Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()) && isRecall){
-                contact.sendMessage(Message.Companion.toMessageByRainCode("欸嘿"));
+    private void sendMessage(MySender mySender,Message message, boolean isRecall){
+        if (mySender.isGroup()){
+            if ((!(Boolean) mySender.getGroupConf().getControl(GroupControlId.CheckBox_PlainAndR18).getValue()
+                    && !(Boolean) mySender.getGroupConf().getControl(GroupControlId.CheckBox_SetuR18).getValue()) && isRecall){
+                mySender.getContact().sendMessage(Message.Companion.toMessageByRainCode("欸嘿"));
                 return;
             }
 
 
         }
 
-        contact.sendMessage(message);
+        mySender.getContact().sendMessage(message);
 
-        if (isRecall){
-            new Thread(new Runnable() {
-                final Message fm = message;
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(reCallTime);
-                    } catch (InterruptedException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                    }
-                    fm.recall();
-                }
-            }).start();
+        if (isRecall || mySender.isMastReCall()){
+            ReCallMsgManager.getInstance().add(new ReCallMsg(mySender, new Date().getTime(), message, mySender.getReCallTime()));
         }
     }
 
@@ -407,6 +408,84 @@ public class LoliconController {
     @Getter
     static class MySender{
         private Contact contact;
+        private Message message;
         private String apikey;
+        private int reCallTime = 0;
+        private boolean isMastReCall = false;
+
+        public boolean isGroup(){
+            return contact instanceof Group;
+        }
+
+        public GroupConf getGroupConf(){
+            if (isGroup()){
+                Group group = (Group) contact;
+                return GroupConfManager.getInstance().get(group.getId());
+            }
+            return null;
+        }
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class ReCallMsg{
+        private MySender mySender;
+        private long time;
+        private final Message message;
+        private long reCallTime;
+    }
+
+    /**
+     * 撤回
+     */
+    static class ReCallMsgManager{
+        private static Thread reCallThread;//撤回线程
+        private static ArrayList<ReCallMsg> reCallMsgList = new ArrayList<>();//需要撤回的消息列表
+        private static ReCallMsgManager msgManager;
+
+        private ReCallMsgManager(){
+            if (reCallThread == null || !reCallThread.isAlive()){
+                reCallThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true){
+                            Iterator<ReCallMsg> it = reCallMsgList.iterator();
+                            while(it.hasNext()){
+                                ReCallMsg reCallMsg = it.next();
+                                long timeDifference = new Date().getTime() - reCallMsg.getTime();
+                                if (timeDifference > reCallMsg.getReCallTime()){
+                                    try {
+                                        reCallMsg.getMessage().recall();
+                                    }catch (Exception e){
+                                        SfLog.getInstance().e(ReCallMsgManager.class, e);
+                                        reCallMsg.getMySender().contact.sendMessage(MyYuQ.getMif().text("由于一些不可预知的错误导致了原本应该撤回的消息并未撤回，请求管理员进行撤回").toMessage());
+                                    }
+                                    it.remove();
+                                }
+                            }
+                            try {
+                                Thread.sleep(1000);//1s检测一次
+                            } catch (InterruptedException e) {
+                                SfLog.getInstance().e(this.getClass(), e);
+                            }
+                        }
+                    }
+                });
+                reCallThread.start();
+            }
+        }
+
+        public static ReCallMsgManager getInstance(){
+            if (msgManager == null){
+                //
+                SfLog.getInstance().d(LoliconController.class, "撤回线程初始化");
+                msgManager = new ReCallMsgManager();
+            }
+            return msgManager;
+        }
+
+        public void add(ReCallMsg msg){
+            reCallMsgList.add(msg);
+        }
     }
 }

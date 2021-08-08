@@ -1,5 +1,6 @@
 package sereinfish.bot.ui.context;
 
+import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.conf.GroupControlType;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 public class ConfContext {
 
@@ -49,6 +51,8 @@ public class ConfContext {
             component = ConfContext.getEditIntNum(conf, control);
         }else if (control.getType() == GroupControlType.SelectRcon){
             component = ConfContext.getRconSelect(conf, control);
+        }else if (control.getType() == GroupControlType.Authority_ComboBox){
+            component = ConfContext.getAuthorityComboBox(conf, control);
         }
 
         return component;
@@ -201,6 +205,46 @@ public class ConfContext {
         });
         panel.add(comboBox);
 
+        return panel;
+    }
+
+    /**
+     * 权限选择框
+     * @return
+     */
+    public static JPanel getAuthorityComboBox(GroupConf conf, GroupConf.Control control){
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+
+        JComboBox comboBox = new JComboBox();
+        comboBox.setToolTipText(control.getTip());
+
+        //初始化列表
+        for (Map.Entry<String, Integer> entry: AuthorityManagement.AuthorityList.entrySet()){
+            comboBox.addItem(entry.getKey());
+        }
+        int var = AuthorityManagement.NORMAL;
+        if (control.getValue() instanceof Integer){
+            var = (int) control.getValue();
+        }else {
+            var = Double.valueOf(control.getValue().toString()).intValue();
+        }
+
+
+        comboBox.setSelectedItem(AuthorityManagement.getInstance().getAuthorityName(var));
+
+        //设置点击事件
+        comboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED){
+                    control.setValue(AuthorityManagement.AuthorityList.get(e.getItem()));
+                    GroupConfManager.getInstance().put(conf);
+                }
+            }
+        });
+
+        panel.add(comboBox);
         return panel;
     }
 

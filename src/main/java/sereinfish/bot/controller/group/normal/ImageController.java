@@ -73,7 +73,7 @@ public class ImageController extends QQController {
     @Action("\\.?丢.?\\")
     public Message diu(Member sender){
         //触发概率
-        if (MyYuQ.getRandom(0,100) > 60){
+        if (MyYuQ.getRandom(0,100) > 2){
             throw new DoNone();
         }
 
@@ -97,7 +97,7 @@ public class ImageController extends QQController {
     @Action("爬")
     public Message pa_2(Member sender){
         //触发概率
-        if (MyYuQ.getRandom(0,100) > 60){
+        if (MyYuQ.getRandom(0,100) > 2){
             throw new DoNone();
         }
         final long member = sender.getId();

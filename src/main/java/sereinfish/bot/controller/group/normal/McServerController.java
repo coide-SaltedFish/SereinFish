@@ -87,33 +87,65 @@ public class McServerController {
         ServerListPing serverListPing = new ServerListPing();
         try {
             //仅SRV解析
-            Lookup lookup = new Lookup("_minecraft._tcp." + addr, Type.SRV);
-            Record[] records = lookup.run();
+            if (addr.indexOf(":") != -1){
+                String addrs[] = addr.split(":");
+                if (addrs.length != 2){
+                    return Message.Companion.toMessageByRainCode("输入的地址可能有误");
+                }
+                int port = -1;
+                try{
+                    port = Integer.valueOf(addrs[1]);
+                }catch (Exception e){
+                    return Message.Companion.toMessageByRainCode("输入的地址可能有误，解析错误");
+                }
 
-            if (lookup.getResult() != Lookup.SUCCESSFUL){
-                lookup = new Lookup(addr, Type.A);
-                records = lookup.run();
+                Lookup lookup = new Lookup(addrs[0], Type.A);//A解析
+                Record[] records = lookup.run();
                 if (lookup.getResult() != Lookup.SUCCESSFUL){
                     try {
-                        InetAddress inetAddress = InetAddress.getByName(addr);
+                        InetAddress inetAddress = InetAddress.getByName(addrs[0]);
                         String hostname = inetAddress.getHostAddress();
-                        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  port);
                         serverListPing.setAddress(inetSocketAddress);
                     }catch (Exception e){
                         SfLog.getInstance().e(this.getClass(), e);
-                        return Message.Companion.toMessageByRainCode("地址 " + addr + " 解析失败");
+                        return Message.Companion.toMessageByRainCode("地址 " + addrs[0] + " 解析失败");
                     }
                 }else {
                     ARecord record = (ARecord) records[0];
                     String hostname = record.getAddress().getHostAddress();
-                    InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                    InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  port);
                     serverListPing.setAddress(inetSocketAddress);
                 }
             }else {
-                SRVRecord srv = (SRVRecord) records[0];
-                String hostname = srv.getTarget().toString().replaceFirst("\\.$", "");
-                InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  srv.getPort());
-                serverListPing.setAddress(inetSocketAddress);
+                Lookup lookup = new Lookup("_minecraft._tcp." + addr, Type.SRV);//SRV解析
+                Record[] records = lookup.run();
+
+                if (lookup.getResult() != Lookup.SUCCESSFUL){
+                    lookup = new Lookup(addr, Type.A);//A解析
+                    records = lookup.run();
+                    if (lookup.getResult() != Lookup.SUCCESSFUL){
+                        try {
+                            InetAddress inetAddress = InetAddress.getByName(addr);
+                            String hostname = inetAddress.getHostAddress();
+                            InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                            serverListPing.setAddress(inetSocketAddress);
+                        }catch (Exception e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                            return Message.Companion.toMessageByRainCode("地址 " + addr + " 解析失败");
+                        }
+                    }else {
+                        ARecord record = (ARecord) records[0];
+                        String hostname = record.getAddress().getHostAddress();
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  25565);
+                        serverListPing.setAddress(inetSocketAddress);
+                    }
+                }else {
+                    SRVRecord srv = (SRVRecord) records[0];
+                    String hostname = srv.getTarget().toString().replaceFirst("\\.$", "");
+                    InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname,  srv.getPort());
+                    serverListPing.setAddress(inetSocketAddress);
+                }
             }
             ServerListPing.StatusResponse response = serverListPing.fetchData();
 

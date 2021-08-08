@@ -19,10 +19,19 @@ public class AuthorityManagement {
     public static final int GROUP_ADMIN = 2;//群管理权限
     public static final int NORMAL = 3;//普通权限
 
+    public static final Map<String, Integer> AuthorityList = new HashMap<>();//权限值映射表
+
     private static AuthorityManagement authorityManagement;//单例模式
     private AuthorityList authorityList;//权限列表类
 
     private AuthorityManagement() throws IOException {
+        //初始化映射表
+        AuthorityList.put("OP", OP);
+        AuthorityList.put("MASTER", MASTER);
+        AuthorityList.put("ADMIN", ADMIN);
+        AuthorityList.put("GROUP_ADMIN", GROUP_ADMIN);
+        AuthorityList.put("NORMAL", NORMAL);
+
         readAuthorityList();//得到权限列表
     }
 
@@ -37,6 +46,21 @@ public class AuthorityManagement {
         }
         return authorityManagement;
     }
+
+    /**
+     * 得到权限字段
+     * @param var
+     * @return
+     */
+    public String getAuthorityName(int var){
+        for (Map.Entry<String, Integer> entry:AuthorityList.entrySet()){
+            if (entry.getValue() == var){
+                return entry.getKey();
+            }
+        }
+        return "未知";
+    }
+
     /**
      * 权限检查
      * @param member

@@ -59,7 +59,7 @@ public class NetHandle {
         if (gamerInfo != null && gamerInfo.getProperties() != null){
             for (GamerInfo.Properties properties : gamerInfo.getProperties()){
                 if (properties.getName().equals("textures")){
-                    textures = properties.getValue().substring(0, properties.getValue().length());
+                    textures = properties.getValue();
                 }
             }
         }else {
@@ -74,16 +74,17 @@ public class NetHandle {
      * @return
      */
     public synchronized static BufferedImage getMcPlayerHeadImage(String uuid, int w) throws IOException {
+        System.out.println(uuid);
         BufferedImage bufferedImage = new BufferedImage(w, w, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D graphics2D = bufferedImage.createGraphics();
-        graphics2D.setBackground(Color.gray);
+        graphics2D.setBackground(new Color(255, 255, 255, 62));
         graphics2D.clearRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
         graphics2D.dispose();
 
         BufferedImage skinImage = getMcPlayerSkin(uuid);
 
         if (skinImage == null){
-            return null;
+            return bufferedImage;
         }
         //裁剪出头像
         BufferedImage head = ImageHandle.crop(skinImage, 8, 8, 16, 16);
@@ -92,6 +93,7 @@ public class NetHandle {
         graphics2D = bufferedImage.createGraphics();
         graphics2D.drawImage(head, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
         graphics2D.drawImage(face, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+        graphics2D.dispose();
 
         return bufferedImage;
     }

@@ -24,7 +24,10 @@ public enum GroupControlId {
     CheckBox_GlobalBlackList,//全局黑名单
     CheckBox_ReRead,//复读
     //setu
+    AuthorityComboBox_Setu,//命令权限
     CheckBox_SetuEnable,//是否启用setu
+    CheckBox_SetuReCall,//setu无论如何都撤回
+    Edit_IntNum_SetuReCallTime,//撤回时间
     Edit_SetuKey,//API Key
     CheckBox_SetuR18,//是否启用R18
     CheckBox_PlainAndR18,//混合模式

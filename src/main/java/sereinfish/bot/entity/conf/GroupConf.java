@@ -1,5 +1,6 @@
 package sereinfish.bot.entity.conf;
 
+import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
@@ -104,6 +105,9 @@ public class GroupConf {
         //
         Map<GroupControlId,Control> setuList = new LinkedHashMap<>();//setu
         setuList.put(GroupControlId.CheckBox_SetuEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
+        setuList.put(GroupControlId.AuthorityComboBox_Setu, new Control(GroupControlType.Authority_ComboBox, GroupControlId.AuthorityComboBox_Setu, "权限", AuthorityManagement.NORMAL, "设置setu命令的执行权限"));
+        setuList.put(GroupControlId.CheckBox_SetuReCall, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_SetuReCall, "强制撤回", false, "不论是否R18，都进行撤回"));
+        setuList.put(GroupControlId.Edit_IntNum_SetuReCallTime, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_SetuReCallTime, "撤回时间(s)", 60, "撤回时间，大于110秒默认等于110秒"));
         setuList.put(GroupControlId.CheckBox_SetuR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuR18,"R18",false,"Lolicon API R18"));
         setuList.put(GroupControlId.CheckBox_PlainAndR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_PlainAndR18,"混合模式",false,"R18与非R8混合"));
         setuList.put(GroupControlId.CheckBox_LoliconLocalImage, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_LoliconLocalImage,"本地模式",false,"额度用完后使用缓存的图片"));
