@@ -66,7 +66,7 @@ public class OnGroupMessageEvent {
         if (!conf.isEnable()){
             if (Message.Companion.toCodeString(event.getMessage()).equals("SereinFish Bot 开")){
                 //权限判断
-                if (AuthorityManagement.getInstance().authorityCheck(event.getSender(),AuthorityManagement.ADMIN)){
+                if (AuthorityManagement.getInstance().authorityCheck(event.getSender(),AuthorityManagement.GROUP_ADMIN)){
                     //开启群
                     conf.setEnable(true);
                     GroupConfManager.getInstance().put(conf);

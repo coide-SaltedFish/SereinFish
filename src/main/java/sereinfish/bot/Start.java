@@ -1,6 +1,6 @@
 package sereinfish.bot;
 
-import com.icecreamqaq.yuq.artqq.YuQArtQQStarter;
+import com.icecreamqaq.yuq.mirai.YuQMiraiStart;
 
 public class Start {
 
@@ -10,7 +10,7 @@ public class Start {
      * @param args 启动参数
      */
     public static void main(String[] args) {
-        YuQArtQQStarter.start(args);
+        YuQMiraiStart.start(args);
     }
 
 }

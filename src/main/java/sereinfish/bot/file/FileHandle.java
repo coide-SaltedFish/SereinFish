@@ -1,5 +1,7 @@
 package sereinfish.bot.file;
 
+import sereinfish.bot.myYuq.MyYuQ;
+
 import java.io.*;
 
 public class FileHandle {
@@ -20,6 +22,7 @@ public class FileHandle {
     public static File gameInfoCacheFile = new File(cachePath,"gameInfo.json");//玩家信息缓存
     public static File imageCachePath = new File(cachePath,"image/");//网络图片缓存
     public static File imageLoliconCachePath = new File(cachePath,"image/lolicon/");//Lolicon图片缓存
+    public static File helpMenuImageCacheFile = new File(cachePath, "helpMenu/helpMenu_" + MyYuQ.version);//帮助菜单缓存文件
 
     public static File groupDataPath = new File(dataPath,"data/group/");//群数据文件路径
 

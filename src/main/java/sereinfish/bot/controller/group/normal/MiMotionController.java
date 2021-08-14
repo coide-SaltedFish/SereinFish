@@ -6,6 +6,8 @@ import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import sereinfish.bot.database.table.Account;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.motion.xiaomi.XiaoMiMotion;
 import sereinfish.bot.file.account.AccountManager;
 import sereinfish.bot.utils.Result;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "小米运动")
 public class MiMotionController {
 
     @Before
@@ -25,6 +28,7 @@ public class MiMotionController {
     }
 
     @Action("小米运动步数 {step}")
+    @MenuItem(name = "小米运动步数", usage = "小米运动步数 {step}", description = "修改小米运动步数为指定值")
     @QMsg(at = true)
     public String xiaomiMotion(Account account, int step) throws IOException, SQLException {
         if (account.getToken() == null)

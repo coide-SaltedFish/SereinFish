@@ -14,6 +14,8 @@ import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import kotlin.Result;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.FileHandle;
@@ -34,6 +36,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "图片生成")
 public class ImageController extends QQController {
     private int paIndex = 16;
 
@@ -59,6 +62,7 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("丢 {member}")
+    @MenuItem(name = "丢某人头像", usage = "丢 {member}", description = "把指定对象头像扔出去")
     public Message diuAt(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
@@ -71,6 +75,7 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("\\.?丢.?\\")
+    @MenuItem(name = "丢触发者头像", usage = ".?丢.?", description = "把触发者头像扔出去")
     public Message diu(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 2){
@@ -82,6 +87,7 @@ public class ImageController extends QQController {
 
 
     @Action("爬 {member}")
+    @MenuItem(name = "爬", usage = "爬 {member}", description = "生成指定对象爬表情")
     public Message pa(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
@@ -95,6 +101,7 @@ public class ImageController extends QQController {
     }
 
     @Action("爬")
+    @MenuItem(name = "爬", usage = "爬", description = "生成触发者爬表情")
     public Message pa_2(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 2){
@@ -112,6 +119,7 @@ public class ImageController extends QQController {
 
     @Action("嚼 {member}")
     @Synonym({"恰 {member}"})
+    @MenuItem(name = "恰", usage = "嚼 {member} | 恰 {member}", description = "生成恰指定对象表情")
     public Message jiao(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
@@ -121,6 +129,7 @@ public class ImageController extends QQController {
 
     @Action("mua {member}")
     @Synonym({"mua {member}"})
+    @MenuItem(name = "mua", usage = "mua {member}", description = "生成mua指定对象表情")
     public Message mua(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
@@ -130,6 +139,7 @@ public class ImageController extends QQController {
 
     @Action("摸 {member}")
     @Synonym({"rua {member}"})
+    @MenuItem(name = "rua", usage = "rua {member} | 摸 {member}", description = "生成rua指定对象表情")
     public Message mo(Group group, long member){
         if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
             throw new SkipMe();
@@ -139,17 +149,19 @@ public class ImageController extends QQController {
 
     @Action("摸")
     @Synonym({"rua"})
+    @MenuItem(name = "rua", usage = "rua | 摸", description = "生成rua触发者表情")
     public Message mo_2(Member sender){
         return getRua(sender.getId());
     }
 
     @Action("\\[.!！]读懂世界$\\")
+    @MenuItem(name = "读懂世界", usage = "[.!！]读懂世界", description = "生成今日热点新闻图片")
     public Message readTheWorld(){
         try {
             return MyYuQ.getMif().imageByInputStream(OkHttpUtils.getByteStream("http://api.03c3.cn/zb/")).toMessage();
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("在读世界时出现了一点错误").toMessage();
+            return MyYuQ.getMif().text("在读取世界数据时出现了一点错误").toMessage();
         }
     }
 
@@ -162,7 +174,7 @@ public class ImageController extends QQController {
         BufferedImage headImage;
         BufferedImage bgImage;
 
-        int hdW = 146;
+        int hdW = 250;
 
         try {
             headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,hdW);
@@ -180,20 +192,22 @@ public class ImageController extends QQController {
         Ellipse2D.Double shape = new Ellipse2D.Double(0, 0, hdW, hdW);
         //需要保留的区域
         graphics.setClip(shape);
-        graphics.rotate(Math.toRadians(-50),hdW / 2,hdW / 2);
+        graphics.rotate(Math.toRadians(-40),hdW / 2,hdW / 2);
         graphics.drawImage(headImage.getScaledInstance(hdW,hdW,Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
         graphics.dispose();
 
         //重合图片
-        Graphics2D graphics2D = bgImage.createGraphics();
+        BufferedImage bufferedImage = new BufferedImage(bgImage.getWidth(), bgImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D graphics2D = bufferedImage.createGraphics();
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
-        graphics2D.drawImage(formatAvatarImage,110 - hdW / 2,275 - hdW / 2,hdW,hdW,null);//头画背景上
+        graphics2D.drawImage(formatAvatarImage,134,220,hdW,210,null);//头画上
+        graphics2D.drawImage(bgImage, 0, 0, null);//背景画上
         graphics2D.dispose();
 
         //先保存为图片
         File file = new File(FileHandle.imageCachePath,"diu_temp");
         try {
-            ImageIO.write(bgImage, "PNG", file);
+            ImageIO.write(bufferedImage, "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);

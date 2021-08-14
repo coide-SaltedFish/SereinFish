@@ -107,6 +107,7 @@ public class GroupConf {
         setuList.put(GroupControlId.CheckBox_SetuEnable, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuEnable,"启用",false,"启用LoliconAPI"));
         setuList.put(GroupControlId.AuthorityComboBox_Setu, new Control(GroupControlType.Authority_ComboBox, GroupControlId.AuthorityComboBox_Setu, "权限", AuthorityManagement.NORMAL, "设置setu命令的执行权限"));
         setuList.put(GroupControlId.CheckBox_SetuReCall, new Control(GroupControlType.CheckBox, GroupControlId.CheckBox_SetuReCall, "强制撤回", false, "不论是否R18，都进行撤回"));
+        setuList.put(GroupControlId.Edit_IntNum_SetuSendMaxNum, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_SetuSendMaxNum, "最大发送数量", 20, "设置一次命令最大图片的发送数量"));
         setuList.put(GroupControlId.Edit_IntNum_SetuReCallTime, new Control(GroupControlType.Edit_IntNum, GroupControlId.Edit_IntNum_SetuReCallTime, "撤回时间(s)", 60, "撤回时间，大于110秒默认等于110秒"));
         setuList.put(GroupControlId.CheckBox_SetuR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_SetuR18,"R18",false,"Lolicon API R18"));
         setuList.put(GroupControlId.CheckBox_PlainAndR18, new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_PlainAndR18,"混合模式",false,"R18与非R8混合"));
@@ -123,6 +124,7 @@ public class GroupConf {
         wikiList.put(GroupControlId.CheckBox_wikiEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiEnable,"wiki",false,"启用wiki"));
         wikiList.put(GroupControlId.CheckBox_wikiMcEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiMcEnable,"mc wiki",false,"启用mc wiki"));
         wikiList.put(GroupControlId.CheckBox_wikiBaiduEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiBaiduEnable,"百度",false,"启用百度"));
+        wikiList.put(GroupControlId.CheckBox_wikiPRTSEnable,new Control(GroupControlType.CheckBox,GroupControlId.CheckBox_wikiMcEnable,"PRTS",false,"启用明日方舟 wiki"));
         confNew.put("Wiki",wikiList);
         //SauceNAO
         Map<GroupControlId,Control> sauceNAOList = new LinkedHashMap<>();//SauceNAO

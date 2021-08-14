@@ -5,6 +5,8 @@ import com.icecreamqaq.yuq.annotation.PrivateController;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Member;
 import sereinfish.bot.database.table.Account;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.motion.xiaomi.XiaoMiMotion;
 import sereinfish.bot.file.account.AccountManager;
 import sereinfish.bot.mlog.SfLog;
@@ -14,9 +16,11 @@ import java.io.IOException;
 import java.util.Date;
 
 @PrivateController
+@Menu(type = Menu.Type.PRIVATE)
 public class MiMotionController {
 
     @Action("小米运动登录 {phone} {password}")
+    @MenuItem(name = "绑定小米运动", usage = "小米运动登录 {phone} {password}", description = "将小米运动账号与bot绑定")
     public String login(String phone, String password, Contact qq) throws IOException {
         SfLog.getInstance().d(this.getClass(),"小米运动账号绑定开始");
         Result<String> loginResult = XiaoMiMotion.login(phone, password);

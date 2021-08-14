@@ -9,10 +9,13 @@ import com.IceCreamQAQ.Yu.util.Web;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.event.GlobalEventChannel;
 import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.entity.ClassManager;
 import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
@@ -60,6 +63,18 @@ public class InitEvent {
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
+        //初始化注解管理器
+        try {
+            ClassManager.init();
+            SfLog.getInstance().d(this.getClass(),"注解管理器初始化完成");
+        } catch (Exception e) {
+            SfLog.getInstance().e(this.getClass(), "注解管理器初始化失败，启动失败", e);
+            System.exit(-1);
+        }
+
+        //初始化mirai事件
+        GlobalEventChannel.INSTANCE.registerListenerHost(new MiraiEvent());//事件注册
+        SfLog.getInstance().d(this.getClass(),"Mirai事件响应初始化完成");
 
         //初始化权限管理器
         try {

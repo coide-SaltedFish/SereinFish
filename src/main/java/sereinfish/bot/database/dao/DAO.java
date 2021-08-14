@@ -333,9 +333,12 @@ public class DAO<E>{
      */
     private boolean tableExist(String name) throws SQLException {
         ResultSet resultSet = dataBase.getConnection().getMetaData().getTables(null, null, name, null );
-        if (resultSet.next()) {
-            return true;
+        if (!resultSet.isClosed()){
+            if (resultSet.next()) {
+                return true;
+            }
         }
+
         return false;
     }
 

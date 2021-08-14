@@ -237,7 +237,7 @@ public class ImageHandle {
                         BufferedImage bufferedImage = new BufferedImage(lineMaxWidth, lineHeight, BufferedImage.TYPE_4BYTE_ABGR);//本行画板
                         //绘制文本
                         Graphics2D graphics2D = bufferedImage.createGraphics();
-                        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+                        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);;//抗锯齿
                         graphics2D.setFont(font);
                         if (bufferedOldImage != null){
                             graphics2D.drawImage(bufferedOldImage, 0, 0, null);//将旧数据绘制上去

@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.entity.conf.GroupConf;
@@ -38,8 +39,7 @@ public class BiliController {
         }
     }
 
-    @Action("\\^BV.*\\")
-    @Synonym({"\\^bv.*\\"})
+    @Action("\\^[Bb][Vv].*\\")
     @QMsg(at = true)
     public Message bvToAv(Message message, Group group) throws IOException {
         GroupConf conf = GroupConfManager.getInstance().get(group.getId());
@@ -50,10 +50,12 @@ public class BiliController {
 
         String bv = message.getBody().get(0).toPath();
 
-        Pattern pattern = Pattern.compile("^BV.*(?=\n?)");
+        Pattern pattern = Pattern.compile("^[Bb][Vv][A-Za-z0-9]{10}(?=\n?)");
         Matcher matcher = pattern.matcher(bv);
         if (matcher.find()) {
             bv = matcher.group(0);
+        }else {
+            throw new SkipMe();
         }
 
         Result<Map<String, String>> result = bvToAv(bv);

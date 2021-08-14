@@ -2,6 +2,7 @@ package sereinfish.bot.net.mc;
  
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.NonNull;
 import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
@@ -175,7 +176,7 @@ public class ServerListPing {
      * @param statusResponse
      * @return
      */
-    public static BufferedImage getServerInfoImage(String name, StatusResponse statusResponse, Rcon rcon) throws Exception{
+    public static BufferedImage getServerInfoImage(String name, @NonNull StatusResponse statusResponse, Rcon rcon) throws Exception{
         try {
             Color defaultColor = Color.decode("#EEEEEE");//背景颜色
             Color shadeColor = new Color(0, 0, 0, 60);
@@ -196,8 +197,13 @@ public class ServerListPing {
             //玩家信息一条90 间隔10
 
             //tps信息高125
+            int playerNum = 0;
+            if(statusResponse.getPlayers() != null && statusResponse.getPlayers().getSample() != null){
+                playerNum = statusResponse.getPlayers().getSample().size();
+            }
+
             int height = 235 //服务器信息
-                    + 10 + (10 + 90) * statusResponse.getPlayers().getSample().size() //玩家信息
+                    + 10 + (10 + 90) *  playerNum//玩家信息
                     + 27 //边框高度
                     ;
             int tpsHeight = 126;

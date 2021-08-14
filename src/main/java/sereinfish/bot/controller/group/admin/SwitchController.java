@@ -30,7 +30,7 @@ public class SwitchController {
      */
     @Before
     public GroupConf before(Group group, Member sender){
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.ADMIN)) { //权限检查
+        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
 //            Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
 //            msg.setReply(message.getSource());
 //            throw msg.toThrowable();
@@ -43,9 +43,9 @@ public class SwitchController {
     @Action("\\[Bb]ot$\\ {state}")
     @QMsg(mastAtBot = true, reply = true)
     public Message enableBot(GroupConf groupConf, Member sender, boolean  state){
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.MASTER)) { //权限检查
-            throw new DoNone();
-        }
+//        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.MASTER)) { //权限检查
+//            throw new DoNone();
+//        }
         groupConf.setEnable(state);
         GroupConfManager.getInstance().put(groupConf);
         return MyYuQ.getMif().text("Bot启用：" + state).toMessage();

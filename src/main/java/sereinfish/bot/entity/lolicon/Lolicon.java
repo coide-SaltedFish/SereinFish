@@ -1,5 +1,7 @@
 package sereinfish.bot.entity.lolicon;
 
+import lombok.Getter;
+import lombok.Setter;
 import sereinfish.bot.mlog.SfLog;
 
 import java.io.UnsupportedEncodingException;
@@ -7,170 +9,67 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledFuture;
 
+@Getter
 public class Lolicon {
     public static final int NO_R18 = 0;
     public static final int R18 = 1;
     public static final int PLAIN_AND_R18 = 2;
 
-    public static final int ERR = -1;
-    public static final int SUCCESS = 0;
-    public static final int APIKEY_ERR = 401;
-    public static final int QUOTA_ERR = 429;
+//    public static final int ERR = -1;
+//    public static final int SUCCESS = 0;
+//    public static final int APIKEY_ERR = 401;
+//    public static final int QUOTA_ERR = 429;
 
-    int code;
-    String msg;
-    int quota;
-    int quota_min_ttl;
-    int count;
+    String error;
     ArrayList<Setu> data;
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public int getQuota() {
-        return quota;
-    }
-
-    public int getQuota_min_ttl() {
-        return quota_min_ttl;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public ArrayList<Setu> getData() {
-        return data;
-    }
-
+    @Getter
     public static class Setu{
         int pid;
         int p;
         int uid;
         String title;
         String author;
-        String url;
         boolean r18;
         int width;
         int height;
         String[] tags;
+        String ext;
+        long uploadDate;
+        Object urls;
+
 
         public Setu() {
         }
 
-        public Setu(boolean r18) {
-            this.r18 = r18;
-        }
-
-        public int getPid() {
-            return pid;
-        }
-
-        public int getP() {
-            return p;
-        }
-
-        public int getUid() {
-            return uid;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getAuthor() {
-            return author;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public boolean isR18() {
-            return r18;
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public String[] getTags() {
-            return tags;
+        public String getUrl(){
+            String url = urls.toString().substring(1, urls.toString().length() - 1);
+            return url.toString().split("=")[1];
         }
     }
 
+    @Getter
+    @Setter
     public static class Request{
-        String apikey = "";
         int r18 = 0;
-        String keyword;
         int num = 1;//一次返回的数量
+        int[] uids;//作者uid
+        String[] tags;
         String proxy;//是否使用原图连接
-        boolean size1200 = true;//是否使用缩略图
 
-        public Request(String apikey, int r18, String keyword, int num, String proxy, boolean size1200) {
-            this.apikey = apikey;
+        public Request(int r18, int num, int[] uids, String[] tags, String proxy) {
             this.r18 = r18;
-            this.keyword = keyword;
+            if (num < 1){
+                this.num = 1;
+            }
+
+            if (num > 100){
+                num = 100;
+            }
             this.num = num;
+            this.uids = uids;
+            this.tags = tags;
             this.proxy = proxy;
-            this.size1200 = size1200;
-        }
-
-        public String getApikey() {
-            return apikey;
-        }
-
-        public void setApikey(String apikey) {
-            this.apikey = apikey;
-        }
-
-        public int getR18() {
-            return r18;
-        }
-
-        public void setR18(int r18) {
-            this.r18 = r18;
-        }
-
-        public String getKeyword() {
-            return keyword;
-        }
-
-        public void setKeyword(String keyword) {
-            this.keyword = keyword;
-        }
-
-        public int getNum() {
-            return num;
-        }
-
-        public void setNum(int num) {
-            this.num = num;
-        }
-
-        public String getProxy() {
-            return proxy;
-        }
-
-        public void setProxy(String proxy) {
-            this.proxy = proxy;
-        }
-
-        public boolean isSize1200() {
-            return size1200;
-        }
-
-        public void setSize1200(boolean size1200) {
-            this.size1200 = size1200;
         }
 
         /**
@@ -178,23 +77,9 @@ public class Lolicon {
          * @return
          */
         public String getUrl(){
-            boolean flag = false;
-            String api = "https://api.lolicon.app/setu/?";
+            String api = "https://api.lolicon.app/setu/v2?";
 
             api += "r18=" + r18;
-            if (apikey != null && !apikey.trim().equals("")){
-                api += "&apikey=" + apikey;
-                flag = true;
-            }
-
-            if (keyword != null && !keyword.trim().equals("")){
-                api += "&keyword=";
-                try {
-                    api += URLEncoder.encode(keyword,"utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                }
-            }
 
             api += "&num=" + num;
 
@@ -202,7 +87,33 @@ public class Lolicon {
                 api += "&proxy=" + proxy;
             }
 
-            api += "&size1200=" + size1200;
+            if (uids != null){
+                for (int uid:uids){
+                    api += "&uid=" + uid;
+                }
+            }
+
+            if (tags != null){
+                for (String tag:tags){
+                    try {
+                        api += "&tag=" + URLEncoder.encode(tag,"utf-8");
+                    } catch (UnsupportedEncodingException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                    }
+                }
+
+//                String orTags = "";
+//                for (int i = 0; i < tags.length; i++){
+//                    if (i != 0){
+//                        orTags += "|";
+//                        orTags += tags[i];
+//                    }
+//                }
+//
+//                api += "&tag=" + orTags;
+            }
+
+
             return api;
         }
     }

@@ -27,6 +27,7 @@ public enum GroupControlId {
     AuthorityComboBox_Setu,//命令权限
     CheckBox_SetuEnable,//是否启用setu
     CheckBox_SetuReCall,//setu无论如何都撤回
+    Edit_IntNum_SetuSendMaxNum,//setu一次最大发送数量
     Edit_IntNum_SetuReCallTime,//撤回时间
     Edit_SetuKey,//API Key
     CheckBox_SetuR18,//是否启用R18
@@ -41,6 +42,7 @@ public enum GroupControlId {
     CheckBox_wikiEnable,
     CheckBox_wikiMcEnable,//mc wiki开关
     CheckBox_wikiBaiduEnable,//baidu 查询开关
+    CheckBox_wikiPRTSEnable,//PRTS wiki开关
     //SauceNAO
     CheckBox_SauceNAOEnable,//启用SauceNAO
     Edit_SauceNAOApiKey,//key

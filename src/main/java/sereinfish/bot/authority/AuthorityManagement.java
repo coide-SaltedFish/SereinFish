@@ -140,7 +140,7 @@ public class AuthorityManagement {
     /**
      * 权限列表类
      */
-    public static class AuthorityList{
+    public class AuthorityList{
         Map<Long,Long> opList = new HashMap<>();//op列表
         Map<Long,Long> masterList = new HashMap<>();//拥有者列表
         Map<Long,Long> adminList = new HashMap<>();//管理员列表
