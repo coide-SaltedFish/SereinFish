@@ -2,7 +2,6 @@ package sereinfish.bot.event.group;
 
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
-import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
@@ -11,16 +10,15 @@ import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.database.table.GroupHistoryMsg;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.FileHandle;
@@ -30,7 +28,8 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.imageio.ImageIO;
-import javax.xml.crypto.Data;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -61,15 +60,14 @@ public class OnGroupMessageEvent {
             //event.getGroup().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
         //群功能启用判断
-        GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         //启用群命令
         if (!conf.isEnable()){
             if (Message.Companion.toCodeString(event.getMessage()).equals("SereinFish Bot 开")){
                 //权限判断
-                if (AuthorityManagement.getInstance().authorityCheck(event.getSender(),AuthorityManagement.GROUP_ADMIN)){
+                if (Permissions.getInstance().authorityCheck(event.getSender(), Permissions.GROUP_ADMIN)){
                     //开启群
                     conf.setEnable(true);
-                    GroupConfManager.getInstance().put(conf);
                     event.getGroup().sendMessage(MyYuQ.getMif().text("本群[启用]开关状态已设置为[true]").plus(MyYuQ.getMif().at(event.getSender())));
                 }
             }
@@ -79,9 +77,10 @@ public class OnGroupMessageEvent {
             event.setCancel(true);
             return;
         }else {
+            //复读
             RepeaterManager.getInstance().add(event.getGroup().getId(),event.getMessage());
             //自动回复
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_AutoReply).getValue() && conf.isDataBaseEnable()){
+            if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
                 try {
                     ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
                     String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
@@ -128,8 +127,8 @@ public class OnGroupMessageEvent {
         Contact contact = event.getSendTo();
         if (contact instanceof Group){
             Group group = (Group) contact;
-            GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_LongMsgToImageEnable).getValue()){
+            GroupConf conf = ConfManager.getInstance().get(group.getId());
+            if (conf.isLongMsgToImageEnable()){
                 //判断消息是否过长
                 int length = 0;
                 Message message = event.getMessage();
@@ -169,7 +168,7 @@ public class OnGroupMessageEvent {
             Contact contact = event.getSendTo();
             if (contact instanceof Group){
                 Group group = (Group) contact;
-                GroupConf conf = GroupConfManager.getInstance().get(group.getId());
+                GroupConf conf = ConfManager.getInstance().get(group.getId());
 
                 event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
                 File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
@@ -203,15 +202,15 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberJoinEvent(GroupMemberJoinEvent.Join event){//群功能启用判断
-        GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
             return;
         }
 
         //进群提示
-        if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_JoinGroupTip).getValue()){
-            String tip = (String) conf.getControl(GroupControlId.Edit_JoinGroupTip).getValue();
+        if (conf.isEnable() && conf.isJoinGroupTipEnable()){
+            String tip = conf.getJoinGroupTipText();
             if (!tip.trim().equals("")){
                 SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
                 event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
@@ -224,8 +223,6 @@ public class OnGroupMessageEvent {
     @Event
     public void g(GroupMemberJoinEvent.Invite invite){
         //TODO:进群邀请事件
-        System.out.println(invite.getInviter().getId());
-        System.out.println(invite.getMember().getId());
     }
 
     /**
@@ -234,7 +231,7 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberLeaveEvent(GroupMemberLeaveEvent event){
-        GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         //群功能启用判断
         if (!conf.isEnable()){
             event.setCancel(true);
@@ -245,8 +242,8 @@ public class OnGroupMessageEvent {
         Group group = event.getGroup();
         //退群提示
         if (conf.isEnable()){
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_QuitGroupTip).getValue()){
-                String tip = (String) conf.getControl(GroupControlId.Edit_QuitGroupTip).getValue();
+            if (conf.isQuitGroupTipEnable()){
+                String tip = conf.getQuitGroupTipText();
                 if (!tip.trim().equals("")){
                     group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
                 }else {
@@ -267,13 +264,23 @@ public class OnGroupMessageEvent {
                 }
             }
             //退群拉黑
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_QuitJoinBlackList).getValue()){
+            if (conf.isQuitJoinBlackListEnable()){
                 if (conf.isDataBaseEnable()){
                     try {
-                        BlackListDao blackListDao = new BlackListDao(conf.getDataBase());
+                        BlackListDao blackListDao;
+                        try {
+                            blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
+                        } catch (Exception e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                            return;
+                        } catch (IllegalModeException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                            return;
+                        }
+
                         blackListDao.insert(new BlackList(new Date(),member.getId(),group.getId(),"退群自动拉黑"));
-                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_AddBlackTip).getValue()){
-                            String tip = (String) conf.getControl(GroupControlId.Edit_AddBlackTip).getValue();
+                        if (conf.isAddGroupBlackListTip()){
+                            String tip = conf.getAddGroupBlackListTipText();
                             if (!tip.trim().equals("")){
                                 group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
                             }
@@ -300,15 +307,15 @@ public class OnGroupMessageEvent {
     @Event
     public void groupMemberKickEvent(GroupMemberLeaveEvent.Kick event){
         //群功能启用判断
-        GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
             return;
         }
 
         //踢人提示
-        if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_KickTip).getValue()){
-            String tip = (String) conf.getControl(GroupControlId.Edit_KickTip).getValue();
+        if (conf.isEnable() && conf.isKickGroupTipEnable()){
+            String tip = conf.getKickGroupTipText();
             if (!tip.trim().equals("")){
                 event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
             }
@@ -322,7 +329,7 @@ public class OnGroupMessageEvent {
     @Event
     public void groupMemberRequestEvent(GroupMemberRequestEvent event){
         //群功能启用判断
-        GroupConf conf = GroupConfManager.getInstance().get(event.getGroup().getId());
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
             return;
@@ -330,9 +337,9 @@ public class OnGroupMessageEvent {
 
         SfLog.getInstance().d(this.getClass(),"[" + event.getQq() + "]申请加入群聊[" + event.getGroup() + "]");
         //自动同意入群
-        if (conf.isEnable() && (Boolean) conf.getControl(GroupControlId.CheckBox_AutoAgreeJoinGroup).getValue()){
+        if (conf.isEnable() && conf.isAutoAgreeJoinGroupEnable()){
             //是否验证黑名单
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
+            if (conf.isBlackListGroupEnable()){
                 //黑名单验证
                 if (!conf.isDataBaseEnable()){
                     event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库未启用，自动同意入群已停止").toMessage());
@@ -340,9 +347,9 @@ public class OnGroupMessageEvent {
                 }else {
                     try {
                         BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                        if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
+                        if (conf.isBlackListGroupEnable()){
                             //全局黑名单
-                            if ((Boolean) conf.getControl(GroupControlId.CheckBox_GlobalBlackList).getValue()){
+                            if (conf.isGlobalBlackListGroupEnable()){
                                 if(blackListDao.exist(event.getQq().getId())){
                                     //拒绝
                                     event.setAccept(false);
@@ -355,7 +362,6 @@ public class OnGroupMessageEvent {
                                     event.setCancel(true);
                                     SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
                                 }
-                                return;
                             }else {
                                 if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
                                     //拒绝
@@ -369,7 +375,6 @@ public class OnGroupMessageEvent {
                                     event.setCancel(true);
                                     SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
                                 }
-                                return;
                             }
                         }
                     } catch (SQLException e) {
@@ -389,7 +394,6 @@ public class OnGroupMessageEvent {
                 event.setAccept(true);
                 event.setCancel(true);
                 SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
-                return;
             }
         }else {
             SfLog.getInstance().d(this.getClass(),"自动同意入群未开启");

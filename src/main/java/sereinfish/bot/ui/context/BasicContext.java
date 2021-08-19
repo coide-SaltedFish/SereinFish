@@ -1,7 +1,5 @@
 package sereinfish.bot.ui.context;
 
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.ui.dialog.FileChooseDialog;
 
 import javax.swing.*;

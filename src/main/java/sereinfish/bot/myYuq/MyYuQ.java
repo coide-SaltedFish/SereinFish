@@ -1,7 +1,6 @@
 package sereinfish.bot.myYuq;
 
 import com.IceCreamQAQ.Yu.annotation.Config;
-import com.IceCreamQAQ.Yu.controller.Router;
 import com.IceCreamQAQ.Yu.job.JobManager;
 import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
@@ -9,16 +8,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
-import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import lombok.Getter;
-import okhttp3.OkHttp;
 import okhttp3.OkHttpClient;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Tag;
 
-import javax.inject.Inject;
+import javax.swing.text.html.HTML;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -115,6 +113,37 @@ public class MyYuQ {
     }
 
     /**
+     * yml文本转class
+     * @param text
+     * @param type
+     * @param <T>
+     * @return
+     */
+    public static <T> T toClassYml(String text, Class type){
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        T t = (T) yaml.loadAs(text, type);
+        return t;
+    }
+
+    /**
+     * 转yml文本
+     * @param o
+     * @return
+     */
+    public static String toYml(Object o){
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        return yaml.dumpAs(o, Tag.MAP, null);
+    }
+
+    /**
      * 文本转json对象
      * @param json
      * @param type
@@ -198,8 +227,12 @@ public class MyYuQ {
      * @return
      */
     public static String replace(String str,String s,String n) {
+        if (!str.contains(s)){
+            return str;
+        }
         for (int i = 0; i <= str.length() - s.length(); i++) {
             String s_1 = str.substring(i, i + s.length());
+            System.out.println(s_1);
             if (s_1.equals(s)) {
                 str = str.substring(0, i) + n + str.substring(i + s.length());
             }

@@ -4,26 +4,21 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
-import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
-import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
-import com.icecreamqaq.yuq.message.MessageItemFactory;
-import kotlin.Result;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.image.gif.AnimatedGifEncoder;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
 
 import javax.imageio.ImageIO;
@@ -32,8 +27,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "图片生成")
@@ -43,31 +36,25 @@ public class ImageController extends QQController {
     private int maxTime = 15000;
 
     @Before
-    public GroupConf before(Group group){
-
-        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-        if (!conf.isEnable()){
-            throw new DoNone();
-        }
+    public void before(){
         //创建缓存路径
         if (!FileHandle.imageCachePath.exists() || FileHandle.imageCachePath.isFile()){
             FileHandle.imageCachePath.mkdirs();
         }
-
-        return conf;
     }
 
     /**
      * 丢头像
      * @return
      */
-    @Action("丢 {member}")
-    @MenuItem(name = "丢某人头像", usage = "丢 {member}", description = "把指定对象头像扔出去")
-    public Message diuAt(Group group, long member){
-        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
+    @Action("丢 {qq}")
+    @MenuItem(name = "丢某人头像", usage = "丢 {qq}", description = "把指定对象头像扔出去")
+    public Message diuAt(Group group,Member sender ,long qq){
+        if ((!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId())
+                && Permissions.getInstance().authorityCheck(sender, Permissions.ADMIN)){
             throw new SkipMe();
         }
-        return getDiu(member);
+        return getDiu(qq);
     }
 
     /**

@@ -8,15 +8,14 @@ import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.table.BlackList;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -30,6 +29,7 @@ import java.util.Date;
  * 黑名单相关控制器
  */
 @GroupController
+@Menu(name = "黑名单", permissions = Permissions.GROUP_ADMIN)
 public class BlackListController {
     private int maxTime = 25000;
     private int page_num = 5;
@@ -37,21 +37,14 @@ public class BlackListController {
      * 权限检查
      */
     @Before
-    public DataBase before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
-        GroupConf conf;
-        DataBase dataBase;
-
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
+    public void before(DataBase dataBase, GroupConf groupConf, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
+        if (!Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
-
-        conf = GroupConfManager.getInstance().get(group.getId());
-        if ((Boolean) conf.getControl(GroupControlId.CheckBox_BlackList).getValue()){
-            if (conf.isDataBaseEnable()){
-                dataBase = DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID());
-            }else {
+        if (groupConf.isBlackListGroupEnable()){//判断黑名单是否启用
+            if (dataBase == null){
                 Message msg = MyYuQ.getMif().text("数据库未启用").toMessage();
                 msg.setReply(message.getSource());
                 throw msg.toThrowable();
@@ -61,7 +54,6 @@ public class BlackListController {
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
-        return dataBase;
     }
 
     /**

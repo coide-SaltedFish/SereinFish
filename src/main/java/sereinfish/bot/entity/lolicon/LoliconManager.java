@@ -1,26 +1,13 @@
 package sereinfish.bot.entity.lolicon;
 
-import com.IceCreamQAQ.Yu.entity.DoNone;
-import com.icecreamqaq.yuq.message.Message;
-import org.apache.commons.codec.digest.DigestUtils;
-import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.lolicon.sf.Request;
 import sereinfish.bot.entity.lolicon.sf.Response;
-import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.utils.OkHttpUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
 
 public class LoliconManager {
     /**
@@ -168,18 +155,18 @@ public class LoliconManager {
      * 得到请求信息
      * @return
      */
-    public static Lolicon.Request getRequest(boolean isGroupMsg, GroupConf conf, String[] tags, int[] uids, int num){
+    public static Lolicon.Request getRequest(boolean isGroupMsg, GroupConf conf, String keyword, int[] uids, int num){
         int r18 = Lolicon.NO_R18;
         if (isGroupMsg){
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_SetuR18).getValue()){
+            if (conf.isSetuR18Enable()){
                 r18 = Lolicon.R18;
             }
-            if ((Boolean) conf.getControl(GroupControlId.CheckBox_PlainAndR18).getValue()){
+            if (conf.isPlainAndR18Enable()){
                 r18 = Lolicon.PLAIN_AND_R18;
             }
         }
 
-        Lolicon.Request request = new Lolicon.Request(r18, num, uids, tags, null);
+        Lolicon.Request request = new Lolicon.Request(r18, num, uids, keyword, null);
 
         return request;
     }

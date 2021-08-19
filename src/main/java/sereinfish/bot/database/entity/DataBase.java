@@ -69,7 +69,7 @@ public class DataBase {
         //jdbc:sqlserver://localhost:1433;DatabaseName=name"
         connection = DriverManager.getConnection("jdbc:mysql://" + dataBaseConfig.getIp() + ":" + dataBaseConfig.getPort() + "/" + dataBaseConfig.getBaseName() +
                 "?allowPublicKeyRetrieval=true&serverTimezone=UTC", dataBaseConfig.getAccount(), dataBaseConfig.getPassword());
-        statement = connection.createStatement();
+        statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
         log.d(this.getClass(),"My SQL数据库连接完成");
     }
 

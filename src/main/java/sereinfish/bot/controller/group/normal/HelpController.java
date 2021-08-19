@@ -2,8 +2,8 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
-import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.entity.bot.menu.MenuManager;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
@@ -21,12 +21,12 @@ public class HelpController {
 
     @Action("\\[.!！]help\\")
     @MenuItem(name = "帮助命令", usage = "[.!！]help", description = "用来获取帮助菜单")
-    public Message getHelpMenu(){
+    public Message getHelpMenu(Member sender){
 
         //先保存为图片
         File file = new File(FileHandle.imageCachePath,"help_temp");
         try {
-            ImageIO.write(MenuManager.getMenuImage(), "PNG", file);
+            ImageIO.write(MenuManager.getMenuImage(sender, null), "PNG", file);
             return MyYuQ.getMif().imageByFile(file).toMessage();
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),e);

@@ -1,6 +1,5 @@
 package sereinfish.bot.ui.menu;
 
-import sereinfish.bot.authority.AuthorityManagement;
 import sereinfish.bot.ui.frame.authority.AuthorityManagerFrame;
 import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.LinkRconFrame;

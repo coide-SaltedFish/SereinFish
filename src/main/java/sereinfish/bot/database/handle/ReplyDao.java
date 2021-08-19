@@ -1,11 +1,10 @@
 package sereinfish.bot.database.handle;
 
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.table.Reply;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.lang.reflect.Field;
@@ -170,11 +169,11 @@ public class ReplyDao extends DAO<Reply> {
      */
     public String queryKey(long group, String key) throws SQLException {
         //得到群聊配置
-        GroupConf conf = GroupConfManager.getInstance().get(group);
+        GroupConf conf = ConfManager.getInstance().get(group);
         String sql;
 
         //判断是否启用全局
-        if (!(Boolean) conf.getControl(GroupControlId.CheckBox_GlobalAutoReply).getValue()){
+        if (!conf.isGlobalAutoReplyEnable()){
             //精确匹配
             sql = "SELECT * FROM " + getTableName() + " WHERE key_ = ? AND group_num = ? AND is_fuzzy = ?";
             PreparedStatement preparedStatement = getDataBase().getConnection().prepareStatement(sql);

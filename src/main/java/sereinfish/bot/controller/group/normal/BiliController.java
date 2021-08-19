@@ -2,7 +2,6 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
-import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.alibaba.fastjson.JSONObject;
 import com.icecreamqaq.yuq.FunKt;
@@ -12,9 +11,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.Result;
 
@@ -31,20 +28,14 @@ import java.util.regex.Pattern;
 public class BiliController {
 
     @Before
-    public void before(Group group){
-        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-        //启用判断
-        if (!(Boolean) conf.getControl(GroupControlId.CheckBox_BiliEnable).getValue()){
-            throw new DoNone();
-        }
+    public void before(GroupConf groupConf){
     }
 
     @Action("\\^[Bb][Vv].*\\")
     @QMsg(at = true)
-    public Message bvToAv(Message message, Group group) throws IOException {
-        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
+    public Message bvToAv(Message message, GroupConf groupConf) throws IOException {
         //启用判断
-        if (!(Boolean) conf.getControl(GroupControlId.CheckBox_BiliBvExplain).getValue()){
+        if (!groupConf.isBiliBvExplainEnable()){
             throw new DoNone();
         }
 
@@ -70,6 +61,10 @@ public class BiliController {
             }
             while(!desc.equals(desc.replace("\n\n","\n"))){
                 desc = desc.replace("\n\n","\n");
+            }
+
+            if (!desc.endsWith("\n")){
+                desc += "\n";
             }
 
             return mif.imageByUrl(map.get("pic")).plus(

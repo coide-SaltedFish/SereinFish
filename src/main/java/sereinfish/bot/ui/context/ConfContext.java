@@ -1,15 +1,20 @@
 package sereinfish.bot.ui.context;
 
-import sereinfish.bot.authority.AuthorityManagement;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlType;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.database.DataBaseConfig;
+import sereinfish.bot.database.DataBaseManager;
+import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.permissions.Permissions;
+import sereinfish.bot.data.conf.ControlType;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
-import sereinfish.bot.net.mc.rcon.Rcon;
 import sereinfish.bot.net.mc.rcon.RconConf;
+import sereinfish.bot.ui.context.entity.ConfControls;
 import sereinfish.bot.ui.dialog.FileChooseDialog;
 import sereinfish.bot.ui.frame.EditFrame;
+import sereinfish.bot.ui.frame.database.select.SelectDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.SelectRconFrame;
 import sereinfish.bot.ui.textfield.plainDocument.NumberTextField;
 
@@ -25,46 +30,105 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class ConfContext {
 
-    public static Component getContext(GroupConf conf, GroupConf.Control control){
+    public static Component getContext(ConfControls.Control control){
         Component component = null;
         //如果是单选框
-        if (control.getType() == GroupControlType.CheckBox){
-            component = ConfContext.getCheckBox(conf, control);
-        }else if (control.getType() == GroupControlType.Edit){
+        if (control.getType() == ControlType.CheckBox){
+            component = ConfContext.getCheckBox(control);
+        }else if (control.getType() == ControlType.Edit){
             //如果是编辑框
-            component = ConfContext.getEdit(conf, control);
-        }else if (control.getType() == GroupControlType.WebLink){
+            component = ConfContext.getEdit(control);
+        }else if (control.getType() == ControlType.WebLink){
             //链接
-            component = ConfContext.getWebLink(conf, control);
-        }else if(control.getType() == GroupControlType.Font_ComboBox){
+            component = ConfContext.getWebLink(control);
+        }else if(control.getType() == ControlType.Font_ComboBox){
             //字体选择下拉框
-            component = ConfContext.getFontComboBox(conf, control);
-        }else if(control.getType() == GroupControlType.Edit_Small_Plain){
+            component = ConfContext.getFontComboBox(control);
+        }else if(control.getType() == ControlType.Edit_Small_Plain){
             //简单输入框
-            component = ConfContext.EditSmallPlain(conf, control);
-        }else if(control.getType() == GroupControlType.Edit_IntNum){
+            component = ConfContext.EditSmallPlain(control);
+        }else if(control.getType() == ControlType.Edit_IntNum){
             //整数输入框
-            component = ConfContext.getEditIntNum(conf, control);
-        }else if (control.getType() == GroupControlType.SelectRcon){
-            component = ConfContext.getRconSelect(conf, control);
-        }else if (control.getType() == GroupControlType.Authority_ComboBox){
-            component = ConfContext.getAuthorityComboBox(conf, control);
+            component = ConfContext.getEditIntNum(control);
+        }else if (control.getType() == ControlType.SelectRcon){
+            component = ConfContext.getRconSelect(control);
+        }else if (control.getType() == ControlType.Authority_ComboBox){
+            component = ConfContext.getAuthorityComboBox(control);
+        }else if(control.getType() == ControlType.DataBaseSelect){
+            component = getDataBaseComboBox(control);
         }
 
         return component;
     }
 
     /**
+     * 数据库选择
+     * @return
+     */
+    public static JPanel getDataBaseComboBox(ConfControls.Control control){
+        JPanel comboBox_panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        DataBaseConfig dataBaseConfig = control.getValue();
+
+        JButton btn_dataBase = new JButton("选择数据库");
+        if (dataBaseConfig != null){
+            btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
+        }
+
+        comboBox_panel.add(btn_dataBase);
+        btn_dataBase.setToolTipText("点击选择此群数据库");
+
+        btn_dataBase.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new SelectDataBaseFrame(new SelectDataBaseFrame.SelectDataBaseListener() {
+                    @Override
+                    public void select(SelectDataBaseFrame frame, DataBase dataBase) {
+                        control.setValue(dataBase.getDataBaseConfig());
+                        DataBaseConfig dataBaseConfig = (DataBaseConfig) control.getValue();
+                        try {
+                            if (DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID()) != null){
+                                btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
+                            }else {
+                                btn_dataBase.setText("选择数据库");
+                            }
+                        } catch (Exception throwables) {
+                            SfLog.getInstance().e(this.getClass(), throwables);
+                        } catch (IllegalModeException illegalModeException) {
+                            SfLog.getInstance().e(this.getClass(), illegalModeException);
+                        }
+                        frame.close();
+                    }
+
+                    @Override
+                    public void cancel(SelectDataBaseFrame frame) {
+                        frame.close();
+                    }
+
+                    @Override
+                    public void close(SelectDataBaseFrame frame){
+                        control.setValue(null);
+                        btn_dataBase.setText("选择数据库");
+                        frame.close();
+                    }
+                });
+            }
+        });
+
+        return comboBox_panel;
+    }
+
+    /**
      * 得到单选框
-     * @param conf
      * @param control
      * @return
      */
-    public static JCheckBox getCheckBox(GroupConf conf, GroupConf.Control control){
+    public static JCheckBox getCheckBox(ConfControls.Control control){
         JCheckBox checkBox = new JCheckBox(control.getName());
         checkBox.setToolTipText(control.getTip());//设置提示
         checkBox.setSelected((Boolean) control.getValue());//设置值
@@ -73,7 +137,6 @@ public class ConfContext {
             @Override
             public void stateChanged(ChangeEvent e) {
                 control.setValue(checkBox.isSelected());
-                GroupConfManager.getInstance().put(conf);
             }
         });
         return checkBox;
@@ -81,11 +144,10 @@ public class ConfContext {
 
     /**
      * 得到编辑框
-     * @param conf
      * @param control
      * @return
      */
-    public static JButton getEdit(GroupConf conf, GroupConf.Control control){
+    public static JButton getEdit(ConfControls.Control control){
         JButton button = new JButton(control.getName());
         button.setToolTipText(control.getTip());
 
@@ -96,7 +158,6 @@ public class ConfContext {
                     @Override
                     public void save(EditFrame editFrame, String text) {
                         control.setValue(text);
-                        GroupConfManager.getInstance().put(conf);
                         editFrame.close();
                     }
 
@@ -114,18 +175,17 @@ public class ConfContext {
 
     /**
      * 网页链接
-     * @param conf
      * @param control
      * @return
      */
-    public static JButton getWebLink(GroupConf conf, GroupConf.Control control){
+    public static JButton getWebLink(ConfControls.Control control){
         JButton button = new JButton(control.getName());
         button.setToolTipText(control.getTip());
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 Desktop desktop=Desktop.getDesktop();
-                String url = (String) control.getValue();
+                String url = control.getValue();
                 try {
                     desktop.browse(new URI(url));
                 } catch (IOException e) {
@@ -140,11 +200,10 @@ public class ConfContext {
 
     /**
      * 字体选择下拉框
-     * @param conf
      * @param control
      * @return
      */
-    public static JPanel getFontComboBox(GroupConf conf, GroupConf.Control control){
+    public static JPanel getFontComboBox(ConfControls.Control control){
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
@@ -188,7 +247,6 @@ public class ConfContext {
                                 comboBox.addItem("文件：" + f.getName());
                                 comboBox.setSelectedItem("文件：" + f.getName());
                                 control.setValue(f.getAbsolutePath());
-                                GroupConfManager.getInstance().put(conf);
                             }
 
                             @Override
@@ -198,7 +256,6 @@ public class ConfContext {
                         }, "ttf");
                     }else {
                         control.setValue(e.getItem());
-                        GroupConfManager.getInstance().put(conf);
                     }
                 }
             }
@@ -212,7 +269,7 @@ public class ConfContext {
      * 权限选择框
      * @return
      */
-    public static JPanel getAuthorityComboBox(GroupConf conf, GroupConf.Control control){
+    public static JPanel getAuthorityComboBox(ConfControls.Control control){
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
@@ -220,26 +277,25 @@ public class ConfContext {
         comboBox.setToolTipText(control.getTip());
 
         //初始化列表
-        for (Map.Entry<String, Integer> entry: AuthorityManagement.AuthorityList.entrySet()){
+        for (Map.Entry<String, Integer> entry: Permissions.AuthorityList.entrySet()){
             comboBox.addItem(entry.getKey());
         }
-        int var = AuthorityManagement.NORMAL;
+        int var = Permissions.NORMAL;
         if (control.getValue() instanceof Integer){
-            var = (int) control.getValue();
+            var = control.getValue();
         }else {
             var = Double.valueOf(control.getValue().toString()).intValue();
         }
 
 
-        comboBox.setSelectedItem(AuthorityManagement.getInstance().getAuthorityName(var));
+        comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(var));
 
         //设置点击事件
         comboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED){
-                    control.setValue(AuthorityManagement.AuthorityList.get(e.getItem()));
-                    GroupConfManager.getInstance().put(conf);
+                    control.setValue(Permissions.AuthorityList.get(e.getItem()));
                 }
             }
         });
@@ -250,11 +306,10 @@ public class ConfContext {
 
     /**
      * 简单输入框
-     * @param conf
      * @param control
      * @return
      */
-    public static JPanel EditSmallPlain(GroupConf conf, GroupConf.Control control){
+    public static JPanel EditSmallPlain(ConfControls.Control control){
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
@@ -269,7 +324,6 @@ public class ConfContext {
                 if(e.getKeyChar()==KeyEvent.VK_ENTER ){
                     //保存内容
                     control.setValue(textField.getText());
-                    GroupConfManager.getInstance().put(conf);
                     panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
                     panel.requestFocus();
                 }
@@ -304,11 +358,10 @@ public class ConfContext {
 
     /**
      * 得到整数编辑框
-     * @param conf
      * @param control
      * @return
      */
-    public static JPanel getEditIntNum(GroupConf conf, GroupConf.Control control){
+    public static JPanel getEditIntNum(ConfControls.Control control){
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
@@ -317,20 +370,8 @@ public class ConfContext {
         textField.setToolTipText(control.getTip());
         textField.setDocument(new NumberTextField(9));
 
-        Object object = control.getValue();
-        try{
-            if (object instanceof Double){
-                double dVar = Double.valueOf((Double) object);
-                int var = (int) dVar;
-                textField.setText(var + "");
-            }else if(object instanceof Integer){
-                int var = (int) object;
-                textField.setText(var + "");
-            }
-        }catch (Exception e){
-            panel.setBorder(BorderFactory.createTitledBorder("[数据源错误]" + control.getName()));
-            textField.setText(0 + "");
-        }
+        int var = control.getValue();
+        textField.setText(var + "");
 
         //保存事件
         textField.addKeyListener(new KeyAdapter() {
@@ -344,7 +385,6 @@ public class ConfContext {
                     try{
                         var = Integer.valueOf(text);
                         control.setValue(var);
-                        GroupConfManager.getInstance().put(conf);
                         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
                         panel.requestFocus();
                     }catch (Exception e1){
@@ -384,22 +424,20 @@ public class ConfContext {
 
     /**
      * Rcon选择
-     * @param groupConf
      * @param control
      * @return
      */
-    public static JPanel getRconSelect(GroupConf groupConf, GroupConf.Control control){
+    public static JPanel getRconSelect(ConfControls.Control control){
         JPanel panel = new JPanel(new FlowLayout());
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
         JButton button = new JButton("选择");
         panel.add(button);
         button.setToolTipText(control.getTip());
-        if (control.getValue() != null){
-            RconConf rconConf = MyYuQ.toClass((String) control.getValue(), RconConf.class);
-            if (rconConf != null){
-                button.setText(rconConf.getName());
-            }
+
+        RconConf rconConf = control.getValue();
+        if (rconConf != null){
+            button.setText(rconConf.getName());
         }
 
         button.addActionListener(new ActionListener() {
@@ -408,15 +446,13 @@ public class ConfContext {
                 new SelectRconFrame("选择Rcon", new SelectRconFrame.SelectListener() {
                     @Override
                     public void select(RconConf conf) {
-                        control.setValue(MyYuQ.toJson(conf, RconConf.class));
-                        GroupConfManager.getInstance().put(groupConf);
+                        control.setValue(conf);
                         button.setText(conf.getName());
                     }
 
                     @Override
                     public void clean() {
-                        control.setValue("");
-                        GroupConfManager.getInstance().put(groupConf);
+                        control.setValue(null);
                         button.setText("选择");
                     }
                 });

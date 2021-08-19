@@ -1,17 +1,16 @@
 package sereinfish.bot.entity.bot.menu;
 
-import com.icecreamqaq.yuq.annotation.GroupController;
-import com.icecreamqaq.yuq.annotation.PrivateController;
+import com.icecreamqaq.yuq.entity.Member;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.apache.xerces.impl.xpath.regex.Match;
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.entity.ClassManager;
 import sereinfish.bot.entity.arknights.penguinStatistics.PenguinStatistics;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
+import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -22,12 +21,11 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class MenuManager {
-    public static BufferedImage getMenuImage(){
+    public static BufferedImage getMenuImage(Member sender, GroupConf conf){
         //判断图片是否存在
         if (FileHandle.helpMenuImageCacheFile.exists() && FileHandle.helpMenuImageCacheFile.isFile()){
             try {
@@ -137,7 +135,7 @@ public class MenuManager {
             textY += rowSpacing + drawString(graphics2D,
                     textColor,
                     font,
-                    "● " + menuEntity.menu.name() + " " + type +  " [" + AuthorityManagement.getInstance().getAuthorityName(menuEntity.menu.permissions()) + "]：",
+                    "● " + menuEntity.menu.name() + " " + type +  " [" + Permissions.getInstance().getAuthorityName(menuEntity.menu.permissions()) + "]：",
                     textX,
                     textY);
             //绘制指令
@@ -147,12 +145,12 @@ public class MenuManager {
                 //名称【权限】
                 textX = leftSpacing + indentLength;
                 textY += rowSpacing + drawString(graphics2D,textColor,font,
-                        (i + 1) + "." + menuItem.name() + "：[" + AuthorityManagement.getInstance().getAuthorityName(menuItem.permission()) + "]",
+                        (i + 1) + "." + menuItem.name() + "：[" + Permissions.getInstance().getAuthorityName(menuItem.permission()) + "]",
                         textX,
                         textY);
                 textX += indentLength;
                 //格式
-                textY += rowSpacing + drawString(graphics2D,Color.RED,font,"调用格式：" + menuItem.usage(), textX, textY);
+                textY += rowSpacing + drawString(graphics2D,Color.DARK_GRAY,font,"调用格式：" + menuItem.usage(), textX, textY);
                 //描述
                 textY += rowSpacing + drawString(graphics2D,textColor,font,"描述：" + menuItem.description(), textX, textY);
             }
@@ -170,22 +168,29 @@ public class MenuManager {
      * @param y
      */
     private static int drawString(Graphics2D graphics2D, Color color, Font font, String str, int x, int y){
-        graphics2D.setColor(color);
+        str = str.replace("●", "§1●§0");
+
+        str = str.replace("[", "§c[");
+        str = str.replace("]", "]§0");
+
+        str = str.replace("{", "§9{");
+        str = str.replace("}", "}§0");
+
+        str = str.replace("@", "§9@§0");
+
+        graphics2D.setPaint(color);
         graphics2D.setFont(font);
         FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
         int textX = x;
         for (int i = 0; i < str.length(); i++){
             String c = String.valueOf(str.charAt(i));
-            if (c.matches("[\\{\\}\\[\\]\\|\\.\\!\\！\\-\\_0-9●]")){
-                graphics2D.setColor(Color.orange);
-                graphics2D.drawString(c, textX, y + metrics.getAscent());
-                textX += metrics.stringWidth(c);
-                graphics2D.setColor(color);
+            if (c.equals("§")){
+                i++;
+                graphics2D.setPaint(JsonColor.getColor(c + str.charAt(i)));
             }else {
                 graphics2D.drawString(c, textX, y + metrics.getAscent());
                 textX += metrics.stringWidth(c);
             }
-
         }
         return metrics.getHeight();
     }

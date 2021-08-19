@@ -74,7 +74,6 @@ public class NetHandle {
      * @return
      */
     public synchronized static BufferedImage getMcPlayerHeadImage(String uuid, int w) throws IOException {
-        System.out.println(uuid);
         BufferedImage bufferedImage = new BufferedImage(w, w, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D graphics2D = bufferedImage.createGraphics();
         graphics2D.setBackground(new Color(255, 255, 255, 62));

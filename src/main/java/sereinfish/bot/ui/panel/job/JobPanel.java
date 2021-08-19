@@ -1,6 +1,6 @@
 package sereinfish.bot.ui.panel.job;
 
-import sereinfish.bot.entity.conf.GroupConf;
+import sereinfish.bot.data.conf.entity.GroupConf;
 
 import javax.swing.*;
 

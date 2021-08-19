@@ -6,12 +6,9 @@ import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
-import sereinfish.bot.entity.jsonEx.JsonMsg;
-import sereinfish.bot.entity.xmlEx.XmlMsg;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -25,19 +22,11 @@ import java.net.URLEncoder;
 @Menu(type = Menu.Type.GROUP, name = "搜索快捷入口")
 public class WikiController {
 
-    @Before
-    public void before(Group group){
-        //检查是否启用
-        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiEnable).getValue()){
-            throw new DoNone();
-        }
-    }
-
     @Action("\\[!！.]wiki$\\ {key}")
     @MenuItem(name = "Mc Wiki", usage = "[!！.]wiki {key}", description = "得到Mc Wiki中指向关键词的链接")
-    public Message mcWiki(Group group, String key){
+    public Message mcWiki(GroupConf groupConf, String key){
         //检查是否启用
-        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiMcEnable).getValue()){
+        if (!groupConf.isMcWikiEnable()){
             throw new DoNone();
         }
 
@@ -55,9 +44,9 @@ public class WikiController {
 
     @Action("\\[!！.]百度$\\ {key}")
     @MenuItem(name = "百度", usage = "[!！.]百度 {key}", description = "得到百度中指向关键词的链接")
-    public Message baidu(Group group, String key){
+    public Message baidu(GroupConf groupConf, String key){
         //检查是否启用
-        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiBaiduEnable).getValue()){
+        if (!groupConf.isBaiduEnable()){
             throw new DoNone();
         }
 
@@ -75,9 +64,9 @@ public class WikiController {
 
     @Action("\\[!！.][Pp][Rr][Tt][Ss]$\\ {key}")
     @MenuItem(name = "PRTS", usage = "[!！.][Pp][Rr][Tt][Ss] {key}", description = "得到PRTS中指向关键词的链接")
-    public Message prts(Group group, String key){
+    public Message prts(GroupConf groupConf, String key){
         //检查是否启用
-        if (!(Boolean) GroupConfManager.getInstance().get(group.getId()).getControl(GroupControlId.CheckBox_wikiPRTSEnable).getValue()){
+        if (!groupConf.isPRTSEnable()){
             throw new DoNone();
         }
 

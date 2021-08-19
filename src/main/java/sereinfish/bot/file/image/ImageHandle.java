@@ -3,19 +3,11 @@ package sereinfish.bot.file.image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
-import gui.ava.html.parser.HtmlParser;
-import gui.ava.html.parser.HtmlParserImpl;
-import gui.ava.html.renderer.ImageRenderer;
-import gui.ava.html.renderer.ImageRendererImpl;
-import org.xhtmlrenderer.swing.Java2DRenderer;
 
 import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupControlId;
-import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.myYuq.MyYuQ;
 import sun.font.FontDesignMetrics;
 import sun.misc.BASE64Decoder;
 
@@ -24,7 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.io.*;
 import java.net.URL;
 import java.util.Arrays;
@@ -180,9 +171,9 @@ public class ImageHandle {
     public static BufferedImage messageToImage(Message message, GroupConf conf){
         Color bgColor = Color.decode("#EEEEEE");//背景颜色
         Color paintColor = Color.decode("#212121");//画笔颜色
-        String mFont = (String) conf.getControl(GroupControlId.ComBox_FontSelect).getValue();
-        int fontSize = (int) (double) conf.getControl(GroupControlId.Edit_IntNum_FontSize).getValue();//文本大小
-        int margin = (int) ((double) conf.getControl(GroupControlId.Edit_IntNum_Margins).getValue());//生成图像边距
+        String mFont = conf.getLongMsgToImageFont();
+        int fontSize = conf.getLongMsgToImageFontSize();//文本大小
+        int margin = conf.getLongMsgToImageMargins();//生成图像边距
         int maxWidth = 1080;//最大图片宽度大小
         int maxLineWidth = maxWidth - (margin * 2);//最大行宽
         int lineMaxWidth = 0;//最大文字宽度
@@ -311,7 +302,7 @@ public class ImageHandle {
         graphics2D.drawImage(bufferedOldImage, margin, margin, null);
         //加个水印
         font = font.deriveFont(22f);
-        String watermark = (String) conf.getControl(GroupControlId.Edit_Small_Plain_MsgToImageWatermark).getValue();
+        String watermark = conf.getMsgToImageWatermark();
         FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
         int wlen = 0;
         for (int i = 0; i < watermark.length(); i++){

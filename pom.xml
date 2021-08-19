@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>SereinFish_bot_art</artifactId>
+    <artifactId>SereinFish_bot</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.IceCreamQAQ.YuQ</groupId>
             <artifactId>YuQ-Mirai</artifactId>
-            <version>0.1.0.0-DEV15</version>
+            <version>0.1.0.0-DEV19</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
@@ -68,11 +68,11 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/gui.ava/html2image -->
-        <dependency>
-            <groupId>gui.ava</groupId>
-            <artifactId>html2image</artifactId>
-            <version>2.0.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>gui.ava</groupId>-->
+<!--            <artifactId>html2image</artifactId>-->
+<!--            <version>2.0.1</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/dnsjava/dnsjava -->
         <dependency>
             <groupId>dnsjava</groupId>
@@ -80,10 +80,16 @@
             <version>3.4.0</version>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.xhtmlrenderer</groupId>-->
+<!--            <artifactId>core-renderer</artifactId>-->
+<!--            <version>R8</version>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>core-renderer</artifactId>
-            <version>R8</version>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.29</version>
         </dependency>
 
         <!--        <dependency>-->

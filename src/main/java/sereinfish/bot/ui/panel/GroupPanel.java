@@ -1,8 +1,7 @@
 package sereinfish.bot.ui.panel;
 
-import sereinfish.bot.database.table.Reply;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.ui.panel.job.JobPanel;
 import sereinfish.bot.ui.panel.table.database.blacklist.DBBlackPanel;
 import sereinfish.bot.ui.panel.table.database.reply.DBReplyPanel;
@@ -24,7 +23,7 @@ public class GroupPanel extends JTabbedPane {
 
     private void build(){
         setBorder(BorderFactory.createTitledBorder("群[" + group + "]"));
-        GroupConf conf = GroupConfManager.getInstance().get(group);
+        GroupConf conf = ConfManager.getInstance().get(group);
 
         add("群配置",new GroupConfPanel(conf));
         add("计划任务", new JobPanel(conf));

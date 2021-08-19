@@ -1,6 +1,6 @@
 package sereinfish.bot.entity.bot.menu.annotation;
 
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.permissions.Permissions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,5 +13,5 @@ public @interface MenuItem {
     String name() default "指令名称";
     String usage() default "./";//命令格式
     String description() default "描述";
-    int permission() default AuthorityManagement.NORMAL;//权限
+    int permission() default Permissions.NORMAL;//权限
 }

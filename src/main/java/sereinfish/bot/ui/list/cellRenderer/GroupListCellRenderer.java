@@ -1,8 +1,8 @@
 package sereinfish.bot.ui.list.cellRenderer;
 
 import com.icecreamqaq.yuq.entity.Group;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.list.CellManager;
@@ -20,7 +20,7 @@ public class GroupListCellRenderer implements ListCellRenderer{
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Group group = (Group)value;//得到群组对象
-        GroupConf groupConf = GroupConfManager.getInstance().get(group.getId());
+        GroupConf groupConf = ConfManager.getInstance().get(group.getId());
         String id = MyYuQ.stringToMD5(group.toString() + index);
 
         if (cellManager.exist(id)){

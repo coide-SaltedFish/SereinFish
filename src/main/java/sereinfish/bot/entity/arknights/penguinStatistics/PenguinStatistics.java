@@ -165,16 +165,16 @@ public class PenguinStatistics {
         //绘制底图
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         BufferedImage bgImage;//获取背景图片干员
-        String bgImagePath = "arknights/" + MyYuQ.getRandom(1, 3) + ".png";
+        String bgImagePath = "arknights/" + MyYuQ.getRandom(1, 5) + ".png";
         try {
             bgImage = ImageIO.read(getClass().getClassLoader().getResource(bgImagePath));
-            graphics2D.drawImage(bgImage, width - bgImage.getWidth(), height - bgImage.getHeight(), null);
+            graphics2D.drawImage(bgImage, width - bgImage.getWidth(), height - bgImage.getHeight(), null);//绘制干员图片
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), "资源读取错误：" + bgImagePath);
         }
         //绘制底层颜色
         graphics2D.setColor(bgColor);
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, bgColorAlp));
+        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, bgColorAlp));//半透明颜色覆盖
         graphics2D.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
         graphics2D.setColor(Color.WHITE);
         graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));

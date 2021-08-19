@@ -12,15 +12,13 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.Reply;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -35,25 +33,16 @@ public class ReplyController extends QQController {
      * 权限检查
      */
     @Before
-    public DataBase before(Group group, Member sender, Message message) throws IllegalModeException, SQLException, ClassNotFoundException {
-        DataBase dataBase;
-
-        GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-        if (!conf.isEnable()){
-            throw new DoNone();
-        }
-
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
+    public void before(GroupConf groupConf, DataBase dataBase, Member sender, Message message){
+        if (!Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
 
 
-        if ((Boolean) conf.getControl(GroupControlId.CheckBox_AutoReply).getValue()){
-            if (conf.isDataBaseEnable()){
-                dataBase = DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID());
-            }else {
+        if (groupConf.isAutoReplyEnable()){
+            if (dataBase == null){
                 Message msg = MyYuQ.getMif().text("数据库未启用").toMessage();
                 msg.setReply(message.getSource());
                 throw msg.toThrowable();
@@ -63,7 +52,6 @@ public class ReplyController extends QQController {
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
-        return dataBase;
     }
 
     @Action("\\[!！.]添加问答$\\")

@@ -5,19 +5,12 @@ import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
-import com.icecreamqaq.yuq.controller.ContextSession;
-import com.icecreamqaq.yuq.controller.QQController;
-import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
-import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import org.xbill.DNS.*;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -25,7 +18,6 @@ import sereinfish.bot.net.mc.ServerListPing;
 import sereinfish.bot.net.mc.rcon.Rcon;
 import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.net.mc.rcon.RconManager;
-import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 
 /**
  * mc服务器相关指令
@@ -42,19 +33,13 @@ import java.net.SocketException;
 @Menu(type = Menu.Type.GROUP, name = "mc服务器相关")
 public class McServerController {
 
-    @Before
-    public GroupConf before(Group group){
-        return GroupConfManager.getInstance().get(group.getId());
-    }
-
-
     @Action("\\[.!！][Ss]tate$\\ {addr}")
     @Synonym("\\[.!！][Ss]tate$\\")
     @MenuItem(name = "获取服务器状态", usage = "[.!！][Ss]tate {addr} | [.!！][Ss]tate", description = "获取指定地址服务器信息或者获取本群绑定服务器信息")
     public Message ping(GroupConf groupConf, Group group, String addr) throws IOException {
         //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_McServerState).getValue()){
+        if (groupConf.isRconEnable()){
+            if (!groupConf.isMcServerState()){
                 throw new DoNone();
             }
         }else {
@@ -64,19 +49,19 @@ public class McServerController {
         Rcon rcon = null;
         String name = "";
         if (addr.matches("([.!！][Ss]tate)")){
-            if (((String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue()).equals("")){
+            if (groupConf.getMcServerAddr().equals("")){
                 return MyYuQ.getMif().text("错误，地址尚未配置，请使用 state {addr} 命令").toMessage();
             }else {
-                if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-                    RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
+                if (groupConf.getSelectGroupRcon() != null){
+                    RconConf rconConf = groupConf.getSelectGroupRcon();
                     if (rconConf != null){
                         rcon = RconManager.getInstance().getRcon(rconConf.getID());
                     }
                 }
 
-                addr = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerAddr).getValue();
+                addr = groupConf.getMcServerAddr();
 
-                name = (String) groupConf.getControl(GroupControlId.Edit_Small_Plain_McServerName).getValue();
+                name = groupConf.getMcServerName();
                 if (name.equals("")){
                     name = addr;
                 }

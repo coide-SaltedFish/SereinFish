@@ -3,20 +3,21 @@ package sereinfish.bot.event;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
+import com.IceCreamQAQ.Yu.hook.YuHook;
 import com.IceCreamQAQ.Yu.job.JobManager;
+import com.IceCreamQAQ.Yu.loader.AppClassloader;
 import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import sereinfish.bot.authority.AuthorityManagement;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.ClassManager;
-import sereinfish.bot.entity.conf.GroupConfManager;
 import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.account.AccountManager;
@@ -71,6 +72,8 @@ public class InitEvent {
             SfLog.getInstance().e(this.getClass(), "注解管理器初始化失败，启动失败", e);
             System.exit(-1);
         }
+        //初始化Hook
+        //YuHook.init();
 
         //初始化mirai事件
         GlobalEventChannel.INSTANCE.registerListenerHost(new MiraiEvent());//事件注册
@@ -78,7 +81,7 @@ public class InitEvent {
 
         //初始化权限管理器
         try {
-            AuthorityManagement.init();
+            Permissions.init();
             SfLog.getInstance().d(this.getClass(),"权限管理器初始化完成");
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(),"权限管理器初始化失败,应用退出",e);
@@ -94,7 +97,7 @@ public class InitEvent {
         RconManager.init();
         SfLog.getInstance().d(this.getClass(),"RCON管理器初始化完成");
         //初始化群配置管理器
-        GroupConfManager.init();
+        ConfManager.init();
         SfLog.getInstance().d(this.getClass(),"群配置管理器初始化完成");
 
         //初始化账号管理器

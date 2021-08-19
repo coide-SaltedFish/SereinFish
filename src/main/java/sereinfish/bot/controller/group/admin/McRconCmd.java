@@ -10,10 +10,8 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
-import sereinfish.bot.authority.AuthorityManagement;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.mc.rcon.Rcon;
 import sereinfish.bot.net.mc.rcon.RconConf;
@@ -28,21 +26,20 @@ public class McRconCmd extends QQController {
     private int maxTime = 15000;
 
     @Before
-    public GroupConf before(Message message, Member sender, Group group){
+    public void before(Message message, Member sender, Group group){
         //权限判断
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.OP)) { //权限检查
+        if (!Permissions.getInstance().authorityCheck(sender, Permissions.OP)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
-        return GroupConfManager.getInstance().get(group.getId());
     }
 
     @Action("\\[.!！][rR][cC][Ee]$\\ {var}")
     public String rconCmdExecute(GroupConf groupConf, String var){
         //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRconCMD).getValue()){
+        if (groupConf.isRconEnable()){
+            if (!groupConf.isRconCMDEnable()){
                 throw new DoNone();
             }
         }else {
@@ -50,8 +47,8 @@ public class McRconCmd extends QQController {
         }
         //得到Rcon
         Rcon rcon = null;
-        if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-            RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
+        if (groupConf.getSelectGroupRcon() != null){
+            RconConf rconConf = groupConf.getSelectGroupRcon();
             if (rconConf != null){
                 rcon = RconManager.getInstance().getRcon(rconConf.getID());
             }
@@ -77,8 +74,8 @@ public class McRconCmd extends QQController {
     @Action("\\[.!！][rR][cC][Ee][Ss]$\\")
     public String rconsCmdExecute(ContextSession session, Member sender, GroupConf groupConf){
         //前置检查
-        if ((Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRcon).getValue()){
-            if (!(Boolean) groupConf.getControl(GroupControlId.CheckBox_EnableRconCMD).getValue()){
+        if (groupConf.isRconEnable()){
+            if (!groupConf.isRconCMDEnable()){
                 throw new DoNone();
             }
         }else {
@@ -90,8 +87,8 @@ public class McRconCmd extends QQController {
             String reMsg = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
             //得到Rcon
             Rcon rcon = null;
-            if (groupConf.getControl(GroupControlId.SelectRcon).getValue() != null){
-                RconConf rconConf = MyYuQ.toClass((String) groupConf.getControl(GroupControlId.SelectRcon).getValue(), RconConf.class);
+            if (groupConf.getSelectGroupRcon() != null){
+                RconConf rconConf = groupConf.getSelectGroupRcon();
                 if (rconConf != null){
                     rcon = RconManager.getInstance().getRcon(rconConf.getID());
                 }

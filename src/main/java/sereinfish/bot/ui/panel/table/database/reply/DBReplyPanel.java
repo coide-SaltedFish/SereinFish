@@ -1,9 +1,11 @@
 package sereinfish.bot.ui.panel.table.database.reply;
 
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.database.DataBaseManager;
+import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.handle.ReplyDao;
-import sereinfish.bot.database.table.BlackList;
 import sereinfish.bot.database.table.Reply;
-import sereinfish.bot.entity.conf.GroupConf;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.frame.database.insert.InsertFrame;
@@ -20,10 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class DBReplyPanel extends JPanel {
     private JPanel contentPane;
@@ -55,8 +55,16 @@ public class DBReplyPanel extends JPanel {
 
         if (conf.isDataBaseEnable()){
             try {
-                replyDao = new ReplyDao(conf.getDataBase());
+                replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
             } catch (SQLException e) {
+                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
+                SfLog.getInstance().e(this.getClass(),e);
+                return;
+            } catch (IllegalModeException e) {
+                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
+                SfLog.getInstance().e(this.getClass(),e);
+                return;
+            } catch (ClassNotFoundException e) {
                 contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
                 SfLog.getInstance().e(this.getClass(),e);
                 return;

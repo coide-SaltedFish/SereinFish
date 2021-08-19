@@ -54,10 +54,10 @@ public class Lolicon {
         int r18 = 0;
         int num = 1;//一次返回的数量
         int[] uids;//作者uid
-        String[] tags;
+        String keyword;
         String proxy;//是否使用原图连接
 
-        public Request(int r18, int num, int[] uids, String[] tags, String proxy) {
+        public Request(int r18, int num, int[] uids, String keyword, String proxy) {
             this.r18 = r18;
             if (num < 1){
                 this.num = 1;
@@ -68,7 +68,7 @@ public class Lolicon {
             }
             this.num = num;
             this.uids = uids;
-            this.tags = tags;
+            this.keyword = keyword;
             this.proxy = proxy;
         }
 
@@ -93,10 +93,19 @@ public class Lolicon {
                 }
             }
 
-            if (tags != null){
-                for (String tag:tags){
+            if (keyword != null){
+                if (keyword.contains("#")){
+                    String[] tags = keyword.split("#");
+                    for (String tag:tags){
+                        try {
+                            api += "&tag=" + URLEncoder.encode(tag,"utf-8");
+                        } catch (UnsupportedEncodingException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        }
+                    }
+                }else {
                     try {
-                        api += "&tag=" + URLEncoder.encode(tag,"utf-8");
+                        api += "&keyword=" + URLEncoder.encode(keyword,"utf-8");
                     } catch (UnsupportedEncodingException e) {
                         SfLog.getInstance().e(this.getClass(),e);
                     }

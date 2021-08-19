@@ -9,37 +9,23 @@ import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
-import com.icecreamqaq.yuq.entity.GroupNotice;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
-import com.icecreamqaq.yuq.message.MessageItem;
-import sereinfish.bot.authority.AuthorityManagement;
-import sereinfish.bot.database.table.GroupHistoryMsg;
-import sereinfish.bot.entity.conf.GroupConf;
-import sereinfish.bot.entity.conf.GroupConfManager;
-import sereinfish.bot.entity.conf.GroupControlId;
-import sereinfish.bot.entity.jsonEx.JsonMsg;
-import sereinfish.bot.entity.xmlEx.XmlMsg;
+import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.performance.MyPerformance;
-import sun.misc.BASE64Decoder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.renderable.RenderableImage;
-import java.awt.image.renderable.RenderableImageOp;
 import java.io.*;
-import java.sql.SQLException;
-import java.util.regex.Pattern;
 
 /**
  * 消息相关命令处理
@@ -52,15 +38,13 @@ public class MsgController extends QQController {
      * 权限检查
      */
     @Before
-    public Group before(Group group, Member sender, Message message){
-        if (!AuthorityManagement.getInstance().authorityCheck(sender,AuthorityManagement.GROUP_ADMIN)) { //权限检查
+    public void before(Member sender, Message message){
+        if (!Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
-
-        return group;
     }
 
     @Action("\\[!！.]版本$\\")
@@ -90,14 +74,13 @@ public class MsgController extends QQController {
     }
 
     @Action("\\[.!！]消息转图片$\\")
-    public Message testMsgImage(ContextSession session, Group group){
+    public Message testMsgImage(GroupConf groupConf, ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"msg_temp");//文件缓存路径
             reply("输入要转换的消息");
             Message m1 = session.waitNextMessage(maxTime);
             reply("请稍后");
-            GroupConf conf = GroupConfManager.getInstance().get(group.getId());
-            ImageIO.write(ImageHandle.messageToImage(m1, conf), "png", imageFile);
+            ImageIO.write(ImageHandle.messageToImage(m1, groupConf), "png", imageFile);
 
             return MyYuQ.getMif().imageByFile(imageFile).toMessage();
         }catch (WaitNextMessageTimeoutException e){

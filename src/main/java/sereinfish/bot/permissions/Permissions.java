@@ -1,4 +1,4 @@
-package sereinfish.bot.authority;
+package sereinfish.bot.permissions;
 
 import com.icecreamqaq.yuq.entity.Member;
 import sereinfish.bot.file.FileHandle;
@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * 权限管理器
  */
-public class AuthorityManagement {
+public class Permissions {
     public static final int OP = -1;//服务器op权限
     public static final int MASTER = 0;//拥有者权限
     public static final int ADMIN = 1;//bot管理员权限
@@ -21,10 +21,10 @@ public class AuthorityManagement {
 
     public static final Map<String, Integer> AuthorityList = new HashMap<>();//权限值映射表
 
-    private static AuthorityManagement authorityManagement;//单例模式
+    private static Permissions permissions;//单例模式
     private AuthorityList authorityList;//权限列表类
 
-    private AuthorityManagement() throws IOException {
+    private Permissions() throws IOException {
         //初始化映射表
         AuthorityList.put("OP", OP);
         AuthorityList.put("MASTER", MASTER);
@@ -35,16 +35,16 @@ public class AuthorityManagement {
         readAuthorityList();//得到权限列表
     }
 
-    public static AuthorityManagement init() throws IOException {
-        authorityManagement = new AuthorityManagement();
-        return authorityManagement;
+    public static Permissions init() throws IOException {
+        permissions = new Permissions();
+        return permissions;
     }
 
-    public static AuthorityManagement getInstance(){
-        if (authorityManagement == null){
+    public static Permissions getInstance(){
+        if (permissions == null){
             throw new NullPointerException("权限管理器未初始化");
         }
-        return authorityManagement;
+        return permissions;
     }
 
     /**
@@ -162,7 +162,7 @@ public class AuthorityManagement {
         public boolean addOP(long id){
             opList.put(id,id);
             try {
-                AuthorityManagement.getInstance().writeAuthorityList();
+                Permissions.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 SfLog.getInstance().e(this.getClass(),"op添加失败:" + id,e);
@@ -181,7 +181,7 @@ public class AuthorityManagement {
             }
             if (opList.remove(id,id)){
                 try {
-                    AuthorityManagement.getInstance().writeAuthorityList();
+                    Permissions.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     SfLog.getInstance().e(this.getClass(),"op删除失败:" + id,e);
@@ -208,7 +208,7 @@ public class AuthorityManagement {
         public boolean addMaster(long id){
             masterList.put(id,id);
             try {
-                AuthorityManagement.getInstance().writeAuthorityList();
+                Permissions.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 SfLog.getInstance().e(this.getClass(),"拥有者添加失败：" + id,e);
@@ -228,7 +228,7 @@ public class AuthorityManagement {
             }
             if(masterList.remove(id,id)){
                 try {
-                    AuthorityManagement.getInstance().writeAuthorityList();
+                    Permissions.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     SfLog.getInstance().e(this.getClass(),"拥有者删除失败:" + id,e);
@@ -256,7 +256,7 @@ public class AuthorityManagement {
         public boolean addAdmin(long id){
             adminList.put(id,id);
             try {
-                AuthorityManagement.getInstance().writeAuthorityList();
+                Permissions.getInstance().writeAuthorityList();
                 return true;
             } catch (IOException e) {
                 SfLog.getInstance().e(this.getClass(),"管理员添加失败：" + id,e);
@@ -276,7 +276,7 @@ public class AuthorityManagement {
             }
             if(adminList.remove(id,id)){
                 try {
-                    AuthorityManagement.getInstance().writeAuthorityList();
+                    Permissions.getInstance().writeAuthorityList();
                     return true;
                 } catch (IOException e) {
                     SfLog.getInstance().e(this.getClass(),"管理员删除失败:" + id,e);

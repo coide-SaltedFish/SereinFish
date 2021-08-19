@@ -6,6 +6,7 @@ import sereinfish.bot.database.dao.annotation.Character;
 import sereinfish.bot.database.entity.DataBase;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -332,11 +333,11 @@ public class DAO<E>{
      * @return
      */
     private boolean tableExist(String name) throws SQLException {
-        ResultSet resultSet = dataBase.getConnection().getMetaData().getTables(null, null, name, null );
-        if (!resultSet.isClosed()){
-            if (resultSet.next()) {
-                return true;
-            }
+        Connection connection = dataBase.getConnection();
+        ResultSet resultSet = connection.getMetaData().getTables(null, null, name, null );
+
+        if (resultSet.next()) {
+            return true;
         }
 
         return false;

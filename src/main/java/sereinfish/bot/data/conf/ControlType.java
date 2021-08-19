@@ -1,12 +1,13 @@
-package sereinfish.bot.entity.conf;
+package sereinfish.bot.data.conf;
 
 /**
  * 组件类型
  */
-public  enum  GroupControlType {
+public  enum ControlType {
     CheckBox,//单选框
     Edit,//文本编辑器
     WebLink,//网页链接
+    DataBaseSelect,//数据库选择
     Font_ComboBox,//字体下拉选择框
     Authority_ComboBox,//权限选择器
     Edit_Small_Plain,//小型普通编辑框
