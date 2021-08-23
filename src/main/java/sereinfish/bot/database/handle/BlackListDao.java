@@ -2,6 +2,7 @@ package sereinfish.bot.database.handle;
 
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.database.table.BlackList;
 
 import java.lang.reflect.Field;
@@ -21,7 +22,7 @@ public class BlackListDao extends DAO<BlackList> {
      * 初始化数据库操作对象
      * @param dataBase
      */
-    public BlackListDao(DataBase dataBase) throws SQLException {
+    public BlackListDao(DataBase dataBase) throws SQLException, MarkIllegalLengthException {
         super(dataBase, BlackList.class);
     }
 

@@ -105,9 +105,6 @@ public class GroupConf{
     @Control(group = "Lolicon", name = "混合模式", type = ControlType.CheckBox, tip = "R18与非R8混合")
     boolean plainAndR18Enable = false;
 
-    @Control(group = "Lolicon", name = "启用本地缓存", type = ControlType.CheckBox, tip = "在发送时，如果本地已有图片缓存，则不再向服务器下载图片")
-    boolean loliconLocalImageEnable = false;
-
     @Control(group = "Lolicon", name = "MD5发送模式", type = ControlType.CheckBox, tip = "有效加快发送速度且能避免mirai的5000ms异常，但可能造成发送失败")
     boolean loliconMD5ImageEnable = false;
 

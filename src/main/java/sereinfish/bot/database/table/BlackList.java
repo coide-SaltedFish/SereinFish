@@ -1,9 +1,6 @@
 package sereinfish.bot.database.table;
 
-import sereinfish.bot.database.dao.annotation.DBHandle;
-import sereinfish.bot.database.dao.annotation.Field;
-import sereinfish.bot.database.dao.annotation.Primary;
-import sereinfish.bot.database.dao.annotation.SizeEnum;
+import sereinfish.bot.database.dao.annotation.*;
 
 import java.util.Date;
 
@@ -17,9 +14,11 @@ public class BlackList {
     private long time;
 
     @Field(name = "qq", type = "bigint", isNotNull = true)
+    @Mark(type = {MarkType.UPDATE}, condition = {"="})
     private long qq;
 
     @Field(name = "group_num", type = "bigint", isNotNull = false)
+    @Mark(type = {MarkType.UPDATE}, condition = {"="})
     private long group;
 
     @Field(name = "remarks", type = "nvarchar", size = SizeEnum.MAX, isChar = true, isNotNull = false)

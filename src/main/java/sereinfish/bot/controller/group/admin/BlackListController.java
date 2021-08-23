@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
@@ -79,6 +80,9 @@ public class BlackListController {
         } catch (IllegalAccessException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
+        } catch (MarkIllegalLengthException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 
@@ -99,6 +103,9 @@ public class BlackListController {
                 return MyYuQ.getMif().text("[" + qq + "]已从本群黑名单移除").toMessage();
             }
         } catch (SQLException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
+        } catch (MarkIllegalLengthException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
@@ -134,6 +141,9 @@ public class BlackListController {
         } catch (IllegalAccessException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
+        } catch (MarkIllegalLengthException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }
     }
 
@@ -160,6 +170,9 @@ public class BlackListController {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         } catch (IllegalAccessException e) {
+            SfLog.getInstance().e(this.getClass(),e);
+            return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
+        } catch (MarkIllegalLengthException e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage();
         }

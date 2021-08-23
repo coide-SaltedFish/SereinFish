@@ -3,18 +3,24 @@ package sereinfish.bot.ui.panel.table.database.reply;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.database.ex.UpdateNoFindThrowable;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.Reply;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.ui.dialog.TipDialog;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.list.CellManager;
+import sereinfish.bot.ui.panel.MyEditorPanel;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
 import sereinfish.bot.ui.panel.table.database.DBTableModel;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -22,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -33,7 +40,7 @@ public class DBReplyPanel extends JPanel {
     private JTable table;
     private DBTableModel<Reply> model;
 
-    private JTextArea textArea_value;
+    private MyEditorPanel editorPanel;
     private JLabel label_select_tip;//选中提示
 
     private ArrayList<Reply> replies;
@@ -65,6 +72,10 @@ public class DBReplyPanel extends JPanel {
                 SfLog.getInstance().e(this.getClass(),e);
                 return;
             } catch (ClassNotFoundException e) {
+                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
+                SfLog.getInstance().e(this.getClass(),e);
+                return;
+            } catch (MarkIllegalLengthException e) {
                 contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
                 SfLog.getInstance().e(this.getClass(),e);
                 return;
@@ -101,8 +112,8 @@ public class DBReplyPanel extends JPanel {
         splitPane_bottom.setDividerLocation(130);
         splitPane.setBottomComponent(splitPane_bottom);
 
-        textArea_value = new JTextArea();//选中格子内容
-        splitPane_bottom.setTopComponent(new JScrollPane(textArea_value));
+        editorPanel = new MyEditorPanel(MyEditorPanel.MODE_RAIN);//选中格子内容
+        splitPane_bottom.setTopComponent(new JScrollPane(editorPanel));
 
         JPanel panel_bottom = new JPanel(new BorderLayout());
         splitPane_bottom.setBottomComponent(panel_bottom);
@@ -161,6 +172,37 @@ public class DBReplyPanel extends JPanel {
             }
         });
 
+        JButton btn_update = new JButton("修改");
+        btn_update.setEnabled(false);
+        btn_update.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btn_update.setEnabled(false);
+                valueUpdate();
+                btn_update.setEnabled(true);
+            }
+        });
+
+        editorPanel.getTextPane().getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+                btn_update.setEnabled(!editorPanel.getText().equals(value));
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+                btn_update.setEnabled(!editorPanel.getText().equals(value));
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+                btn_update.setEnabled(!editorPanel.getText().equals(value));
+            }
+        });
+
         JButton btn_reLoad = new JButton("刷新");
         btn_reLoad.addActionListener(new ActionListener() {
             @Override
@@ -172,6 +214,7 @@ public class DBReplyPanel extends JPanel {
         JPanel panel_btn = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel_btn.add(btn_insert);
         panel_btn.add(btn_delete);
+        panel_btn.add(btn_update);
         panel_btn.add(btn_reLoad);
 
         panel_bottom.add(panel_btn,BorderLayout.CENTER);
@@ -193,12 +236,46 @@ public class DBReplyPanel extends JPanel {
                 //展示选中格子
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
                 if (value != null){
-                    textArea_value.setText(value);
+                    editorPanel.setText(value);
                 }else {
-                    textArea_value.setText("");
+                    editorPanel.setText("");
                 }
             }
         });
+    }
+
+    /**
+     * 修改
+     */
+    private void valueUpdate(){
+        DBTableModel model = (DBTableModel) table.getModel();
+        String tableValue = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
+        String value = editorPanel.getText();
+        String fieldName = "";
+        try {
+            fieldName = replyDao.getFieldNames().get(table.getSelectedColumn());
+        } catch (SQLException e) {
+            SfLog.getInstance().e(DBReplyPanel.class, e);
+            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
+            return;
+        }
+
+        Reply reply = (Reply) model.getRows(table.getSelectedRow());
+
+        try {
+            replyDao.update(reply, new String[]{fieldName}, new String[]{value});
+            new TipDialog(MainFrame.getMainFrame(), "完成", fieldName + "[" + tableValue + "->" + value + "]", true);
+            update();
+        } catch (UpdateNoFindThrowable updateNoFindThrowable) {
+            SfLog.getInstance().e(DBReplyPanel.class, updateNoFindThrowable);
+            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + updateNoFindThrowable.getMessage(), true);
+        } catch (IllegalAccessException e) {
+            SfLog.getInstance().e(DBReplyPanel.class, e);
+            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
+        } catch (SQLException e) {
+            SfLog.getInstance().e(DBReplyPanel.class, e);
+            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
+        }
     }
 
     /**
@@ -210,9 +287,9 @@ public class DBReplyPanel extends JPanel {
         if (tableSelection.length > 0){
             //展示选中格子
             String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-            textArea_value.setText(value);
+            editorPanel.setText(value);
         }else {
-            textArea_value.setText("");
+            editorPanel.setText("");
         }
     }
 

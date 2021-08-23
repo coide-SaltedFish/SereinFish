@@ -43,7 +43,7 @@ public class LoliconController {
         int authority = groupConf.getLoliconPermissions();
         if (!Permissions.getInstance().authorityCheck(sender, authority)){
             String tipMsg = "权限不足,所需权限（" + Permissions.getInstance().getAuthorityName(authority) + "）";
-            group.sendMessage(new Message().lineQ().at(sender).text(tipMsg));
+            group.sendMessage(new Message().lineQ().at(sender).text("\n").text(tipMsg));
             SfLog.getInstance().w(this.getClass(), tipMsg);
             throw new DoNone();
         }

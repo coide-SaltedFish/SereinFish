@@ -37,7 +37,7 @@ public class TipDialog extends JDialog {
      * 构建窗体
      */
     private void build(){
-        setBounds(100, 100, 200, 170);
+        setBounds(100, 100, 320, 180);
         setLocationRelativeTo(null);
         contentPane = new JPanel(new BorderLayout());
         setContentPane(contentPane);

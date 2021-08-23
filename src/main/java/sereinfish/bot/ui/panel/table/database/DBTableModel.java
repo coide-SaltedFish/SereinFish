@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class DBTableModel<E> extends AbstractTableModel{
 
     String[] title;
-    ArrayList<E> datas = new ArrayList<>();
+    ArrayList<E> datas;
     Class t;
 
     /**
@@ -30,6 +30,10 @@ public class DBTableModel<E> extends AbstractTableModel{
             returnValue = Object.class;
         }
         return returnValue;
+    }
+
+    public E getRows(int rows){
+        return datas.get(rows);
     }
 
     /**

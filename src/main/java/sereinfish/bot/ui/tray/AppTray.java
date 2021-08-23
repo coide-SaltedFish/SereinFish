@@ -1,5 +1,6 @@
 package sereinfish.bot.ui.tray;
 
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.ui.frame.MainFrame;
 
 import javax.swing.*;
@@ -119,5 +120,9 @@ public class AppTray {
     public void setTray() throws AWTException {
         SystemTray systemTray = SystemTray.getSystemTray();
         systemTray.add(trayIcon);
+    }
+
+    public TrayIcon getTrayIcon() {
+        return trayIcon;
     }
 }

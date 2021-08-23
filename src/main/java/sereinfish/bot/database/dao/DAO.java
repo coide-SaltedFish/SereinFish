@@ -4,6 +4,9 @@ import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.dao.annotation.*;
 import sereinfish.bot.database.dao.annotation.Character;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.database.ex.UpdateNoFindThrowable;
+import sereinfish.bot.utils.JdbcUtil;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -11,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DAO<E>{
     private Class table;//表对象
@@ -20,7 +25,7 @@ public class DAO<E>{
     /**
      * 初始化数据库操作对象
      */
-    public DAO(DataBase dataBase, Class<E> t) throws SQLException {
+    public DAO(DataBase dataBase, Class<E> t) throws SQLException, MarkIllegalLengthException {
         this.dataBase = dataBase;
         this.table = t;
         tableName = ((DBHandle)table.getAnnotation(DBHandle.class)).tableName();
@@ -31,10 +36,20 @@ public class DAO<E>{
     /**
      * 创建表
      */
-    public void createTable() throws SQLException {
+    public void createTable() throws SQLException, MarkIllegalLengthException {
         if (tableExist(tableName)){
             return;
         }
+        //mark字段检查
+        for (Field field:table.getDeclaredFields()){
+            if (field.isAnnotationPresent(Mark.class)){
+                Mark mark = field.getAnnotation(Mark.class);
+                if (mark.type().length != mark.condition().length){
+                    throw new MarkIllegalLengthException("mark 标注长度非法：" + tableName + ">>" + field.getName());
+                }
+            }
+        }
+
         //生成数据库创建语句
         StringBuilder stringBuilder = new StringBuilder("CREATE TABLE " + tableName + " (");
         int i = 0;
@@ -263,8 +278,130 @@ public class DAO<E>{
      * 修改
      * @param value
      */
-    public void update(E value){
+    public void update(E value, String[] names, String[] values) throws UpdateNoFindThrowable, IllegalAccessException, SQLException {
 
+        if (names.length != values.length){
+            throw new UpdateNoFindThrowable("字段数量与参数数量不匹配");
+        }
+
+        ArrayList<String> prepareds = new ArrayList<>();
+        ArrayList<Field> updateFields = new ArrayList<>();
+        //生成命令
+        StringBuffer sql = new StringBuffer("UPDATE " + tableName + " SET ");
+        //检索字段
+        AtomicBoolean isUpdate = new AtomicBoolean(false);//是否可以使用update语句
+        for (Field field:value.getClass().getDeclaredFields()){
+            if (field.isAnnotationPresent(Mark.class)){
+                Mark mark = field.getAnnotation(Mark.class);
+                Arrays.stream(mark.type()).forEach(item->{
+                    if (item == MarkType.UPDATE){
+                        isUpdate.set(true);
+                        updateFields.add(field);
+                    }
+                });
+            }
+        }
+        //
+        if (!isUpdate.get()){
+            throw new UpdateNoFindThrowable("未能找到update标注字段");
+        }
+        //解析set
+        String val = "";
+        int i = 0;
+        for (Field field:value.getClass().getDeclaredFields()){
+            if (!field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                continue;
+            }
+
+            boolean isName = false;
+            int valIndex = 0;
+            for (String name:names){
+                if (name.equals(field.getName())){
+                    isName = true;
+                    break;
+                }
+                valIndex++;
+            }
+
+            if (!isName){
+                continue;
+            }
+
+            if (i != 0){
+                sql.append(",");
+            }
+
+            sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+
+
+
+            val = dField.name();
+            if (dField.isChar()){
+                val += "=?";
+                prepareds.add(values[valIndex]);
+            }else {
+                val += "=";
+                val += values[valIndex];
+            }
+            sql.append(val);
+            i++;
+        }
+        //where
+        i = 0;
+        sql.append(" WHERE ");
+        for (Field field:updateFields){
+            if (i != 0){
+                sql.append(" AND ");
+            }
+
+
+            sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+
+            Mark mark = field.getAnnotation(Mark.class);
+            String condition = "=";
+
+            for (int j = 0; j < mark.type().length; j++){
+                if (mark.type()[j] == MarkType.UPDATE){
+                    condition = mark.condition()[j];
+                    break;
+                }
+            }
+
+            val = dField.name();
+            val += condition;
+            if (dField.isChar()){
+                val += "?";
+                try {
+                    prepareds.add(field.get(value).toString());
+                } catch (IllegalAccessException e) {
+                    field.setAccessible(true);
+                    prepareds.add(field.get(value).toString());
+                }
+            }else {
+                try {
+                    val += field.get(value).toString();
+                } catch (IllegalAccessException e) {
+                    field.setAccessible(true);
+                    val += field.get(value).toString();
+                }
+            }
+            sql.append(val);
+
+            i++;
+        }
+
+        PreparedStatement preparedStatement = dataBase.getConnection().prepareStatement(sql.toString());
+        //文本处理
+        i = 1;
+        for (String p:prepareds){
+            preparedStatement.setString(i,p);
+            i++;
+        }
+        //
+//        System.out.println(sql);
+//        System.out.println(JdbcUtil.printRealSql(sql.toString(), prepareds.toArray(new Object[]{})));
+
+        preparedStatement.execute();
     }
 
     /**

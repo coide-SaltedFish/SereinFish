@@ -6,6 +6,7 @@ import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.database.table.Account;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.mlog.SfLog;
@@ -25,11 +26,11 @@ public class AccountManager extends DAO<Account> {
      * 初始化数据库操作对象
      * @param dataBase
      */
-    private AccountManager(DataBase dataBase) throws SQLException {
+    private AccountManager(DataBase dataBase) throws SQLException, MarkIllegalLengthException {
         super(dataBase, Account.class);
     }
 
-    public static AccountManager init() throws IllegalModeException, SQLException, ClassNotFoundException {
+    public static AccountManager init() throws IllegalModeException, SQLException, ClassNotFoundException, MarkIllegalLengthException {
         //连接数据库
         DataBase dataBase = new DataBase(new DataBaseConfig(DataBaseConfig.SQLITE,"","","account","",0));
 

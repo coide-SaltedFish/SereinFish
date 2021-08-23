@@ -2,6 +2,7 @@ package sereinfish.bot.ui.frame.database.insert;
 
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.frame.EditFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
 
 import javax.swing.*;
@@ -58,11 +59,33 @@ public class InsertFrame<E> extends JFrame {
                 JPanel panel_e = new JPanel(new VFlowLayout());
                 JTextPane textPane = new JTextPane();
                 panel_e.add(new JScrollPane(textPane));
+                //编辑框
+                JButton btn_edit = new JButton("文本编辑器");
+                btn_edit.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        EditFrame editFrame = new EditFrame(dField.name(), new EditFrame.EditListener() {
+                            @Override
+                            public void save(EditFrame editFrame, String text) {
+                                textPane.setText(text);
+                                editFrame.close();
+                            }
+
+                            @Override
+                            public void cancel(EditFrame editFrame) {
+                                editFrame.close();
+                            }
+                        });
+                        editFrame.setText(textPane.getText());
+                        editFrame.setVisible(true);
+                    }
+                });
 
                 JLabel label = new JLabel(dField.name());
                 textPanes.add(textPane);
                 panel.add(label,BorderLayout.WEST);
                 panel.add(panel_e,BorderLayout.CENTER);
+                panel.add(btn_edit, BorderLayout.EAST);
 
                 panel_edit.add(panel);
             }

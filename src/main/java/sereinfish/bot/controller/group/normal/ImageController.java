@@ -48,7 +48,8 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("丢 {qq}")
-    @MenuItem(name = "丢某人头像", usage = "丢 {qq}", description = "把指定对象头像扔出去")
+    @Synonym({"扔 {qq}", "diu {qq}"})
+    @MenuItem(name = "丢某人头像", usage = "[丢、扔、diu] {qq}", description = "把指定对象头像扔出去")
     public Message diuAt(Group group,Member sender ,long qq){
         if ((!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId())
                 && Permissions.getInstance().authorityCheck(sender, Permissions.ADMIN)){
@@ -62,6 +63,7 @@ public class ImageController extends QQController {
      * @return
      */
     @Action("\\.?丢.?\\")
+    @Synonym("\\.?扔.?\\")
     @MenuItem(name = "丢触发者头像", usage = ".?丢.?", description = "把触发者头像扔出去")
     public Message diu(Member sender){
         //触发概率

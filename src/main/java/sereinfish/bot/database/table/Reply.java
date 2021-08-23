@@ -11,7 +11,7 @@ public class Reply {
     public static final int BOOLEAN_FALSE = 0;
     public static final int BOOLEAN_TRUE = 1;
 
-    @Mark(type = {MarkType.DELETE}, condition = {"="})
+    @Mark(type = {MarkType.DELETE, MarkType.UPDATE}, condition = {"=", "="})
     @Field(name = "id", type = "nvarchar", size = 8, isChar = true, isNotNull = true)
     private String id;
 

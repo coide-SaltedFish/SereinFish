@@ -97,17 +97,21 @@ public class Lolicon {
                 if (keyword.contains("#")){
                     String[] tags = keyword.split("#");
                     for (String tag:tags){
-                        try {
-                            api += "&tag=" + URLEncoder.encode(tag,"utf-8");
-                        } catch (UnsupportedEncodingException e) {
-                            SfLog.getInstance().e(this.getClass(),e);
+                        if (!tag.equals("")){
+                            try {
+                                api += "&tag=" + URLEncoder.encode(tag,"utf-8");
+                            } catch (UnsupportedEncodingException e) {
+                                SfLog.getInstance().e(this.getClass(),e);
+                            }
                         }
                     }
                 }else {
-                    try {
-                        api += "&keyword=" + URLEncoder.encode(keyword,"utf-8");
-                    } catch (UnsupportedEncodingException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
+                    if (!keyword.equals("")){
+                        try {
+                            api += "&keyword=" + URLEncoder.encode(keyword,"utf-8");
+                        } catch (UnsupportedEncodingException e) {
+                            SfLog.getInstance().e(this.getClass(),e);
+                        }
                     }
                 }
 

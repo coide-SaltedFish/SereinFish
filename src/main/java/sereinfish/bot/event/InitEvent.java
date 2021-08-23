@@ -3,9 +3,8 @@ package sereinfish.bot.event;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
-import com.IceCreamQAQ.Yu.hook.YuHook;
+import com.IceCreamQAQ.Yu.event.events.AppStopEvent;
 import com.IceCreamQAQ.Yu.job.JobManager;
-import com.IceCreamQAQ.Yu.loader.AppClassloader;
 import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.icecreamqaq.yuq.RainBot;
@@ -13,6 +12,7 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
@@ -39,7 +39,7 @@ import java.sql.SQLException;
  * 初始化类
  */
 @EventListener
-public class InitEvent {
+public class InitEvent{
     @Inject
     private JobManager jobManager;
     @Inject
@@ -52,6 +52,14 @@ public class InitEvent {
     private RainBot rainBot;
     @Inject
     private Web web;
+
+
+    @Event
+    public void exitEvent(AppStopEvent event){
+        SystemTray systemTray = SystemTray.getSystemTray();
+        systemTray.remove(AppTray.getInstance().getTrayIcon());
+        SfLog.getInstance().w(AppTray.class, "程序退出");
+    }
 
     /**
      * 软件启动事件
@@ -72,8 +80,10 @@ public class InitEvent {
             SfLog.getInstance().e(this.getClass(), "注解管理器初始化失败，启动失败", e);
             System.exit(-1);
         }
-        //初始化Hook
-        //YuHook.init();
+
+        //初始化Mirai-console-terminal
+//        MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon(new MiraiConsoleImplementationTerminal());
+//        SfLog.getInstance().d(this.getClass(),"Mirai-console-terminal 启动");
 
         //初始化mirai事件
         GlobalEventChannel.INSTANCE.registerListenerHost(new MiraiEvent());//事件注册
@@ -113,6 +123,9 @@ public class InitEvent {
         } catch (ClassNotFoundException e) {
             SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
             System.exit(-1);
+        } catch (MarkIllegalLengthException e) {
+            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
+            System.exit(-1);
         }
 
         //初始化群消息记录管理器
@@ -126,6 +139,9 @@ public class InitEvent {
             SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
             System.exit(-1);
         } catch (ClassNotFoundException e) {
+            SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
+            System.exit(-1);
+        } catch (MarkIllegalLengthException e) {
             SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
             System.exit(-1);
         }

@@ -26,7 +26,7 @@ public class EditFrame extends JFrame {
         contentPane = new JPanel(new BorderLayout());
         setContentPane(contentPane);
 
-        editorPane = new MyEditorPanel(MyEditorPanel.MODE_IMAGE);
+        editorPane = new MyEditorPanel(MyEditorPanel.MODE_RAIN);
         contentPane.add(editorPane,BorderLayout.CENTER);
 
         btn_save = new JButton("保存");

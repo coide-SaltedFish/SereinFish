@@ -1,6 +1,7 @@
 package sereinfish.bot.performance;
 
 import com.sun.management.OperatingSystemMXBean;
+import net.mamoe.mirai.Mirai;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.time.Time;
 

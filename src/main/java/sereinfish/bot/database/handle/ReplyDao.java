@@ -4,6 +4,7 @@ import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.database.table.Reply;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -20,7 +21,7 @@ public class ReplyDao extends DAO<Reply> {
      * 初始化数据库操作对象
      * @param dataBase
      */
-    public ReplyDao(DataBase dataBase) throws SQLException {
+    public ReplyDao(DataBase dataBase) throws SQLException, MarkIllegalLengthException {
         super(dataBase, Reply.class);
     }
 

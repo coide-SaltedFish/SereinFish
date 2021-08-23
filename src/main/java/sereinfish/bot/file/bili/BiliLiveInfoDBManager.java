@@ -2,6 +2,7 @@ package sereinfish.bot.file.bili;
 
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.database.table.BiliLiveInfo;
 
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ public class BiliLiveInfoDBManager extends DAO<BiliLiveInfo> {
      *
      * @param dataBase
      */
-    public BiliLiveInfoDBManager(DataBase dataBase) throws SQLException {
+    public BiliLiveInfoDBManager(DataBase dataBase) throws SQLException, MarkIllegalLengthException {
         super(dataBase, BiliLiveInfo.class);
     }
 

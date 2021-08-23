@@ -5,5 +5,5 @@ import javax.swing.*;
 /**
  * Rain码高亮编辑框
  */
-public class RainCodeEdit extends JPanel {
+public class RainCodeEdit extends JTextPane {
 }

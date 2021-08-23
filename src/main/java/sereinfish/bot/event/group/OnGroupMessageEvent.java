@@ -12,6 +12,7 @@ import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
@@ -97,6 +98,8 @@ public class OnGroupMessageEvent {
                 } catch (IllegalModeException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 } catch (ClassNotFoundException e) {
+                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+                } catch (MarkIllegalLengthException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 }
             }
@@ -384,6 +387,9 @@ public class OnGroupMessageEvent {
                         SfLog.getInstance().e(this.getClass(),e);
                         event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
                     } catch (ClassNotFoundException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
+                    } catch (MarkIllegalLengthException e) {
                         SfLog.getInstance().e(this.getClass(),e);
                         event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
                     }

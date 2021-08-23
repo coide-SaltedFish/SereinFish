@@ -6,6 +6,7 @@ import sereinfish.bot.database.DataBaseConfig;
 import sereinfish.bot.database.dao.DAO;
 import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.database.ex.IllegalModeException;
+import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.mlog.SfLog;
 
@@ -22,11 +23,11 @@ public class GroupHistoryMsgDBManager extends DAO<GroupHistoryMsg>{
 
     //单例
     private static GroupHistoryMsgDBManager groupHistoryMsgDBManager;
-    private GroupHistoryMsgDBManager(DataBase dataBase) throws SQLException {
+    private GroupHistoryMsgDBManager(DataBase dataBase) throws SQLException, MarkIllegalLengthException {
         super(dataBase,GroupHistoryMsg.class);
     }
 
-    public static GroupHistoryMsgDBManager init() throws IllegalModeException, SQLException, ClassNotFoundException {
+    public static GroupHistoryMsgDBManager init() throws IllegalModeException, SQLException, ClassNotFoundException, MarkIllegalLengthException {
         //连接数据库
         DataBase dataBase = new DataBase(new DataBaseConfig(DataBaseConfig.SQLITE,"","","groupMsg","",0));
 

@@ -22,6 +22,23 @@
             <artifactId>YuQ-Mirai</artifactId>
             <version>0.1.0.0-DEV19</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.mamoe</groupId>
+            <artifactId>mirai-console-terminal</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-console -->
+        <dependency>
+            <groupId>net.mamoe</groupId>
+            <artifactId>mirai-console</artifactId>
+            <version>2.7-RC</version>
+            <type>pom</type>
+            <scope>runtime</scope>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
@@ -37,8 +54,8 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.32.3</version>
-<!--            <version>3.7.2</version>-->
+<!--            <version>3.32.3</version>-->
+            <version>3.7.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>

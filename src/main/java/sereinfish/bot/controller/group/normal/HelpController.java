@@ -19,7 +19,7 @@ import java.io.IOException;
 @Menu(type = Menu.Type.GROUP, name = "帮助")
 public class HelpController {
 
-    @Action("\\[.!！]help\\")
+    @Action("\\^[.!！]help\\")
     @MenuItem(name = "帮助命令", usage = "[.!！]help", description = "用来获取帮助菜单")
     public Message getHelpMenu(Member sender){
 
