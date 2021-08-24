@@ -27,6 +27,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "图片生成")
@@ -47,13 +48,35 @@ public class ImageController extends QQController {
      * 丢头像
      * @return
      */
-    @Action("丢 {qq}")
-    @Synonym({"扔 {qq}", "diu {qq}"})
-    @MenuItem(name = "丢某人头像", usage = "[丢、扔、diu] {qq}", description = "把指定对象头像扔出去")
-    public Message diuAt(Group group,Member sender ,long qq){
-        if ((!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId())
-                && Permissions.getInstance().authorityCheck(sender, Permissions.ADMIN)){
-            throw new SkipMe();
+    @Action("丢 {member}")
+    @Synonym({"扔 {member}", "diu {member}"})
+    @MenuItem(name = "丢某人头像", usage = "[丢、扔、diu] {member}", description = "把指定对象头像扔出去")
+    public Message diuAt(Group group,Member sender ,String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
         }
         return getDiu(qq);
     }
@@ -77,15 +100,38 @@ public class ImageController extends QQController {
 
     @Action("爬 {member}")
     @MenuItem(name = "爬", usage = "爬 {member}", description = "生成指定对象爬表情")
-    public Message pa(Group group, long member){
-        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
-            throw new SkipMe();
+    public Message pa(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
         }
 
         if (MyYuQ.getRandom(0,100) > 50){
-            return getPa(member);
+            return getPa(qq);
         }else {
-            return getSuperPa(member);
+            return getSuperPa(qq);
         }
     }
 
@@ -109,31 +155,100 @@ public class ImageController extends QQController {
     @Action("嚼 {member}")
     @Synonym({"恰 {member}"})
     @MenuItem(name = "恰", usage = "嚼 {member} | 恰 {member}", description = "生成恰指定对象表情")
-    public Message jiao(Group group, long member){
-        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
-            throw new SkipMe();
+    public Message jiao(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
         }
-        return getJiao(member);
+        return getJiao(qq);
     }
 
     @Action("mua {member}")
     @Synonym({"mua {member}"})
     @MenuItem(name = "mua", usage = "mua {member}", description = "生成mua指定对象表情")
-    public Message mua(Group group, long member){
-        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
-            throw new SkipMe();
+    public Message mua(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
         }
-        return getMuaGif(member);
+        return getMuaGif(qq);
     }
 
     @Action("摸 {member}")
     @Synonym({"rua {member}"})
     @MenuItem(name = "rua", usage = "rua {member} | 摸 {member}", description = "生成rua指定对象表情")
-    public Message mo(Group group, long member){
-        if (!group.getMembers().containsKey(member) && member != MyYuQ.getYuQ().getBotId()){
-            throw new SkipMe();
+    public Message mo(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
         }
-        return getRua(member);
+        return getRua(qq);
     }
 
     @Action("摸")
