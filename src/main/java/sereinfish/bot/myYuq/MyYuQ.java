@@ -41,6 +41,7 @@ public class MyYuQ {
     private static RainBot rainBot;
     private static OkHttpClient okHttpClient;
     private static Web web;
+    private static String botName;
 
     public static final String BASE_PACK = "sereinfish.bot";//包名
 
@@ -50,19 +51,20 @@ public class MyYuQ {
     @Config("yu.scanPackages")
     Object scanPackages;
 
-    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot, Web web) {
+    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot, Web web, String botName) {
         this.yuQ = yuQ;
         this.mif = mif;
         this.jobManager = jobManager;
         this.dateUtil = dateUtil;
         this.rainBot = rainBot;
         this.web = web;
+        this.botName = botName;
 
         okHttpClient = new OkHttpClient();
     }
 
-    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot, Web web){
-        myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot, web);
+    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot, Web web, String botName){
+        myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot, web, botName);
 
         return myYuQ;
     }
@@ -269,5 +271,7 @@ public class MyYuQ {
         return groups;
     }
 
-
+    public static String getBotName() {
+        return botName;
+    }
 }

@@ -1,5 +1,6 @@
 package sereinfish.bot.event;
 
+import com.IceCreamQAQ.Yu.annotation.Config;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
@@ -33,6 +34,7 @@ import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 
 /**
@@ -53,6 +55,8 @@ public class InitEvent{
     @Inject
     private Web web;
 
+    @Config("YuQ.bot.name")
+    private String name;
 
     @Event
     public void exitEvent(AppStopEvent event){
@@ -68,7 +72,7 @@ public class InitEvent{
     @Event
     public void initEvent(AppStartEvent event){
         //初始化MyYuQ
-        MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web);
+        MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web, name);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");

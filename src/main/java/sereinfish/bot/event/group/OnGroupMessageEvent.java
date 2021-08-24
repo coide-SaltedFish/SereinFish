@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.entity.MessageAt;
 import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
@@ -34,7 +35,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 群事件监听
@@ -105,6 +108,41 @@ public class OnGroupMessageEvent {
             }
             //刷屏检测
 
+        }
+
+        //bot名称
+        Message message = event.getMessage();
+        if (message.getBody().size() > 0){
+            if(message.getBody().get(0) instanceof Text){
+                Text text = (Text) message.getBody().get(0);
+                if (text.getText().startsWith(MyYuQ.getBotName())){
+                    String noNameMsg = text.getText().substring(MyYuQ.getBotName().length());
+                    while (noNameMsg.startsWith(" ")){
+                        noNameMsg = noNameMsg.substring(1);
+                    }
+
+                    Message msgStart = new Message().lineQ()
+                            .at(MyYuQ.getYuQ().getBotId())
+                            .text(noNameMsg)
+                            .getMessage();
+                    ArrayList<MessageItem> messageItems = new ArrayList<>(msgStart.getBody());
+                    ArrayList<MessageItem> pathItems = new ArrayList<>(new Message().lineQ()
+                            .text(noNameMsg)
+                            .getMessage().getBody());
+
+                    for (int i = 1; i < message.getBody().size(); i++){
+                        messageItems.add(message.getBody().get(i));
+                        pathItems.add(message.getBody().get(i));
+                    }
+                    message.setBody(messageItems);
+
+                    message.setPath(pathItems);
+                    for (MessageItem messageItem:message.getPath()){
+                        System.out.println(messageItem.toPath());
+                    }
+                    System.out.println(message.getCodeStr());
+                }
+            }
         }
     }
 
