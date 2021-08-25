@@ -126,21 +126,30 @@ public class OnGroupMessageEvent {
                             .text(noNameMsg)
                             .getMessage();
                     ArrayList<MessageItem> messageItems = new ArrayList<>(msgStart.getBody());
-                    ArrayList<MessageItem> pathItems = new ArrayList<>(new Message().lineQ()
-                            .text(noNameMsg)
-                            .getMessage().getBody());
-
                     for (int i = 1; i < message.getBody().size(); i++){
                         messageItems.add(message.getBody().get(i));
-                        pathItems.add(message.getBody().get(i));
                     }
                     message.setBody(messageItems);
 
-                    message.setPath(pathItems);
+                    //path修改
+                    MessageItem pathItem = message.getPath().get(0);
+                    if (pathItem instanceof Text){
+                        if (text.getText().startsWith(MyYuQ.getBotName())){
+                            noNameMsg = text.getText().substring(MyYuQ.getBotName().length());
+                            while (noNameMsg.startsWith(" ")){
+                                noNameMsg = noNameMsg.substring(1);
+                            }
+                            noNameMsg = noNameMsg.replaceAll("[ \n\r]+", " ");
+
+                            String[] paths = noNameMsg.split(" ");
+                            message.getPath().remove(0);
+                            message.getPath().add(0, new Message().lineQ().text(paths[0]).getMessage().getBody().get(0));
+                        }
+                    }
+
                     for (MessageItem messageItem:message.getPath()){
                         System.out.println(messageItem.toPath());
                     }
-                    System.out.println(message.getCodeStr());
                 }
             }
         }

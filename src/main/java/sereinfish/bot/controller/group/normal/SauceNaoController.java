@@ -8,6 +8,8 @@ import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
@@ -33,6 +35,7 @@ import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,6 +117,39 @@ public class SauceNaoController extends QQController {
         }
     }
 
+    @Action("搜头像 {member}")
+    @QMsg(mastAtBot = true)
+    public void headImageSearch(Group group, Message message, GroupConf groupConf, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e) {
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())) {
+                qq = group.getBot().getId();
+            } else {
+                for (Map.Entry<Long, Member> entry : group.getMembers().entrySet()) {
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)) {
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1) {
+                throw new SkipMe();
+            }
+        }
+        String url = "http://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640";
+        sNSearch(message, groupConf, group, url);
+    }
+
 
     /**
      * 搜图
@@ -141,7 +177,7 @@ public class SauceNaoController extends QQController {
                     for(Result result:sauceNAO.getResults()) {//得到结果
                         messageLineQ.textLine("相似度：" + result.getHeader().getSimilarity())
                                 .textLine("索引名称：" + result.getHeader().getIndex_name())
-                                .text("链接：");
+                                .text("Pixiv链接：");
                         if (result.getData().getExt_urls().length > 0){
                             for (String url:result.getData().getExt_urls()){
                                 messageLineQ.textLine(url);

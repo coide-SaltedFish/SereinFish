@@ -72,6 +72,9 @@ public class InitEvent{
     @Event
     public void initEvent(AppStartEvent event){
         //初始化MyYuQ
+        if (name == null || name.equals("")){
+            name = yuQ.getBotInfo().getName();
+        }
         MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web, name);
         //初始化日志
         SfLog.init();
