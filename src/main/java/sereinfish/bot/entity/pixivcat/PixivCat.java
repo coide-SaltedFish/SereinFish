@@ -21,6 +21,7 @@ public class PixivCat {
     private String original_url;
     private String[] original_urls_proxy;
     private String original_url_proxy;
+    private String error;
 
     /**
      * 得到PixivCat

@@ -1,12 +1,18 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.myYuq.MyYuQ;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 @GroupController
 @Menu(name = "骰子")
@@ -73,6 +79,36 @@ public class RandomController {
         }
 
         return new Message().lineQ().at(sender).text("\n").textLine("设置值：" + var).textLine("对[" + name + "]进行判定，判定值:" + rdVar).text(result).getMessage();
+    }
+
+    @Action("抽一位幸运群友")
+    @Synonym({"抽个幸运群友", "抽一个幸运群友"})
+    @QMsg(mastAtBot = true)
+    public Message randomMember(Group group){
+        ArrayList<Member> members = new ArrayList<>();
+        for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+            members.add(entry.getValue());
+        }
+        Member member = members.get(MyYuQ.getRandom(0, members.size() - 1));
+        String name = member.getNameCard();
+        if (name == null || name.equals("")){
+            name = member.getName();
+        }
+        return new Message().lineQ().textLine("抽中了:" + name + "[" + member.getId() + "]").imageByUrl(member.getAvatar()).getMessage();
+    }
+
+    @Action("抽一位幸运管理")
+    @Synonym({"抽个幸运管理", "抽一个幸运管理","抽一位幸运管理员","抽个幸运管理员", "抽一个幸运管理员"})
+    @QMsg(mastAtBot = true)
+    public Message randomAdminMember(Group group){
+        ArrayList<Member> members = new ArrayList<>();
+        for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+            if (entry.getValue().isAdmin()){
+                members.add(entry.getValue());
+            }
+        }
+        Member member = members.get(MyYuQ.getRandom(0, members.size() - 1));
+        return new Message().lineQ().textLine("抽中了:" + member.getNameCard() + "[" + member.getId() + "]").imageByUrl(member.getAvatar()).getMessage();
     }
 
 

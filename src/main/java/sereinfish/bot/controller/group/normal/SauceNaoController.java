@@ -58,7 +58,7 @@ public class SauceNaoController extends QQController {
     }
 
     @Action("\\[!！.。]搜图\\")
-    public void search(Group group, Message message, GroupConf groupConf){
+    public void search(Member sender, Group group, Message message, GroupConf groupConf){
         if (message.getReply() == null){
             Image image = null;
             for (MessageItem messageItem:message.getBody()){
@@ -72,7 +72,7 @@ public class SauceNaoController extends QQController {
                 group.sendMessage("找不到要进行搜索的图片，请确认指令正确");
                 return;
             }
-            sNSearch(message, groupConf, group, image.getUrl());
+            sNSearch(sender, message, groupConf, group, image.getUrl());
         }else {
             GroupHistoryMsg groupHistoryMsg = null;
             try {
@@ -85,7 +85,7 @@ public class SauceNaoController extends QQController {
                 for (MessageItem messageItem:replayMsg.getBody()){
                     if (messageItem instanceof Image){
                         Image image = (Image) messageItem;
-                        sNSearch(message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0");
+                        sNSearch(sender, message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0");
                         break;
                     }
                 }
@@ -98,7 +98,7 @@ public class SauceNaoController extends QQController {
 
     @Action("搜图")
     @QMsg(mastAtBot = true)
-    public void atSearch(Group group, Message message, GroupConf groupConf, ContextSession session){
+    public void atSearch(Member sender, Group group, Message message, GroupConf groupConf, ContextSession session){
         Message message1 = MyYuQ.getMif().text("请输入消息内容(" + (maxTime / 1000) + "s)").toMessage();
         message1.setReply(message.getSource());
         reply(message1);
@@ -108,7 +108,7 @@ public class SauceNaoController extends QQController {
             for (MessageItem messageItem:msg.getBody()){
                 if (messageItem instanceof Image){
                     Image image = (Image) messageItem;
-                    sNSearch(msg, groupConf, group, image.getUrl());
+                    sNSearch(sender, msg, groupConf, group, image.getUrl());
                     return;
                 }
             }
@@ -119,7 +119,7 @@ public class SauceNaoController extends QQController {
 
     @Action("搜头像 {member}")
     @QMsg(mastAtBot = true)
-    public void headImageSearch(Group group, Message message, GroupConf groupConf, String member){
+    public void headImageSearch(Member sender, Group group, Message message, GroupConf groupConf, String member){
         long qq = -1;
         try {
             if (member.startsWith("At_")){
@@ -147,7 +147,7 @@ public class SauceNaoController extends QQController {
             }
         }
         String url = "http://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640";
-        sNSearch(message, groupConf, group, url);
+        sNSearch(sender, message, groupConf, group, url);
     }
 
 
@@ -156,7 +156,7 @@ public class SauceNaoController extends QQController {
      * @param group
      * @param imageUrl
      */
-    private void sNSearch(Message message, GroupConf groupConf, Group group, String imageUrl){
+    private void sNSearch(Member sender, Message message, GroupConf groupConf, Group group, String imageUrl){
         Message msg = new Message().lineQ().text("正在搜索~").getMessage();
         msg.setReply(message.getSource());
         group.sendMessage(msg);
@@ -173,9 +173,13 @@ public class SauceNaoController extends QQController {
             //判断是否成功
             if (sauceNAO.getHeader().getStatus() == SauceNAO.SUCCESS){
                 if (sauceNAO.getResults().size() > 0){
-                    MessageLineQ messageLineQ = new Message().lineQ().textLine("成功找到了图片：");
+                    MessageLineQ messageLineQ = new Message().lineQ();
+                    if (sender != null){
+                        messageLineQ.at(sender);
+                    }
+                    messageLineQ.textLine("成功找到了图片：");
                     for(Result result:sauceNAO.getResults()) {//得到结果
-                        messageLineQ.textLine("相似度：" + result.getHeader().getSimilarity())
+                        messageLineQ.textLine("相似度：" + result.getHeader().getSimilarity() + "%")
                                 .textLine("索引名称：" + result.getHeader().getIndex_name())
                                 .text("Pixiv链接：");
                         if (result.getData().getExt_urls().length > 0){
@@ -217,37 +221,41 @@ public class SauceNaoController extends QQController {
                                     }
                                     //获取链接
                                     String finalP = p;
+                                    //pixiv cat
                                     PixivCat.getPixivCat("https://www.pixiv.net/artworks/" + result.getData().getPixiv_id(), new Callback() {
                                         @Override
                                         public void onFailure(@NotNull Call call, @NotNull IOException e) {
                                             SfLog.getInstance().e(SauceNaoController.this.getClass(), e);
-                                            group.sendMessage(new Message().lineQ().text("唔，预览图获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                            group.sendMessage(new Message().lineQ().textLine("唔，预览图获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息")
+                                                    .text("(" + e.getMessage()).getMessage() + ")");
                                             group.sendMessage(messageLineQ.getMessage());
                                         }
 
                                         @Override
                                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                             String string = response.body().string();
+                                            //System.out.println(string);
                                             PixivCat pixivCat = MyYuQ.toClass(string, PixivCat.class);
 
-                                            try {
-                                                int imageP = Integer.parseInt(finalP);
-                                                String proxyUrl = "";
-                                                if (pixivCat.getOriginal_urls_proxy() != null){
-                                                    if (imageP < pixivCat.getOriginal_urls_proxy().length){
-                                                        proxyUrl = pixivCat.getOriginal_urls_proxy()[imageP];
+                                            if (pixivCat.isSuccess()){
+                                                try {
+                                                    int imageP = Integer.parseInt(finalP);
+                                                    String proxyUrl = "";
+                                                    if (pixivCat.getOriginal_urls_proxy() != null){
+                                                        if (imageP < pixivCat.getOriginal_urls_proxy().length){
+                                                            proxyUrl = pixivCat.getOriginal_urls_proxy()[imageP];
+                                                        }else {
+                                                            group.sendMessage(new Message().lineQ().text("唔，找不到预览图，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                            group.sendMessage(messageLineQ.getMessage());
+                                                            return;
+                                                        }
+                                                    }else if(pixivCat.getOriginal_url_proxy() != null){
+                                                        proxyUrl = pixivCat.getOriginal_url_proxy();
                                                     }else {
                                                         group.sendMessage(new Message().lineQ().text("唔，找不到预览图，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                                         group.sendMessage(messageLineQ.getMessage());
                                                         return;
                                                     }
-                                                }else if(pixivCat.getOriginal_url_proxy() != null){
-                                                    proxyUrl = pixivCat.getOriginal_url_proxy();
-                                                }else {
-                                                    group.sendMessage(new Message().lineQ().text("唔，找不到预览图，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                                    group.sendMessage(messageLineQ.getMessage());
-                                                    return;
-                                                }
 
                                                     //原图
                                                     messageLineQ.textLine("原图（也许是?）：");
@@ -261,8 +269,12 @@ public class SauceNaoController extends QQController {
                                                         group.sendMessage(noImage);
                                                     }
 
-                                            }catch (Exception e){
-                                                group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                }catch (Exception e){
+                                                    group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                    group.sendMessage(messageLineQ.getMessage());
+                                                }
+                                            }else {
+                                                messageLineQ.text("代理获取失败：" + pixivCat.getError());
                                                 group.sendMessage(messageLineQ.getMessage());
                                             }
                                         }
@@ -296,40 +308,44 @@ public class SauceNaoController extends QQController {
                                             String string = response.body().string();
                                             PixivCat pixivCat = MyYuQ.toClass(string, PixivCat.class);
 
-                                            try {
-                                                int imageP = Integer.parseInt(finalP);
-                                                String proxyUrl = "";
-                                                if (pixivCat.getOriginal_urls_proxy() != null){
-                                                    if (imageP < pixivCat.getOriginal_urls_proxy().length){
-                                                        proxyUrl = pixivCat.getOriginal_urls_proxy()[imageP];
+                                            if (pixivCat.isSuccess()){
+                                                try {
+                                                    int imageP = Integer.parseInt(finalP);
+                                                    String proxyUrl = "";
+                                                    if (pixivCat.getOriginal_urls_proxy() != null){
+                                                        if (imageP < pixivCat.getOriginal_urls_proxy().length){
+                                                            proxyUrl = pixivCat.getOriginal_urls_proxy()[imageP];
+                                                        }else {
+                                                            group.sendMessage(new Message().lineQ().text("唔，找不到预览图，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                            group.sendMessage(messageLineQ.getMessage());
+                                                            return;
+                                                        }
+                                                    }else if(pixivCat.getOriginal_url_proxy() != null){
+                                                        proxyUrl = pixivCat.getOriginal_url_proxy();
                                                     }else {
-                                                        group.sendMessage(new Message().lineQ().text("唔，无法获取预览图链接，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                        group.sendMessage(new Message().lineQ().text("唔，找不到预览图，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                                         group.sendMessage(messageLineQ.getMessage());
                                                         return;
                                                     }
-                                                }else if(pixivCat.getOriginal_url_proxy() != null){
-                                                    proxyUrl = pixivCat.getOriginal_url_proxy();
-                                                }else {
-                                                    group.sendMessage(new Message().lineQ().text("唔，找不到预览图链接，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+
+                                                    //原图
+                                                    messageLineQ.textLine("原图（也许是?）：");
+                                                    messageLineQ.imageByUrl(proxyUrl);
+
+                                                    try {
+                                                        group.sendMessage(messageLineQ.getMessage());
+                                                    }catch (IllegalStateException e){
+                                                        SfLog.getInstance().e(this.getClass(), e);
+                                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                        group.sendMessage(noImage);
+                                                    }
+
+                                                }catch (Exception e){
+                                                    group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                                     group.sendMessage(messageLineQ.getMessage());
-                                                    return;
                                                 }
-
-                                                //原图
-                                                messageLineQ.textLine("原图链接（也许是?）：");
-                                                messageLineQ.text(proxyUrl);
-
-                                                try {
-                                                    group.sendMessage(messageLineQ.getMessage());
-                                                }catch (IllegalStateException e){
-                                                    SfLog.getInstance().e(this.getClass(), e);
-                                                    group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                                    group.sendMessage(noImage);
-                                                }
-
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                                group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                            }else {
+                                                messageLineQ.text("代理获取失败：" + pixivCat.getError());
                                                 group.sendMessage(messageLineQ.getMessage());
                                             }
                                         }

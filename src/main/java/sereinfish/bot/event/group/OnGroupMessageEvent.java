@@ -11,6 +11,7 @@ import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
@@ -96,7 +97,9 @@ public class OnGroupMessageEvent {
                         }
                         SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
                     }
-                } catch (SQLException e) {
+                }catch (SQLServerException e){
+                    SfLog.getInstance().e(this.getClass(), e.getMessage());
+                }catch (SQLException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
                 } catch (IllegalModeException e) {
                     SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
@@ -115,8 +118,15 @@ public class OnGroupMessageEvent {
         if (message.getBody().size() > 0){
             if(message.getBody().get(0) instanceof Text){
                 Text text = (Text) message.getBody().get(0);
-                if (text.getText().startsWith(MyYuQ.getBotName())){
-                    String noNameMsg = text.getText().substring(MyYuQ.getBotName().length());
+                String botName = MyYuQ.getBotName();
+                if (text.getText().startsWith(MyYuQ.getBotName() + ",")){
+                    botName = MyYuQ.getBotName() + ",";
+                }else if (text.getText().startsWith(MyYuQ.getBotName() + "，")){
+                    botName = MyYuQ.getBotName() + "，";
+                }
+
+                if (text.getText().startsWith(botName)){
+                    String noNameMsg = text.getText().substring(botName.length());
                     while (noNameMsg.startsWith(" ")){
                         noNameMsg = noNameMsg.substring(1);
                     }
@@ -134,8 +144,8 @@ public class OnGroupMessageEvent {
                     //path修改
                     MessageItem pathItem = message.getPath().get(0);
                     if (pathItem instanceof Text){
-                        if (text.getText().startsWith(MyYuQ.getBotName())){
-                            noNameMsg = text.getText().substring(MyYuQ.getBotName().length());
+                        if (text.getText().startsWith(botName)){
+                            noNameMsg = text.getText().substring(botName.length());
                             while (noNameMsg.startsWith(" ")){
                                 noNameMsg = noNameMsg.substring(1);
                             }
@@ -147,9 +157,9 @@ public class OnGroupMessageEvent {
                         }
                     }
 
-                    for (MessageItem messageItem:message.getPath()){
-                        System.out.println(messageItem.toPath());
-                    }
+//                    for (MessageItem messageItem:message.getPath()){
+//                        System.out.println(messageItem.toPath());
+//                    }
                 }
             }
         }
@@ -457,5 +467,10 @@ public class OnGroupMessageEvent {
     public void clickBotEvent(ClickBotEvent event){
         String msgs[] = {"唔","干嘛","rua","唉呀","哼"};
         event.getOperator().sendMessage(MyYuQ.getMif().text(msgs[MyYuQ.getRandom(0, msgs.length - 1)]).toMessage());
+    }
+
+    @Event
+    public void clickEvent(ClickEvent event){
+        System.out.println(event.getOperator().getName() + event.getAction() + event.getSuffix());
     }
 }
