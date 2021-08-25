@@ -83,6 +83,19 @@ public class GroupConf{
 
     @Control(group = "自动回复", name = "启用全局问答", type = ControlType.CheckBox, tip = "自动回复时使用全局问答列表")
     boolean globalAutoReplyEnable = false;
+    //SauceNaoAPI
+    @Control(group = "SauceNaoAPI", name = "启用", type = ControlType.CheckBox, tip = "启用SauceNao搜图功能")
+    boolean SauceNaoAPIEnable = false;
+
+    @Control(group = "SauceNaoAPI", name = "Api Key", type = ControlType.Edit, tip = "SauceNao搜图功能的api key")
+    String SauceNaoApiKey = "";
+
+    @Control(group = "SauceNaoAPI", name = "数据库索引", type = ControlType.Edit_IntNum, tip = "指定搜索的数据库")
+    int SauceNaoApiDb = 5;
+
+    @Control(group = "SauceNaoAPI", name = "查看索引列表", type = ControlType.WebLink, tip = "跳转到数据库掩码列表")
+    String SauceNaoApiDbList = "https://saucenao.com/tools/examples/api/index_details.txt";
+
     //Lolicon
     @Control(group = "Lolicon", name = "启用", type = ControlType.CheckBox, tip = "启用LoliconAPI")
     boolean loliconEnable = false;

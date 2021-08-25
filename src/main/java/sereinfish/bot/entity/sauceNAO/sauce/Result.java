@@ -10,7 +10,7 @@ import java.util.Map;
 @Getter
 public class Result {
     Header header;
-    Map<String,Object> data;
+    Data data;
 
     @Getter
     public class Header{
@@ -21,23 +21,24 @@ public class Result {
         int dupes;//不知道是啥，被这搜索结果迷惑的人？
     }
 
-//    public class Data{
-//        String[] ext_urls;//外部链接，结果的
-//        String title;//标题
-//        String da_id;//
-//        String author_name;
-//        String author_url;
-//    }
-
-
-    @Override
-    public String toString() {
-        String s =  "Result:" +
-                "\n相似度：" + header.getSimilarity() +
-                "\n缩略图：" + header.getThumbnail();
-        for (Map.Entry<String,Object> entry:data.entrySet()){
-            s += "\n" + entry.getKey() + ":" + entry.getValue();
-        }
-        return s;
+    @Getter
+    public class Data{
+        String[] ext_urls;//外部链接，结果的
+        String title = "无";//标题
+        long pixiv_id = 0;//
+        String member_name = "无";
+        long member_id = 0;
     }
+
+
+//    @Override
+//    public String toString() {
+//        String s =  "Result:" +
+//                "\n相似度：" + header.getSimilarity() +
+//                "\n缩略图：" + header.getThumbnail();
+//        for (Map.Entry<String,Object> entry:data.entrySet()){
+//            s += "\n" + entry.getKey() + ":" + entry.getValue();
+//        }
+//        return s;
+//    }
 }

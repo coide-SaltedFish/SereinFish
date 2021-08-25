@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 @Getter
 public class SauceNAO {
+    public static final int SUCCESS = 0;
+
     Header header;
     ArrayList<Result> results;
 
