@@ -1,8 +1,10 @@
 package sereinfish.bot.performance;
 
 import com.sun.management.OperatingSystemMXBean;
+import net.mamoe.mirai.IMirai;
 import net.mamoe.mirai.Mirai;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 
 import java.lang.management.ManagementFactory;

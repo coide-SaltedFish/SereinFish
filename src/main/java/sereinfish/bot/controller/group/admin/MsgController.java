@@ -47,7 +47,7 @@ public class MsgController extends QQController {
         }
     }
 
-    @Action("\\[!！.]版本$\\")
+    @Action("\\^[!！.]版本$\\")
     @QMsg(reply = true)
     public Message version(){
         return MyYuQ.getMif().text(MyYuQ.getVersionInfo()).toMessage();
@@ -73,7 +73,7 @@ public class MsgController extends QQController {
         return MyYuQ.getMif().text(str.toString()).toMessage();
     }
 
-    @Action("\\[.!！]消息转图片$\\")
+    @Action("\\^[.!！]消息转图片$\\")
     public Message testMsgImage(GroupConf groupConf, ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"msg_temp");//文件缓存路径
@@ -92,7 +92,7 @@ public class MsgController extends QQController {
         }
     }
 
-    @Action("\\[.！!]base64转图片$\\")
+    @Action("\\^[.！!]base64转图片$\\")
     public Message base64ToImage(ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"base64ToImage_temp");//文件缓存路径
@@ -113,7 +113,7 @@ public class MsgController extends QQController {
         }
     }
 
-    @Action("\\[.！!]玩家头像$\\ {uuid}")
+    @Action("\\^[.！!]玩家头像$\\ {uuid}")
     public Message getMcPlayerHeadImage(String uuid){
         File imageFile = new File(FileHandle.imageCachePath,"mcPlayerHeadImage_temp");//文件缓存路径
         try {

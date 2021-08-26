@@ -198,7 +198,7 @@ public class OnGroupMessageEvent {
                         length += text.getText().length();
                     }
                 }
-                if (length >= 350){
+                if (length >= conf.getLongMsgToImageTextLengthMax()){
                     //取消发送
                     event.setCancel(true);
                     event.getSendTo().sendMessage(MyYuQ.getMif().text("消息过长，正在处理").toMessage());

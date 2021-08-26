@@ -26,7 +26,7 @@ import static sereinfish.bot.utils.OkHttpUtil.JSON;
 @Menu(type = Menu.Type.GROUP, name = "枝网")
 public class ASoulCnKiController {
 
-    @Action("\\[.!！]枝网查重$\\")
+    @Action("\\^[.!！]枝网查重$\\")
     @MenuItem(name = "枝网查重", usage = "[ReplyMsg][.!！]枝网查重", description = "查询小作文重复率捏")
     public String check(Group group, Message message){
         if(message.getReply() == null){

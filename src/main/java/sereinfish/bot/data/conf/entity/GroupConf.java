@@ -157,6 +157,9 @@ public class GroupConf{
     @Control(group = "消息转图片", name = "启用长文本转图片功能", type = ControlType.CheckBox, tip = "bot在发送长文本时将自动把消息转换为图片发送")
     boolean longMsgToImageEnable = false;
 
+    @Control(group = "消息转图片", name = "最大字数", type = ControlType.Edit_IntNum, tip = "超过自动转图片")
+    int longMsgToImageTextLengthMax = 300;
+
     @Control(group = "消息转图片", name = "文本转图片字体", type = ControlType.Font_ComboBox, tip = "文本转图片时的文本字体")
     String longMsgToImageFont = "微软雅黑";
 

@@ -33,8 +33,8 @@ import java.net.InetSocketAddress;
 @Menu(type = Menu.Type.GROUP, name = "mc服务器相关")
 public class McServerController {
 
-    @Action("\\[.!！][Ss]tate$\\ {addr}")
-    @Synonym("\\[.!！][Ss]tate$\\")
+    @Action("\\^[.!！][Ss]tate$\\ {addr}")
+    @Synonym("\\^[.!！][Ss]tate$\\")
     @MenuItem(name = "获取服务器状态", usage = "[.!！][Ss]tate {addr} | [.!！][Ss]tate", description = "获取指定地址服务器信息或者获取本群绑定服务器信息")
     public Message ping(GroupConf groupConf, Group group, String addr) throws IOException {
         //前置检查

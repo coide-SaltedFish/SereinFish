@@ -79,12 +79,12 @@ public class InitEvent{
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
-        //初始化注解管理器
+        //初始化类管理器
         try {
             ClassManager.init();
-            SfLog.getInstance().d(this.getClass(),"注解管理器初始化完成");
+            SfLog.getInstance().d(this.getClass(),"类管理器初始化完成");
         } catch (Exception e) {
-            SfLog.getInstance().e(this.getClass(), "注解管理器初始化失败，启动失败", e);
+            SfLog.getInstance().e(this.getClass(), "类管理器初始化失败，启动失败", e);
             System.exit(-1);
         }
 
@@ -186,6 +186,7 @@ public class InitEvent{
         MessageState.init();
         SfLog.getInstance().d(this.getClass(),"消息队列初始化完成");
         //显示主窗体
+        SfLog.getInstance().d(this.getClass(),"主界面初始化中");
         MainFrame.getMainFrame().setVisible(true);
         SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
 

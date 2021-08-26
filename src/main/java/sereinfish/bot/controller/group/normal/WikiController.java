@@ -22,7 +22,7 @@ import java.net.URLEncoder;
 @Menu(type = Menu.Type.GROUP, name = "搜索快捷入口")
 public class WikiController {
 
-    @Action("\\[!！.]wiki$\\ {key}")
+    @Action("\\^[!！.]wiki$\\ {key}")
     @MenuItem(name = "Mc Wiki", usage = "[!！.]wiki {key}", description = "得到Mc Wiki中指向关键词的链接")
     public Message mcWiki(GroupConf groupConf, String key){
         //检查是否启用
@@ -42,7 +42,7 @@ public class WikiController {
         return MyYuQ.getMif().text("点击链接查看MC Wiki中有关[" + key + "]的内容:\n" + url).toMessage();
     }
 
-    @Action("\\[!！.]百度$\\ {key}")
+    @Action("\\^[!！.]百度$\\ {key}")
     @MenuItem(name = "百度", usage = "[!！.]百度 {key}", description = "得到百度中指向关键词的链接")
     public Message baidu(GroupConf groupConf, String key){
         //检查是否启用
@@ -62,7 +62,7 @@ public class WikiController {
         return MyYuQ.getMif().text("点击链接查看百度中有关[" + key + "]的内容:\n" + url).toMessage();
     }
 
-    @Action("\\[!！.][Pp][Rr][Tt][Ss]$\\ {key}")
+    @Action("\\^[!！.][Pp][Rr][Tt][Ss]$\\ {key}")
     @MenuItem(name = "PRTS", usage = "[!！.][Pp][Rr][Tt][Ss] {key}", description = "得到PRTS中指向关键词的链接")
     public Message prts(GroupConf groupConf, String key){
         //检查是否启用

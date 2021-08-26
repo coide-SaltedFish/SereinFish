@@ -55,8 +55,8 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\[!！.]添加问答$\\")
-    @Synonym({"\\[!！.]问答添加$\\"})
+    @Action("\\^[!！.]添加问答$\\")
+    @Synonym({"\\^[!！.]问答添加$\\"})
     public Message addReply(Member sender, DataBase dataBase, Group group, ContextSession session){
         try{
             reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
@@ -86,8 +86,8 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\[!！.]问答添加$\\ 问{key}答{re}")
-    @Synonym("\\[!！.]添加问答$\\ 问{key}答{re}")
+    @Action("\\^[!！.]问答添加$\\ 问{key}答{re}")
+    @Synonym("\\^[!！.]添加问答$\\ 问{key}答{re}")
     public Message addReply(DataBase dataBase, Group group, Member sender, Message message, String key,String re){
         String msg = Message.Companion.toCodeString(message);
         String msgInfo = msg.substring(msg.indexOf(" 问"));
@@ -115,8 +115,8 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\[!！.]问答查询$\\ {page} \"{key}\"")
-    @Synonym("\\[!！.]问答查询$\\ {page} {key}")
+    @Action("\\^[!！.]问答查询$\\ {page} \"{key}\"")
+    @Synonym("\\^[!！.]问答查询$\\ {page} {key}")
     public Message queryReply(DataBase dataBase, Group group, int page, String key){
         if (page < 1){
             return MyYuQ.getMif().text("不合法的页数：" + page).toMessage();
@@ -153,7 +153,7 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\[!！.]问答查询$\\ {key}")
+    @Action("\\^[!！.]问答查询$\\ {key}")
     public Message queryReply(DataBase dataBase, Group group, String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
@@ -182,7 +182,7 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\[!！.]问答删除$\\ {id}")
+    @Action("\\^[!！.]问答删除$\\ {id}")
     public Message delete(DataBase dataBase, String id){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);

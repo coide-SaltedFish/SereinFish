@@ -62,8 +62,8 @@ public class BlackListController {
      * @param qq        qq
      * @param remake    备注
      */
-    @Action("\\[.!！]黑名单添加$\\ {qq} {remake}")
-    @Synonym({"\\[.!！]加黑$\\ {qq} {remake}"})
+    @Action("\\^[.!！]黑名单添加$\\ {qq} {remake}")
+    @Synonym({"\\^[.!！]加黑$\\ {qq} {remake}"})
     public Message add(Group group, DataBase dataBase, long qq, String remake){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
@@ -90,8 +90,8 @@ public class BlackListController {
      * 删除黑名单
      * @param qq        qq
      */
-    @Action("\\[.!！]黑名单删除$\\ {qq}")
-    @Synonym({"\\[.!！]删黑$\\ {qq}"})
+    @Action("\\^[.!！]黑名单删除$\\ {qq}")
+    @Synonym({"\\^[.!！]删黑$\\ {qq}"})
     public Message delete(DataBase dataBase, Group group, long qq){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
@@ -114,8 +114,8 @@ public class BlackListController {
     /**
      * 查询本群黑名单
      */
-    @Action("\\[.!！]本群黑名单$\\ {page}")
-    @Synonym("\\[.!！]黑名单$\\ {page}")
+    @Action("\\^[.!！]本群黑名单$\\ {page}")
+    @Synonym("\\^[.!！]黑名单$\\ {page}")
     public Message query(DataBase dataBase, Group group, int page){
         if (page < 1){
             return MyYuQ.getMif().text("页面错误：" + page).toMessage();
@@ -150,8 +150,8 @@ public class BlackListController {
     /**
      * 查询本群黑名单
      */
-    @Action("\\[.!！]本群黑名单$\\")
-    @Synonym("\\[.!！]黑名单$\\")
+    @Action("\\^[.!！]本群黑名单$\\")
+    @Synonym("\\^[.!！]黑名单$\\")
     public Message query(DataBase dataBase, Group group){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);

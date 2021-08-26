@@ -82,7 +82,7 @@ public class RandomController {
     }
 
     @Action("抽一位幸运群友")
-    @Synonym({"抽个幸运群友", "抽一个幸运群友"})
+    @Synonym({"抽个幸运群友", "抽一个幸运群友", "抽个幸运群员", "抽一个幸运群员", "抽一位幸运群员"})
     @QMsg(mastAtBot = true)
     public Message randomMember(Group group){
         ArrayList<Member> members = new ArrayList<>();

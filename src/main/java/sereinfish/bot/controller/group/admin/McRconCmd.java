@@ -35,7 +35,7 @@ public class McRconCmd extends QQController {
         }
     }
 
-    @Action("\\[.!！][rR][cC][Ee]$\\ {var}")
+    @Action("\\^[.!！][rR][cC][Ee]$\\ {var}")
     public String rconCmdExecute(GroupConf groupConf, String var){
         //前置检查
         if (groupConf.isRconEnable()){
@@ -71,7 +71,7 @@ public class McRconCmd extends QQController {
      * @param groupConf
      * @return
      */
-    @Action("\\[.!！][rR][cC][Ee][Ss]$\\")
+    @Action("\\^[.!！][rR][cC][Ee][Ss]$\\")
     public String rconsCmdExecute(ContextSession session, Member sender, GroupConf groupConf){
         //前置检查
         if (groupConf.isRconEnable()){

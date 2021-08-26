@@ -6,6 +6,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +49,35 @@ public class Permissions {
     }
 
     /**
+     * 通过qq得到用户所在权限组
+     * @param member
+     * @return
+     */
+    public Integer[] getMemberPermissions(Member member){
+        ArrayList<Integer> permissions = new ArrayList<>();
+        try {
+            readAuthorityList();//得到权限列表
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), "权限列表更新失败，使用缓存中", e);
+        }
+        if (authorityList.isOP(member.getId())){
+            permissions.add(OP);
+        }
+
+        if (authorityList.isMaster(member.getId())){
+            permissions.add(MASTER);
+        }else if (authorityList.isAdmin(member.getId())){
+            permissions.add(ADMIN);
+        }else if (member.isAdmin()){
+            permissions.add(GROUP_ADMIN);
+        }else {
+            permissions.add(NORMAL);
+        }
+
+        return permissions.toArray(new Integer[]{});
+    }
+
+    /**
      * 得到权限字段
      * @param var
      * @return
@@ -59,6 +89,24 @@ public class Permissions {
             }
         }
         return "未知";
+    }
+
+    /**
+     * 权限检查
+     * @return
+     */
+    public boolean authorityCheck(Integer[] permissions, int authority){
+        for (int p:permissions){
+            if (p == OP){
+                if(p == authority){
+                    return true;
+                }
+            }
+            if (p >= 0 && p <= authority){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

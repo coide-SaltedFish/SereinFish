@@ -34,6 +34,8 @@ public class MenuManager {
                 SfLog.getInstance().e(ClassManager.class, e);
             }
         }
+        //得到所在权限组
+        Integer[] permissions = Permissions.getInstance().getMemberPermissions(sender);
         //类扫描
         ArrayList<MenuEntity> menus = new ArrayList<>();
         for (Class cls:ClassManager.getInstance().getControllerClassList()){
@@ -43,10 +45,15 @@ public class MenuManager {
                 //遍历函数
                 for (Method method:cls.getDeclaredMethods()){
                     if (method.isAnnotationPresent(MenuItem.class)){
-                        entity.add(method.getAnnotation(MenuItem.class));
+                        MenuItem menuItem = method.getAnnotation(MenuItem.class);
+                        if (Permissions.getInstance().authorityCheck(permissions, menuItem.permission())){
+                            entity.add(method.getAnnotation(MenuItem.class));
+                        }
                     }
                 }
-                menus.add(entity);
+                if (entity.getMenuItems().size() > 0){
+                    menus.add(entity);
+                }
             }
         }
         //生成图片
@@ -94,7 +101,7 @@ public class MenuManager {
         int height = topSpacing //上边距
                 + downSpacing //下边距
                 + FontDesignMetrics.getMetrics(font.deriveFont(Font.BOLD, titleFontSize)).getHeight()//标题高度
-                + FontDesignMetrics.getMetrics(font.deriveFont(Font.BOLD, menuFontSize)).getHeight() * menuHeight //分类标题高度
+                + FontDesignMetrics.getMetrics(font.deriveFont(Font.BOLD, menuFontSize)).getHeight() * (menuHeight + 1) //分类标题高度
                 + FontDesignMetrics.getMetrics(font.deriveFont(Font.PLAIN, menuItemFontSize)).getHeight() * menuItemHeight //分类标题高度
                 + rowSpacing * (menuHeight + menuItemHeight)//文字间距
                 ;
@@ -112,6 +119,20 @@ public class MenuManager {
         textX = leftSpacing;
         font = font.deriveFont(Font.BOLD, titleFontSize);
         textY += rowSpacing + drawString(graphics2D, textColor, font,"SereinFish Bot 指令菜单 " + MyYuQ.getVersion(), textX, textY);
+
+        if (menus.size() == 0){
+            textX = leftSpacing;
+            font = font.deriveFont(Font.BOLD, menuFontSize);
+            textY += rowSpacing + drawString(graphics2D,
+                    textColor,
+                    font,
+                    "无可执行指令",
+                    textX,
+                    textY);
+
+            graphics2D.dispose();
+            return bufferedImage;
+        }
 
         //遍历绘制文字
         for (MenuEntity menuEntity:menus){
@@ -154,6 +175,7 @@ public class MenuManager {
                 //描述
                 textY += rowSpacing + drawString(graphics2D,textColor,font,"描述：" + menuItem.description(), textX, textY);
             }
+
         }
         graphics2D.dispose();
         return bufferedImage;

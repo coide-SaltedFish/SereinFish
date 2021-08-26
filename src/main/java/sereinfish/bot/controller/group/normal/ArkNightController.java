@@ -21,7 +21,7 @@ import java.io.IOException;
 @Menu(type = Menu.Type.GROUP, name = "企鹅物流")
 public class ArkNightController {
 
-    @Action("\\[!！.]企鹅物流$\\ {name}")
+    @Action("\\^[!！.]企鹅物流$\\ {name}")
     @MenuItem(name = "企鹅物流物品掉落查询", usage = "[!！.]企鹅物流 {name}", description = "在企鹅物流查询物品掉落数据")
     public Message penguinStatisticsQuery(Group group, String name){
         group.sendMessage(MyYuQ.getMif().text(getWaitMsg()).toMessage());
