@@ -12,11 +12,6 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import okhttp3.OkHttpClient;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.Tag;
-
-import javax.swing.text.html.HTML;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -112,37 +107,6 @@ public class MyYuQ {
      */
     public static String toJson(Object o, Type type){
         return new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create().toJson(o,type);
-    }
-
-    /**
-     * yml文本转class
-     * @param text
-     * @param type
-     * @param <T>
-     * @return
-     */
-    public static <T> T toClassYml(String text, Class type){
-        DumperOptions dumperOptions = new DumperOptions();
-        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-        dumperOptions.setPrettyFlow(false);
-        Yaml yaml = new Yaml(dumperOptions);
-        T t = (T) yaml.loadAs(text, type);
-        return t;
-    }
-
-    /**
-     * 转yml文本
-     * @param o
-     * @return
-     */
-    public static String toYml(Object o){
-        DumperOptions dumperOptions = new DumperOptions();
-        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-        dumperOptions.setPrettyFlow(false);
-        Yaml yaml = new Yaml(dumperOptions);
-        return yaml.dumpAs(o, Tag.MAP, null);
     }
 
     /**

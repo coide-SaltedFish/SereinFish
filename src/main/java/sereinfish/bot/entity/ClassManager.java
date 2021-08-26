@@ -2,14 +2,13 @@ package sereinfish.bot.entity;
 
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -128,6 +127,7 @@ public class ClassManager {
         String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
         String packagePath = jarInfo[1].substring(1);
         try {
+            jarFilePath = URLDecoder.decode(jarFilePath,"utf-8");
             JarFile jarFile = new JarFile(jarFilePath);
             Enumeration<JarEntry> entrys = jarFile.entries();
             while (entrys.hasMoreElements()) {
@@ -157,7 +157,7 @@ public class ClassManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            SfLog.getInstance().e(this.getClass(), e);
         }
         return myClassName;
     }
