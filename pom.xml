@@ -69,36 +69,24 @@
             <version>4.9.1</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/gui.ava/html2image -->
-<!--        <dependency>-->
-<!--            <groupId>gui.ava</groupId>-->
-<!--            <artifactId>html2image</artifactId>-->
-<!--            <version>2.0.1</version>-->
-<!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/dnsjava/dnsjava -->
         <dependency>
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
             <version>3.4.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.xhtmlrenderer</groupId>-->
-<!--            <artifactId>core-renderer</artifactId>-->
-<!--            <version>R8</version>-->
-<!--        </dependency>-->
+<!--        二维码-->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.3.0</version>
+        </dependency>
 
-        <!--        <dependency>-->
-<!--            <groupId>com.IceCreamQAQ.Yu</groupId>-->
-<!--            <artifactId>Yu-DB</artifactId>-->
-<!--            <version>0.0.2.0-DEV2</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.h2database</groupId>-->
-<!--            <artifactId>h2</artifactId>-->
-<!--            <version>1.4.200</version>-->
-<!--        </dependency>-->
 
     </dependencies>
 
@@ -143,6 +131,11 @@
         <repository>
             <id>IceCream</id>
             <url>https://maven.IceCreamQAQ.com/repository/maven-public/</url>
+        </repository>
+
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 

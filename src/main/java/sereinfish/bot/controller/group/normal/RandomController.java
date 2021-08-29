@@ -111,5 +111,13 @@ public class RandomController {
         return new Message().lineQ().textLine("抽中了:" + member.getNameCard() + "[" + member.getId() + "]").imageByUrl(member.getAvatar()).getMessage();
     }
 
+    @Action("抽一位幸运群主")
+    @Synonym({"抽个幸运群主", "抽一个幸运群主"})
+    @QMsg(mastAtBot = true)
+    public Message randomOwnerMember(Group group){
+        Member member = group.getOwner();
+        return new Message().lineQ().textLine("抽中了:" + member.getNameCard() + "[" + member.getId() + "]").imageByUrl(member.getAvatar()).getMessage();
+    }
+
 
 }

@@ -35,7 +35,7 @@ public class MsgDBController extends QQController {
      */
     @Before
     public void before(Group group, Member sender, Message message){
-        if (!Permissions.getInstance().authorityCheck(sender, Permissions.ADMIN)) { //权限检查
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
 
             msg.setReply(message.getSource());

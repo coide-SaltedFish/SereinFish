@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.google.zxing.WriterException;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
@@ -12,6 +13,8 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
+import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.event.GroupReCallMessageManager;
@@ -22,10 +25,13 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.performance.MyPerformance;
+import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Date;
 
 /**
  * 消息相关命令处理
@@ -38,8 +44,8 @@ public class MsgController extends QQController {
      * 权限检查
      */
     @Before
-    public void before(Member sender, Message message){
-        if (!Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)) { //权限检查
+    public void before(Group group, Member sender, Message message){
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             
             msg.setReply(message.getSource());
@@ -124,6 +130,13 @@ public class MsgController extends QQController {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("获取失败:" + e.getMessage()).toMessage();
         }
+    }
+
+    @Action("戳我")
+    @QMsg(mastAtBot = true)
+    public void clickMe(Member sender){
+        SfLog.getInstance().d(this.getClass(), "戳：" + sender.getName());
+        //sender.click();
     }
 
     @Action("撤回")

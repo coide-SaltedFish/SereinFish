@@ -12,6 +12,7 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -33,7 +34,7 @@ import java.io.IOException;
 import java.util.*;
 
 @GroupController
-@Menu(type = Menu.Type.ALL, name = "Lolicon")
+//@Menu(type = Menu.Type.ALL, name = "Lolicon")
 public class LoliconController {
     private static boolean isSending = false;//是否正在发送中
 
@@ -41,7 +42,7 @@ public class LoliconController {
     public void before(Group group, GroupConf groupConf, Member sender){
         //权限检查
         int authority = groupConf.getLoliconPermissions();
-        if (!Permissions.getInstance().authorityCheck(sender, authority)){
+        if (!Permissions.getInstance().authorityCheck(group, sender, authority)){
             String tipMsg = "权限不足,所需权限（" + Permissions.getInstance().getAuthorityName(authority) + "）";
             group.sendMessage(new Message().lineQ().at(sender).text("\n").text(tipMsg));
             SfLog.getInstance().w(this.getClass(), tipMsg);
@@ -56,14 +57,14 @@ public class LoliconController {
     @Action("\\img_B407F708A2C6A506342098DF7CAC4A57\\")
     @Synonym({"\\[!！.]setu$\\", "\\[!！.]色图$\\","\\img_049231702ACB5E94ECCD953F46E6CAB9\\"})
     //@MenuItem(name = "涩图", usage = "[!！.]setu | [!！.]色图", description = "要一张涩图")
-    public Message[] getST(Message message, GroupConf groupConf){
-        return getLoliconMsg(message,true, groupConf, null, null, 1);
+    public Message[] getST(Group group, Message message, GroupConf groupConf){
+        return getLoliconMsg(group, message,true, groupConf, null, null, 1);
     }
 
     @Action("\\img_7CF98559280FD216C5C48AA3D22A8815\\")
     @QMsg(mastAtBot = true)
-    public Message[] getST_2(Message message, GroupConf groupConf){
-        return getLoliconMsg(message, true, groupConf, null, null, 1);
+    public Message[] getST_2(Group group, Message message, GroupConf groupConf){
+        return getLoliconMsg(group, message, true, groupConf, null, null, 1);
     }
 
 //    @Action(".来点{key}色图")
@@ -85,8 +86,6 @@ public class LoliconController {
     @MenuItem(name = "涩图且指定数量和tag", usage = "@Bot 来{strNum}[张份]{key}[色涩]图", description = "要指定数量和tag的涩图")
     @QMsg(mastAtBot = true)
     public Message[] setuAtBotKeyWord(Group group, Message message, GroupConf groupConf, String strNum, String key){
-        int max = groupConf.getSetuSendMaxNum();
-
         int num;
         try {
             if (strNum.equals("")){
@@ -106,15 +105,8 @@ public class LoliconController {
         }
 
         ArrayList<Message> messages = new ArrayList<>();
-        if (num > max){
-            num = max;
-            messages.add(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"));
-        }
 
-        if (num <= 0){
-            return new Message[]{Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>")};
-        }
-        for (Message msg:getLoliconMsg(message, true, groupConf, null, key, num)){
+        for (Message msg:getLoliconMsg(group, message, true, groupConf, null, key, num)){
             messages.add(msg);
         }
         return messages.toArray(new Message[]{});
@@ -124,16 +116,16 @@ public class LoliconController {
     @Synonym({"来点{key}涩图","来张{key}涩图","来张{key}色图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
     @MenuItem(name = "来点涩图且指定tag", usage = "@Bot 来[点张]{key}[涩色]图 | {key}[色涩]图摩多摩多 | {key}色图摩多", description = "要一张涩图且指定tag")
     @QMsg(mastAtBot = true)
-    public Message[] setuAtBot(Message message, GroupConf groupConf, String key){
-        return getLoliconMsg(message, true, groupConf, null, key, 1);
+    public Message[] setuAtBot(Group group, Message message, GroupConf groupConf, String key){
+        return getLoliconMsg(group, message, true, groupConf, null, key, 1);
     }
 
     @Action("涩图摩多")
     @Synonym({"涩图摩多摩多","色图摩多摩多","涩图摩多","色图摩多"})
     @MenuItem(name = "要一张涩图", usage = "@Bot [色涩]图摩多 | [色涩]图摩多摩多", description = "要一张涩图")
     @QMsg(mastAtBot = true)
-    public Message[] setuAtBotMore(Message message, GroupConf groupConf){
-        return getLoliconMsg(message, true, groupConf, null, null, 1);
+    public Message[] setuAtBotMore(Group group, Message message, GroupConf groupConf){
+        return getLoliconMsg(group, message, true, groupConf, null, null, 1);
     }
 
     @Action("我要{strNum}张色图")
@@ -141,8 +133,6 @@ public class LoliconController {
     @MenuItem(name = "涩图且指定数量", usage = "@Bot 我要{strNum}张[色涩]图 | 来{strNum}份[涩色]图", description = "要指定数量的涩图")
     @QMsg(mastAtBot = true)
     public Message[] setuNum(Group group, Message message, GroupConf groupConf, String strNum){
-        int max = groupConf.getSetuSendMaxNum();
-
         int num;
         try {
             num = Integer.valueOf(strNum);
@@ -159,16 +149,8 @@ public class LoliconController {
         }
 
         ArrayList<Message> messages = new ArrayList<>();
-        if (num > max){
-            num = max;
-            messages.add(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"));
-        }
 
-        if (num <= 0){
-            return new Message[]{Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>")};
-        }
-
-        for (Message msg:getLoliconMsg(message, true, groupConf, null, null, num)){
+        for (Message msg:getLoliconMsg(group, message, true, groupConf, null, null, num)){
             messages.add(msg);
         }
 
@@ -177,10 +159,10 @@ public class LoliconController {
 
     @Action("\\img_0E558CBAE41368A42DB812E7C1D9A172\\")
     @QMsg(mastAtBot = true)
-    public Message enableR18(GroupConf groupConf, Member sender){
+    public Message enableR18(Group group, GroupConf groupConf, Member sender){
 
         //权限判断
-        if (Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)){
+        if (Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             groupConf.setSetuR18Enable(true);
             groupConf.setPlainAndR18Enable(false);
             return Message.Companion.toMessageByRainCode("<Rain:Image:241A6BB95CC02A98CCE648BEE17148D0.jpg>");
@@ -191,9 +173,9 @@ public class LoliconController {
     @Action("\\img_982776A6AA3DD49A9DE457F8EABE4EB0\\")
     @Synonym({"\\img_AE8B71A4EB5E5DF105E9EEA61CE6152D\\", "\\img_B112EE7AB6BB3C96A797B0AB5889BFCC\\"})
     @QMsg(mastAtBot = true)
-    public Message enableNoR18(GroupConf groupConf, Member sender){
+    public Message enableNoR18(Group group, GroupConf groupConf, Member sender){
         //权限判断
-        if (Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)){
+        if (Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             groupConf.setSetuR18Enable(false);
             groupConf.setPlainAndR18Enable(false);
             return Message.Companion.toMessageByRainCode("<Rain:Image:2098B7ECBFDC0C092816EE006E24DB05.jpg>");
@@ -204,9 +186,9 @@ public class LoliconController {
     @Action("\\[lL]olicon混合模式$\\ {state}")
     @MenuItem(name = "Lolicon的混合模式开关", usage = "@Bot [lL]olicon混合模式 {state}", description = "开关Lolicon的混合模式", permission = Permissions.GROUP_ADMIN)
     @QMsg(mastAtBot = true,reply = true)
-    public Message r18Blend(boolean state, GroupConf groupConf, Member sender){
+    public Message r18Blend(Group group, boolean state, GroupConf groupConf, Member sender){
         //权限判断
-        if (Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)){
+        if (Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             groupConf.setPlainAndR18Enable(state);
             return Message.Companion.toMessageByRainCode("Lolicon 混合模式：" + state);
         }
@@ -221,7 +203,7 @@ public class LoliconController {
      * @param keyword
      * @param num
      */
-    public Message[] getLoliconMsg(Message message, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
+    public Message[] getLoliconMsg(Group group, Message message, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
         ArrayList<Message> messages = new ArrayList<>();
         if (isSending){
             Message msg = new Message().lineQ().text(" 别急，正在发呢").getMessage();
@@ -230,8 +212,19 @@ public class LoliconController {
 
             return messages.toArray(new Message[]{});
         }
+
+        int max = conf.getSetuSendMaxNum();
+        if (num > max){
+            num = max;
+            messages.add(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"));
+        }
+
+        if (num <= 0){
+            return new Message[]{Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>")};
+        }
+
         isSending = true;
-        Message[] msgs = getLoliconMsgs(isGroupMsg, conf, uids, keyword, num);
+        Message[] msgs = getLoliconMsgs(group, isGroupMsg, conf, uids, keyword, num);
         isSending = false;
 
         return msgs;
@@ -246,7 +239,7 @@ public class LoliconController {
      * @param num
      * @return
      */
-    private Message[] getLoliconMsgs(boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
+    private Message[] getLoliconMsgs(Group group, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
         //普通Lolicon
         Lolicon.Request request = LoliconManager.getRequest(isGroupMsg,conf,keyword,uids, num);
         try {
@@ -265,7 +258,6 @@ public class LoliconController {
                     File file = CacheManager.getLoliconImage(setu.getPid(),setu);
                     SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
                     //MD5发送方法
-                    Message message = MyYuQ.getMif().imageByFile(file).toMessage();
                     if (conf.isLoliconMD5ImageEnable()){
                         try {
                             StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
@@ -277,11 +269,23 @@ public class LoliconController {
                             messages.add(reMsg);
                         } catch (IOException e) {
                             SfLog.getInstance().e(LoliconManager.class,e);
+                            messages.add(new Message().lineQ().text("图片加载失败：MD5 send>>" + setu.getPid()).getMessage());
                         }
                     }else {
-                        if (setu.isR18() || conf.isSetuMastReCallEnable()){
-                            message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                        //普通发送
+                        Message message;
+                        //上传图片
+                        try {
+                            String imageMD5 = MyYuQ.uploadImage(group, file);
+                            message = Message.Companion.toMessageByRainCode("<Rain:Image:" + imageMD5 + ".jpg>");
+                            if (setu.isR18() || conf.isSetuMastReCallEnable()){
+                                message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                            }
+                        }catch (IOException e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                            message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
                         }
+
                         messages.add(message);
                     }
                 }

@@ -1,4 +1,4 @@
-package sereinfish.bot.ui.frame.authority;
+package sereinfish.bot.ui.frame.permission;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +9,7 @@ public class AuthorityManagerFrame extends JFrame {
     private JPanel contentPane;//最底层面板
 
     public AuthorityManagerFrame() {
-        setTitle("权限列表");
+        setTitle("权限管理");
         setBounds(100, 100, 315, 320);
         setLocationRelativeTo(null);
 

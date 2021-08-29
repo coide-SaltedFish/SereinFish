@@ -1,6 +1,8 @@
 package sereinfish.bot.permissions;
 
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import lombok.Getter;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -14,11 +16,16 @@ import java.util.Map;
  * 权限管理器
  */
 public class Permissions {
+    public static final int ALL_GROUP = -1;//所有群组
+
     public static final int OP = -1;//服务器op权限
-    public static final int MASTER = 0;//拥有者权限
-    public static final int ADMIN = 1;//bot管理员权限
-    public static final int GROUP_ADMIN = 2;//群管理权限
-    public static final int NORMAL = 3;//普通权限
+    public static final int SYSTEM = 0;//系统级权限
+    public static final int MASTER = 1;//拥有者权限
+    public static final int ADMIN = 2;//bot管理员权限
+    public static final int GROUP_MASTER = 3;//群主权限
+    public static final int GROUP_BOT_ADMIN = 4;//群bot管理权限
+    public static final int GROUP_ADMIN = 5;//群管理权限
+    public static final int NORMAL = 6;//普通权限
 
     public static final Map<String, Integer> AuthorityList = new HashMap<>();//权限值映射表
 
@@ -28,8 +35,11 @@ public class Permissions {
     private Permissions() throws IOException {
         //初始化映射表
         AuthorityList.put("OP", OP);
+        AuthorityList.put("SYSTEM", SYSTEM);
         AuthorityList.put("MASTER", MASTER);
         AuthorityList.put("ADMIN", ADMIN);
+        AuthorityList.put("GROUP_MASTER", GROUP_MASTER);
+        AuthorityList.put("GROUP_BOT_ADMIN", GROUP_BOT_ADMIN);
         AuthorityList.put("GROUP_ADMIN", GROUP_ADMIN);
         AuthorityList.put("NORMAL", NORMAL);
 
@@ -53,14 +63,14 @@ public class Permissions {
      * @param member
      * @return
      */
-    public Integer[] getMemberPermissions(Member member){
+    public Integer[] getMemberPermissions(Group group, Member member){
         ArrayList<Integer> permissions = new ArrayList<>();
         try {
             readAuthorityList();//得到权限列表
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), "权限列表更新失败，使用缓存中", e);
         }
-        if (authorityList.isOP(member.getId())){
+        if (authorityList.isOP(group.getId(), member.getId())){
             permissions.add(OP);
         }
 
@@ -68,9 +78,13 @@ public class Permissions {
             permissions.add(MASTER);
         }else if (authorityList.isAdmin(member.getId())){
             permissions.add(ADMIN);
+        }else if(member.isOwner()){
+            permissions.add(GROUP_MASTER);
         }else if (member.isAdmin()){
             permissions.add(GROUP_ADMIN);
-        }else {
+        }else if(authorityList.isGroupBotAdmin(group.getId(), member.getId())){
+            permissions.add(GROUP_BOT_ADMIN);
+        }else{
             permissions.add(NORMAL);
         }
 
@@ -114,7 +128,7 @@ public class Permissions {
      * @param member
      * @return
      */
-    public boolean authorityCheck(Member member, int authority){
+    public boolean authorityCheck(Group group, Member member, int authority){
         if (member == null){
             SfLog.getInstance().w(this.getClass(),"无法获取发送者信息：null");
             return false;
@@ -125,40 +139,7 @@ public class Permissions {
             SfLog.getInstance().e(this.getClass(), "权限列表更新失败，使用缓存中", e);
         }
 
-        if (authority == NORMAL){//普通权限
-            return true;
-        }else {
-            //多权限判断
-            if(authority == OP){//op
-                if (authorityList.isOP(member.getId())){
-                    return true;
-                }
-            }else {
-                switch (authority){
-                    case MASTER://拥有者
-                        if (authorityList.isMaster(member.getId())){
-                            return true;
-                        }
-                        break;
-                    case ADMIN://管理员
-                        if (authorityList.isMaster(member.getId())
-                                || authorityList.isAdmin(member.getId())){
-                            return true;
-                        }
-                        break;
-                    case GROUP_ADMIN://群管理
-                        if (authorityList.isMaster(member.getId())
-                                || authorityList.isAdmin(member.getId())
-                                || member.isAdmin()){
-                            return true;
-                        }
-                        break;
-                    default:
-                        return false;
-                }
-            }
-        }
-        return false;
+        return authorityCheck(getMemberPermissions(group, member), authority);
     }
 
 
@@ -188,18 +169,30 @@ public class Permissions {
     /**
      * 权限列表类
      */
+    @Getter
     public class AuthorityList{
-        Map<Long,Long> opList = new HashMap<>();//op列表
+        Map<Long,ArrayList<Long>> opList = new HashMap<>();//op列表
         Map<Long,Long> masterList = new HashMap<>();//拥有者列表
         Map<Long,Long> adminList = new HashMap<>();//管理员列表
+        Map<Long, ArrayList<Long>> groupBotAdmin = new HashMap<>();//群bot管理员列表
 
         /**
          * 是否是OP
          * @param id
          * @return
          */
-        public boolean isOP(long id){
-            return opList.containsKey(id);
+        public boolean isOP(long group, long id){
+            //是否在群组
+            if (!opList.containsKey(group)){
+                return false;
+            }
+            //是否为所有群组OP
+            if (opList.containsKey(ALL_GROUP)){
+                if (opList.get(ALL_GROUP).contains(id)){
+                    return true;
+                }
+            }
+            return opList.get(group).contains(id);
         }
 
         /**
@@ -207,8 +200,11 @@ public class Permissions {
          * @param id
          * @return
          */
-        public boolean addOP(long id){
-            opList.put(id,id);
+        public boolean addOP(long group, long id){
+            if (!opList.containsKey(group)){
+                opList.put(group, new ArrayList<>());
+            }
+            opList.get(group).add(id);
             try {
                 Permissions.getInstance().writeAuthorityList();
                 return true;
@@ -222,12 +218,12 @@ public class Permissions {
          * 删除op
          * @return
          */
-        public boolean deleteOP(long id){
-            if (!isOP(id)){
+        public boolean deleteOP(long group, long id){
+            if (!isOP(group, id)){
                 SfLog.getInstance().e(this.getClass(),"op不存在：" + id);
                 return false;
             }
-            if (opList.remove(id,id)){
+            if (opList.get(group).remove(id)){
                 try {
                     Permissions.getInstance().writeAuthorityList();
                     return true;
@@ -334,17 +330,63 @@ public class Permissions {
             return false;
         }
 
-
-        public Map<Long, Long> getOpList() {
-            return opList;
+        /**
+         * 是否是群bot管理员
+         * @param id
+         * @return
+         */
+        public boolean isGroupBotAdmin(long group, long id){
+            //是否在群组
+            if (!groupBotAdmin.containsKey(group)){
+                return false;
+            }
+            //是否为所有群组OP
+            if (groupBotAdmin.containsKey(ALL_GROUP)){
+                if (groupBotAdmin.get(ALL_GROUP).contains(id)){
+                    return true;
+                }
+            }
+            return groupBotAdmin.get(group).contains(id);
         }
 
-        public Map<Long, Long> getMasterList() {
-            return masterList;
+        /**
+         * 群bot管理员添加
+         * @param id
+         * @return
+         */
+        public boolean addGroupBotAdmin(long group, long id){
+            if (!groupBotAdmin.containsKey(group)){
+                groupBotAdmin.put(group, new ArrayList<>());
+            }
+            groupBotAdmin.get(group).add(id);
+            try {
+                Permissions.getInstance().writeAuthorityList();
+                return true;
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),"群bot管理员添加失败:" + id,e);
+                return false;
+            }
         }
 
-        public Map<Long, Long> getAdminList() {
-            return adminList;
+        /**
+         * 删除群bot管理员
+         * @return
+         */
+        public boolean deleteGroupBotAdmin(long group, long id){
+            if (!isGroupBotAdmin(group, id)){
+                SfLog.getInstance().e(this.getClass(),"群bot管理员不存在：" + id);
+                return false;
+            }
+            if (groupBotAdmin.get(group).remove(id)){
+                try {
+                    Permissions.getInstance().writeAuthorityList();
+                    return true;
+                } catch (IOException e) {
+                    SfLog.getInstance().e(this.getClass(),"群bot管理员删除失败:" + id,e);
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

@@ -29,7 +29,7 @@ public class SwitchController {
      */
     @Before
     public void before(Group group, Member sender){
-        if (!Permissions.getInstance().authorityCheck(sender, Permissions.GROUP_ADMIN)) { //权限检查
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)) { //权限检查
 //            Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
 //            msg.setReply(message.getSource());
 //            throw msg.toThrowable();

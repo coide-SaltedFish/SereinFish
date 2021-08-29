@@ -3,6 +3,7 @@ package sereinfish.bot.controller.group.normal;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.google.zxing.WriterException;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
@@ -28,12 +29,19 @@ import sereinfish.bot.entity.sauceNAO.SauceNao;
 import sereinfish.bot.entity.sauceNAO.SauceNaoAPI;
 import sereinfish.bot.entity.sauceNAO.sauce.Result;
 import sereinfish.bot.entity.sauceNAO.sauce.SauceNAO;
+import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.QRCodeImage;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -275,8 +283,11 @@ public class SauceNaoController extends QQController {
                                                             group.sendMessage(noImage);
                                                         }
 
-                                                    }catch (Exception e){
+                                                    }catch (NumberFormatException e){
                                                         group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                        group.sendMessage(messageLineQ.getMessage());
+                                                    }catch (IllegalStateException e){
+                                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                                         group.sendMessage(messageLineQ.getMessage());
                                                     }
                                                 }else {
@@ -336,12 +347,30 @@ public class SauceNaoController extends QQController {
 
                                                         //原图
                                                         messageLineQ.textLine("原图链接（也许是?）：");
-                                                        messageLineQ.text(proxyUrl);
-
+                                                        //生成二维码
+                                                        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+                                                        try {
+                                                            BufferedImage image = QRCodeImage.backgroundMatrix(
+                                                                    QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                                                    ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                                                    0.6f,
+                                                                    new Color(91, 91, 187));
+                                                            ImageIO.write(image, "png", imageFile);
+                                                            messageLineQ.imageByFile(imageFile);
+                                                        } catch (WriterException e) {
+                                                            SfLog.getInstance().e(this.getClass(), e);
+                                                            messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                                                        }catch (IOException e){
+                                                            SfLog.getInstance().e(this.getClass(), e);
+                                                            messageLineQ.text("唔，二维码图片生成失败了：IOException");
+                                                        }
                                                         group.sendMessage(messageLineQ.getMessage());
 
-                                                    }catch (Exception e){
+                                                    }catch (NumberFormatException e){
                                                         group.sendMessage(new Message().lineQ().text("唔，预览图分P获取失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                        group.sendMessage(messageLineQ.getMessage());
+                                                    }catch (IllegalStateException e){
+                                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                                         group.sendMessage(messageLineQ.getMessage());
                                                     }
                                                 }else {

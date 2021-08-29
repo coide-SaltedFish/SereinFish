@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Date;
 
 @PrivateController
-@Menu(type = Menu.Type.PRIVATE)
+@Menu(name = "小米运动绑定", type = Menu.Type.PRIVATE)
 public class MiMotionController {
 
     @Action("小米运动登录 {phone} {password}")

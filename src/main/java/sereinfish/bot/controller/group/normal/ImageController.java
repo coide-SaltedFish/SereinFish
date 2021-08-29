@@ -4,12 +4,16 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.google.zxing.WriterException;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.file.FileHandle;
@@ -20,6 +24,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
+import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -27,6 +32,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
 import java.util.Map;
 
 @GroupController
@@ -269,6 +276,49 @@ public class ImageController extends QQController {
         }
     }
 
+    @Action("二维码 {text} {img}")
+    @QMsg(mastAtBot = true)
+    @MenuItem(name = "二维码生成", usage = "@bot 二维码 {text} {img(可选)}", description = "让猫砂帮你生成一张还行的二维码")
+    public Message qr(Message message, String text, Image img){
+        MessageLineQ messageLineQ = new Message().lineQ();
+        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+        BufferedImage bufferedImage;
+        if (img == null){
+            try {
+                BufferedImage qrImage = QRCodeImage.backgroundMatrix(
+                        QRCodeImage.generateQRCodeBitMatrix(text, 800, 800),
+                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                        0.6f,
+                        new Color(20, 78, 88));
+                ImageIO.write(qrImage, "png", imageFile);
+                messageLineQ.imageByFile(imageFile);
+            } catch (WriterException e) {
+                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+            } catch (IOException e) {
+                messageLineQ.text("唔，二维码图片生成失败了：IOException");
+            }
+        }else {
+            try {
+                bufferedImage = ImageIO.read(new URL(img.getUrl()));
+                BufferedImage qrImage = QRCodeImage.backgroundMatrix(
+                        QRCodeImage.generateQRCodeBitMatrix(text, 800, 800),
+                        bufferedImage,
+                        0.6f,
+                        new Color(20, 78, 88));
+                ImageIO.write(qrImage, "png", imageFile);
+                messageLineQ.imageByFile(imageFile);
+            } catch (IOException e) {
+                messageLineQ.text("图片读取出错了");
+            } catch (WriterException e) {
+                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+            }
+        }
+
+        Message msg = messageLineQ.getMessage();
+        msg.setReply(message.getSource());
+        return msg;
+    }
+
     /**
      * 得到一个丢消息
      * @param m
@@ -297,7 +347,7 @@ public class ImageController extends QQController {
         //需要保留的区域
         graphics.setClip(shape);
         graphics.rotate(Math.toRadians(-40),hdW / 2,hdW / 2);
-        graphics.drawImage(headImage.getScaledInstance(hdW,hdW,Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
+        graphics.drawImage(headImage.getScaledInstance(hdW,hdW, java.awt.Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
         graphics.dispose();
 
         //重合图片
@@ -345,7 +395,7 @@ public class ImageController extends QQController {
         Ellipse2D.Double shape = new Ellipse2D.Double(0, 0, hdW, hdW);
         //需要保留的区域
         graphics.setClip(shape);
-        graphics.drawImage(headImage.getScaledInstance(hdW,hdW,Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
+        graphics.drawImage(headImage.getScaledInstance(hdW,hdW, java.awt.Image.SCALE_SMOOTH), 0, 0, hdW, hdW, null);
         graphics.dispose();
 
         //重合图片
@@ -549,7 +599,7 @@ public class ImageController extends QQController {
     public Message getMuaGif(long m){
         int bgWH = 240;//背景宽高
         int delay = 50;//每张图之间的延迟
-        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImageNoFrame(m,80);//得到头像
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,80);//得到头像
         File imageFile = new File(FileHandle.imageCachePath,"mua_temp");//文件缓存路径
 
         AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();

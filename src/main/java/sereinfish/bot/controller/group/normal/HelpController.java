@@ -32,12 +32,12 @@ public class HelpController {
         //先保存为图片
         File file = new File(FileHandle.imageCachePath,"help_temp");
         try {
-            ImageIO.write(MenuManager.getMenuImage(sender, null), "PNG", file);
+            ImageIO.write(MenuManager.getMenuImage(group, sender, null), "PNG", file);
             MessageLineQ messageLineQ = new Message().lineQ();
             messageLineQ.at(sender).textLine("");
             messageLineQ.text("您的权限为：");
 
-            for (int p: Permissions.getInstance().getMemberPermissions(sender)){
+            for (int p: Permissions.getInstance().getMemberPermissions(group, sender)){
                 messageLineQ.text("[" + Permissions.getInstance().getAuthorityName(p) + "]");
             }
             messageLineQ.textLine("");

@@ -1,6 +1,6 @@
 package sereinfish.bot.ui.menu;
 
-import sereinfish.bot.ui.frame.authority.AuthorityManagerFrame;
+import sereinfish.bot.ui.frame.permission.AuthorityManagerFrame;
 import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
 import sereinfish.bot.ui.frame.rcon.RconListFrame;

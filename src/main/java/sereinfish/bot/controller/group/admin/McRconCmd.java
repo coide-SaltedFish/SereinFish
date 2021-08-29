@@ -28,7 +28,7 @@ public class McRconCmd extends QQController {
     @Before
     public void before(Message message, Member sender, Group group){
         //权限判断
-        if (!Permissions.getInstance().authorityCheck(sender, Permissions.OP)) { //权限检查
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.OP)) { //权限检查
             Message msg = MyYuQ.getMif().text("你没有权限使用这个命令喵").toMessage();
             msg.setReply(message.getSource());
             throw msg.toThrowable();

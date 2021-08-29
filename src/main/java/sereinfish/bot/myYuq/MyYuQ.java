@@ -6,15 +6,28 @@ import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import okhttp3.OkHttpClient;
-import java.io.StringReader;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.FileSystems;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -233,6 +246,21 @@ public class MyYuQ {
             groups.add(entry.getValue());
         }
         return groups;
+    }
+
+    /**
+     * 上传图片
+     * @param group
+     * @param file
+     * @return
+     */
+    public static String uploadImage(Group group, File file) throws IOException {
+        try {
+            group.uploadImage(file);
+            return DigestUtils.md5Hex(new FileInputStream(file));
+        }catch (IllegalStateException e){
+            throw e;
+        }
     }
 
     public static String getBotName() {

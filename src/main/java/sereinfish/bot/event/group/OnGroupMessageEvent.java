@@ -70,7 +70,7 @@ public class OnGroupMessageEvent {
         if (!conf.isEnable()){
             if (Message.Companion.toCodeString(event.getMessage()).equals("SereinFish Bot 开")){
                 //权限判断
-                if (Permissions.getInstance().authorityCheck(event.getSender(), Permissions.GROUP_ADMIN)){
+                if (Permissions.getInstance().authorityCheck(event.getGroup(), event.getSender(), Permissions.GROUP_ADMIN)){
                     //开启群
                     conf.setEnable(true);
                     event.getGroup().sendMessage(MyYuQ.getMif().text("本群[启用]开关状态已设置为[true]").plus(MyYuQ.getMif().at(event.getSender())));

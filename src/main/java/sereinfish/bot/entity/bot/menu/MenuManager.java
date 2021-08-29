@@ -1,5 +1,6 @@
 package sereinfish.bot.entity.bot.menu;
 
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,7 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class MenuManager {
-    public static BufferedImage getMenuImage(Member sender, GroupConf conf){
+    public static BufferedImage getMenuImage(Group group, Member sender, GroupConf conf){
         //判断图片是否存在
         if (FileHandle.helpMenuImageCacheFile.exists() && FileHandle.helpMenuImageCacheFile.isFile()){
             try {
@@ -35,7 +36,7 @@ public class MenuManager {
             }
         }
         //得到所在权限组
-        Integer[] permissions = Permissions.getInstance().getMemberPermissions(sender);
+        Integer[] permissions = Permissions.getInstance().getMemberPermissions(group, sender);
         //类扫描
         ArrayList<MenuEntity> menus = new ArrayList<>();
         for (Class cls:ClassManager.getInstance().getControllerClassList()){
