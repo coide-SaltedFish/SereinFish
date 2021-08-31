@@ -106,7 +106,5 @@ public class MainFrame extends JFrame {
      */
     public void close(){
         setVisible(false);
-        dispose();
-        mainFrame = null;
     }
 }

@@ -36,6 +36,9 @@ public class ArkNightController {
                     SfLog.getInstance().e(this.getClass(), "企鹅物流查询到的数据为null:" + name);
                     return MyYuQ.getMif().text("摸鱼中，一会再试试看喵").toMessage();
                 }
+                if (penguinWidgetData.getError() != null){
+                    return new Message().lineQ().textLine("出现错误了:" + name + ">>").text(penguinWidgetData.getError().getDetails()).getMessage();
+                }
                 //先保存为图片
                 File file = new File(FileHandle.imageCachePath,"penguinStatisticsQuery_temp");
                 try {

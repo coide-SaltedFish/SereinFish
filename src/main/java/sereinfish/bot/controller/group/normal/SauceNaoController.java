@@ -353,8 +353,8 @@ public class SauceNaoController extends QQController {
                                                             BufferedImage image = QRCodeImage.backgroundMatrix(
                                                                     QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
                                                                     ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
-                                                                    0.6f,
-                                                                    new Color(91, 91, 187));
+                                                                    0.3f,
+                                                                    Color.BLACK);
                                                             ImageIO.write(image, "png", imageFile);
                                                             messageLineQ.imageByFile(imageFile);
                                                         } catch (WriterException e) {

@@ -10,11 +10,16 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.annotation.Control;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.entity.jsonEx.JsonMsg;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.context.ControlManager;
+import sereinfish.bot.ui.context.entity.ConfControls;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
@@ -47,25 +52,28 @@ public class SwitchController {
         return MyYuQ.getMif().text("Bot启用：" + state).toMessage();
     }
 
-//    @Action("开关控制 {groupName} {name} {state}")
-//    @QMsg(mastAtBot = true, reply = true)
-//    public Message switchController(GroupConf groupConf , String groupName, String name, boolean state){
-//        GroupConf.Control control = groupConf.getControl(groupName,name);
-//        if (control == null){
-//            return MyYuQ.getMif().text("[" + groupName + "][" + name + "]未找到").toMessage();
-//        }else {
-//            if (control.getValue() instanceof Boolean){
-//                if(groupConf.setControlValue(groupName, name, state)){
-//                    return MyYuQ.getMif().text("成功,[" + groupName + "]->[" + name + "]设置为[" + state + "]").toMessage();
-//                }else {
-//                    return MyYuQ.getMif().text("失败：[" + groupName + "]->[" + name + "]设置为[" + state + "]").toMessage();
-//                }
-//
-//            }else {
-//                return MyYuQ.getMif().text("失败：" + control.getValue().getClass().getSimpleName() + " No Boolean").toMessage();
-//            }
-//        }
-//    }
+    @Action("开关控制 {groupName} {name} {value}")
+    @QMsg(mastAtBot = true, reply = true)
+    public Message switchController(Group group, GroupConf groupConf , String groupName, String name, String value){
+        //遍历配置
+        for (Field field:groupConf.getClass().getDeclaredFields()){
+            if (field.isAnnotationPresent(Control.class)){
+                Control control = field.getAnnotation(Control.class);
+                //找到指定配置项
+                if (control.group().equals(groupName) && control.name().equals(name)){
+                    //修改值
+                    ConfControls.Control control1 = ControlManager.getInstance().getControl(group.getId(), groupName, name);
+                    if (control1 != null){
+                        control1.setValue(MyYuQ.toClass(value, field.getType()));
+                        return new Message().lineQ().text("本群配置[" + groupName + "]->[" + name + "]已修改值为:" + value).getMessage();
+                    }else {
+                        return new Message().lineQ().text("找不到配置[" + groupName + "]->[" + name + "]").getMessage();
+                    }
+                }
+            }
+        }
+        return new Message().lineQ().text("找不到配置[" + groupName + "]->[" + name + "]").getMessage();
+    }
 //
 //    @Action("开关控制 ?")
 //    @Synonym("开关控制 ？")

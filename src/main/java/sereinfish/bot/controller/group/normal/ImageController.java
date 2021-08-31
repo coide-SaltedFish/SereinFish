@@ -276,49 +276,6 @@ public class ImageController extends QQController {
         }
     }
 
-    @Action("二维码 {text} {img}")
-    @QMsg(mastAtBot = true)
-    @MenuItem(name = "二维码生成", usage = "@bot 二维码 {text} {img(可选)}", description = "让猫砂帮你生成一张还行的二维码")
-    public Message qr(Message message, String text, Image img){
-        MessageLineQ messageLineQ = new Message().lineQ();
-        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
-        BufferedImage bufferedImage;
-        if (img == null){
-            try {
-                BufferedImage qrImage = QRCodeImage.backgroundMatrix(
-                        QRCodeImage.generateQRCodeBitMatrix(text, 800, 800),
-                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
-                        0.6f,
-                        new Color(20, 78, 88));
-                ImageIO.write(qrImage, "png", imageFile);
-                messageLineQ.imageByFile(imageFile);
-            } catch (WriterException e) {
-                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
-            } catch (IOException e) {
-                messageLineQ.text("唔，二维码图片生成失败了：IOException");
-            }
-        }else {
-            try {
-                bufferedImage = ImageIO.read(new URL(img.getUrl()));
-                BufferedImage qrImage = QRCodeImage.backgroundMatrix(
-                        QRCodeImage.generateQRCodeBitMatrix(text, 800, 800),
-                        bufferedImage,
-                        0.6f,
-                        new Color(20, 78, 88));
-                ImageIO.write(qrImage, "png", imageFile);
-                messageLineQ.imageByFile(imageFile);
-            } catch (IOException e) {
-                messageLineQ.text("图片读取出错了");
-            } catch (WriterException e) {
-                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
-            }
-        }
-
-        Message msg = messageLineQ.getMessage();
-        msg.setReply(message.getSource());
-        return msg;
-    }
-
     /**
      * 得到一个丢消息
      * @param m

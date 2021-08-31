@@ -2,6 +2,7 @@ package sereinfish.bot.ui.panel;
 
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.ui.context.ConfContext;
+import sereinfish.bot.ui.context.ControlManager;
 import sereinfish.bot.ui.context.entity.ConfControls;
 import sereinfish.bot.ui.layout.VFlowLayout;
 
@@ -48,6 +49,7 @@ public class GroupConfPanel extends JPanel {
             panel.setBorder(BorderFactory.createTitledBorder(entry.getKey()));
             //解析组件
             for (ConfControls.Control control:entry.getValue()){
+                ControlManager.getInstance().add(control);
                 Component component = ConfContext.getContext(control);
                 if(component != null){
                     panel.add(component);

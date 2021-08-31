@@ -2,6 +2,10 @@ package sereinfish.bot.event.group.repeater;
 
 import com.icecreamqaq.yuq.message.Message;
 import lombok.Getter;
+import net.mamoe.mirai.Mirai;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.code.MiraiCode;
+import net.mamoe.mirai.message.data.MessageChain;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -13,8 +17,6 @@ import java.util.Map;
  * 复读管理器
  */
 public class RepeaterManager {
-    //TODO:添加配置文件
-    private int n = 3;//当消息重复3次复读
 
     private Map<Long, ReMsg> groupArrayListMap = new HashMap<>();//消息列表
 
@@ -40,18 +42,18 @@ public class RepeaterManager {
      * @param group
      * @param message
      */
-    public void add(long group, Message message){
-        String msg = Message.Companion.toCodeString(message);
+    public void add(Group group, MessageChain message){
+        String msg = message.toString().replaceAll("\\[mirai:source:\\[[0-9]+],\\[[0-9]+]]", "");
 
-        if (groupArrayListMap.containsKey(group)){
-            ReMsg reMsg = groupArrayListMap.get(group);
+        if (groupArrayListMap.containsKey(group.getId())){
+            ReMsg reMsg = groupArrayListMap.get(group.getId());
             if (reMsg.msg.equals(msg)){
                 reMsg.num++;
             }else {
-                groupArrayListMap.put(group,new ReMsg(msg,1));
+                groupArrayListMap.put(group.getId(),new ReMsg(group, message,1));
             }
         }else {
-            groupArrayListMap.put(group,new ReMsg(msg,1));
+            groupArrayListMap.put(group.getId(),new ReMsg(group, message,1));
         }
 
         check();
@@ -62,17 +64,12 @@ public class RepeaterManager {
      */
     public void check(){
         for (Map.Entry<Long,ReMsg> entry:groupArrayListMap.entrySet()){
-            GroupConf conf = ConfManager.getInstance().get(entry.getKey());
+            GroupConf conf = ConfManager.getInstance().get(entry.getValue().getGroup().getId());
+
             if (conf.isEnable() && conf.isReReadEnable()){
-                if (!entry.getValue().isRepeater && entry.getValue().num >= n){
+                if (!entry.getValue().isRepeater && entry.getValue().num >= conf.getReReadNum()){
                     entry.getValue().isRepeater = true;
-                    if (MyYuQ.getYuQ().getGroups().containsKey(entry.getKey())){
-                        if(!entry.getValue().msg.contains("<Rain:NoImpl:NoImpl>")){
-                            MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode(entry.getValue().msg));
-                        }else {
-                            MyYuQ.getYuQ().getGroups().get(entry.getKey()).sendMessage(Message.Companion.toMessageByRainCode("啪唧，打断（混乱"));
-                        }
-                    }
+                    entry.getValue().getGroup().sendMessage(entry.getValue().getChain());
                 }
             }
         }
@@ -80,12 +77,16 @@ public class RepeaterManager {
 
     @Getter
     class ReMsg{
+        private Group group;
+        private MessageChain chain;
         private boolean isRepeater = false;
         private String msg;
         private int num;
 
-        public ReMsg(String msg, int num) {
-            this.msg = msg;
+        public ReMsg(Group group, MessageChain chain, int num) {
+            this.group = group;
+            this.chain = chain;
+            this.msg = chain.toString().replaceAll("\\[mirai:source:\\[[0-9]+],\\[[0-9]+]]", "");
             this.num = num;
         }
     }

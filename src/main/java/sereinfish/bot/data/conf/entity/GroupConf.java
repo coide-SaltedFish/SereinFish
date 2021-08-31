@@ -14,6 +14,7 @@ import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.data.conf.annotation.Control;
 import sereinfish.bot.data.conf.ControlType;
+import sereinfish.bot.ui.context.ControlManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,6 +78,9 @@ public class GroupConf{
     //复读
     @Control(group = "复读", name = "启用复读", type = ControlType.CheckBox, tip = "bot复读功能开关")
     boolean reReadEnable = false;
+
+    @Control(group = "复读", name = "复读条件", type = ControlType.Edit_IntNum, tip = "bot复读所需消息条数")
+    int reReadNum = 2;
     //自动回复
     @Control(group = "自动回复", name = "启用自动回复", type = ControlType.CheckBox, tip = "自动查表根据关键词进行回复")
     boolean autoReplyEnable = false;

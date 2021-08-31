@@ -17,6 +17,7 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import net.mamoe.mirai.Bot;
 import okhttp3.OkHttpClient;
 import org.apache.commons.codec.digest.DigestUtils;
 

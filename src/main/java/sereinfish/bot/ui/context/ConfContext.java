@@ -75,10 +75,16 @@ public class ConfContext {
 
         DataBaseConfig dataBaseConfig = control.getValue();
 
-        JButton btn_dataBase = new JButton("选择数据库");
+        final JButton btn_dataBase = new JButton("选择数据库");
         if (dataBaseConfig != null){
             btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
         }
+
+        control.setListener(control1 -> {
+            if (dataBaseConfig != null){
+                btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
+            }
+        });
 
         comboBox_panel.add(btn_dataBase);
         btn_dataBase.setToolTipText("点击选择此群数据库");
@@ -129,9 +135,13 @@ public class ConfContext {
      * @return
      */
     public static JCheckBox getCheckBox(ConfControls.Control control){
-        JCheckBox checkBox = new JCheckBox(control.getName());
+        final JCheckBox checkBox = new JCheckBox(control.getName());
         checkBox.setToolTipText(control.getTip());//设置提示
-        checkBox.setSelected((Boolean) control.getValue());//设置值
+        checkBox.setSelected(control.getValue());//设置值
+
+        control.setListener(control1 -> {
+            checkBox.setSelected(control.getValue());//设置值
+        });
         //设置监听
         checkBox.addChangeListener(new ChangeListener() {
             @Override
@@ -166,7 +176,7 @@ public class ConfContext {
                         editFrame.close();
                     }
                 });
-                editFrame.setText((String) control.getValue());
+                editFrame.setText(control.getValue());
                 editFrame.setVisible(true);
             }
         });
@@ -207,24 +217,42 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
-        JComboBox comboBox = new JComboBox();
+        final JComboBox comboBox = new JComboBox();
         comboBox.setToolTipText(control.getTip());
 
         GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] fonts = graphicsEnvironment.getAvailableFontFamilyNames();
-        boolean isSelect = false;
+        boolean isSelect = false;//是否已设置值
         for (String font:fonts){
+            comboBox.addItem(font);
             if (font.equals(control.getValue())){
                 isSelect = true;
+                comboBox.setSelectedItem(font);
             }
-            comboBox.addItem(font);
         }
         comboBox.addItem("选择字体文件");
 
-        if (!isSelect){
+        if (!isSelect) {
             comboBox.addItem("文件：" + new File((String) control.getValue()).getName());
+            comboBox.setSelectedItem("文件：" + new File((String) control.getValue()).getName());
         }
-        comboBox.setSelectedItem("文件：" + new File((String) control.getValue()).getName());
+
+        control.setListener(control1 -> {
+            boolean isSelects = false;//是否已设置值
+            for (String font:fonts){
+                comboBox.addItem(font);
+                if (font.equals(control.getValue())){
+                    isSelects = true;
+                    comboBox.setSelectedItem(font);
+                }
+            }
+            comboBox.addItem("选择字体文件");
+
+            if (!isSelects) {
+                comboBox.addItem("文件：" + new File((String) control.getValue()).getName());
+                comboBox.setSelectedItem("文件：" + new File((String) control.getValue()).getName());
+            }
+        });
 
         //设置点击事件
         comboBox.addItemListener(new ItemListener() {
@@ -273,22 +301,19 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
-        JComboBox comboBox = new JComboBox();
+        final JComboBox comboBox = new JComboBox();
         comboBox.setToolTipText(control.getTip());
 
         //初始化列表
         for (Map.Entry<String, Integer> entry: Permissions.AuthorityList.entrySet()){
             comboBox.addItem(entry.getKey());
         }
-        int var = Permissions.NORMAL;
-        if (control.getValue() instanceof Integer){
-            var = control.getValue();
-        }else {
-            var = Double.valueOf(control.getValue().toString()).intValue();
-        }
 
+        comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(control.getValue()));
 
-        comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(var));
+        control.setListener(control1 -> {
+            comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(control.getValue()));
+        });
 
         //设置点击事件
         comboBox.addItemListener(new ItemListener() {
@@ -313,10 +338,15 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
-        JTextField textField = new JTextField();
+        final JTextField textField = new JTextField();
         textField.setColumns(25);
         textField.setToolTipText(control.getTip());
         textField.setText(control.getValue().toString());
+
+        control.setListener(control1 -> {
+            textField.setText(control.getValue().toString());
+        });
+
         //保存事件
         textField.addKeyListener(new KeyAdapter() {
             @Override
@@ -365,13 +395,17 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
-        JTextField textField = new JTextField();
+        final JTextField textField = new JTextField();
         textField.setColumns(10);
         textField.setToolTipText(control.getTip());
         textField.setDocument(new NumberTextField(9));
 
         int var = control.getValue();
         textField.setText(var + "");
+
+        control.setListener(control1 -> {
+            textField.setText(var + "");
+        });
 
         //保存事件
         textField.addKeyListener(new KeyAdapter() {
@@ -431,7 +465,7 @@ public class ConfContext {
         JPanel panel = new JPanel(new FlowLayout());
         panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
 
-        JButton button = new JButton("选择");
+        final JButton button = new JButton("选择");
         panel.add(button);
         button.setToolTipText(control.getTip());
 
@@ -439,6 +473,13 @@ public class ConfContext {
         if (rconConf != null){
             button.setText(rconConf.getName());
         }
+
+        control.setListener(control1 -> {
+            RconConf conf = control.getValue();
+            if (conf != null){
+                button.setText(conf.getName());
+            }
+        });
 
         button.addActionListener(new ActionListener() {
             @Override

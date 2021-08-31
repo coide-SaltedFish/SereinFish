@@ -1,12 +1,12 @@
 package sereinfish.bot.utils;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
+import com.google.zxing.*;
+import com.google.zxing.Result;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import javax.imageio.ImageIO;
@@ -173,25 +173,30 @@ public class QRCodeImage {
         graphics2D.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
         graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
 
-        //设置颜色
-        graphics2D.setPaint(onColor);
-
-        int rowSizeBg = 3;//绘制时的像素点大小
+        int rowSizeBg = 2;//绘制时的像素点大小
 
         //绘制二维码像素点
         for (int y = 0; y < bit.length; y++){
             for (int x = 0; x < bit[y].length; x++){
+
+                int imageX = (int) (whiteSideWidth + (x * rowSize) + (rowSize - rowSizeBg) / 2.0);
+                int imageY = (int) (whiteSideWidth + (y * rowSize) + (rowSize - rowSizeBg) / 2.0);
+
                 if (bit[y][x]){
+                    //设置颜色
+                    graphics2D.setPaint(onColor);
                     //判断是否是标记框
                     if (isFlagRect(bit[y].length, bit.length, x, y)){
-                        int imageX = whiteSideWidth + (x * rowSize);
-                        int imageY = whiteSideWidth + (y * rowSize);
+                        imageX = whiteSideWidth + (x * rowSize);
+                        imageY = whiteSideWidth + (y * rowSize);
                         graphics2D.fillRect(imageX, imageY, rowSize, rowSize);
                     }else {
-                        int imageX = (int) (whiteSideWidth + (x * rowSize) + (rowSize - rowSizeBg) / 2.0);
-                        int imageY = (int) (whiteSideWidth + (y * rowSize) + (rowSize - rowSizeBg) / 2.0);
                         graphics2D.fillRect(imageX, imageY, rowSizeBg, rowSizeBg);
                     }
+                }else {
+                    //设置颜色
+                    graphics2D.setPaint(Color.WHITE);
+                    graphics2D.fillRect(imageX, imageY, rowSizeBg, rowSizeBg);
                 }
             }
         }
@@ -256,6 +261,24 @@ public class QRCodeImage {
         }
 
         return false;
+    }
+
+    /**
+     * 扫码
+     * @param image
+     * @return
+     * @throws NotFoundException
+     */
+    public static Result getQrResult(BufferedImage image) throws NotFoundException {
+        Result result = null;
+        BinaryBitmap bitmap = new BinaryBitmap(
+                new HybridBinarizer(new BufferedImageLuminanceSource(image)));
+
+        HashMap hints = new HashMap<>();
+        hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+        result = new MultiFormatReader().decode(bitmap, hints);
+
+        return result;
     }
 
 }

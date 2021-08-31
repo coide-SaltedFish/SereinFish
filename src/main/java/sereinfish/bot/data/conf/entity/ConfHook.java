@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.hook.HookRunnable;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.context.ControlManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class ConfHook implements HookRunnable {
         }else {
             SfLog.getInstance().e(this.getClass(), "hook失败：类实例为null：" + hookMethod.info);
         }
+        ControlManager.getInstance().updateControls();//更新面板
     }
 
     @Override

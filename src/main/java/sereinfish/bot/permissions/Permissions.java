@@ -10,6 +10,7 @@ import sereinfish.bot.myYuq.MyYuQ;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -28,6 +29,7 @@ public class Permissions {
     public static final int NORMAL = 6;//普通权限
 
     public static final Map<String, Integer> AuthorityList = new HashMap<>();//权限值映射表
+    public static final Map<String, Integer> dynamicPermissionList = new LinkedHashMap<>();//可命令动态修改的权限列表
 
     private static Permissions permissions;//单例模式
     private AuthorityList authorityList;//权限列表类
@@ -42,6 +44,10 @@ public class Permissions {
         AuthorityList.put("GROUP_BOT_ADMIN", GROUP_BOT_ADMIN);
         AuthorityList.put("GROUP_ADMIN", GROUP_ADMIN);
         AuthorityList.put("NORMAL", NORMAL);
+        //初始化可动态修改的权限的映射表
+        dynamicPermissionList.put("OP", OP);
+        dynamicPermissionList.put("ADMIN", ADMIN);
+        dynamicPermissionList.put("GROUP_BOT_ADMIN", GROUP_BOT_ADMIN);
 
         readAuthorityList();//得到权限列表
     }
@@ -56,6 +62,29 @@ public class Permissions {
             throw new NullPointerException("权限管理器未初始化");
         }
         return permissions;
+    }
+
+    /**
+     * 添加权限组
+     * @param group
+     * @param qq
+     * @param permission
+     * @return
+     */
+    public void addPermission(long group, long qq, int permission) throws IllegalStateException{
+        switch (permission){
+            case ADMIN:
+                authorityList.addAdmin(qq);
+                break;
+            case OP:
+                authorityList.addOP(group, qq);
+                break;
+            case GROUP_BOT_ADMIN:
+                authorityList.addGroupBotAdmin(group, qq);
+                break;
+            default:
+                throw new IllegalStateException("添加失败，可能是权限值错误或该权限并不支持动态添加:" + permission);
+        }
     }
 
     /**
@@ -103,6 +132,52 @@ public class Permissions {
             }
         }
         return "未知";
+    }
+
+    /**
+     * 得到权限值
+     * @param var
+     * @return
+     */
+    public int getAuthorityValue(String var) throws IllegalStateException{
+        for (Map.Entry<String, Integer> entry:AuthorityList.entrySet()){
+            if (entry.getKey().equals(var)){
+                return entry.getValue();
+            }
+        }
+        throw new IllegalStateException("未知权限字段:" + var);
+    }
+
+    /**
+     * 判断是否可以操作权限
+     * @param member
+     * @param permission
+     * @return
+     */
+    public boolean isOperation(Group group, Member member, int permission){
+        boolean flag = false;
+        for(int p:getMemberPermissions(group, member)){
+            if (flag == true){
+                break;
+            }
+
+            if (p == OP){
+                flag = false;
+                continue;
+            }
+
+            if (p == MASTER){
+                flag = true;
+                break;
+            }
+
+            if (p > permission){
+                flag = true;
+            }
+
+        }
+
+        return flag;
     }
 
     /**
@@ -204,7 +279,11 @@ public class Permissions {
             if (!opList.containsKey(group)){
                 opList.put(group, new ArrayList<>());
             }
-            opList.get(group).add(id);
+            if (opList.get(group).contains(id)){
+                throw new IllegalStateException("已拥有该权限");
+            }else {
+                opList.get(group).add(id);
+            }
             try {
                 Permissions.getInstance().writeAuthorityList();
                 return true;
@@ -358,7 +437,11 @@ public class Permissions {
             if (!groupBotAdmin.containsKey(group)){
                 groupBotAdmin.put(group, new ArrayList<>());
             }
-            groupBotAdmin.get(group).add(id);
+            if (groupBotAdmin.get(group).contains(id)){
+                throw new IllegalStateException("已拥有该权限");
+            }else {
+                groupBotAdmin.get(group).add(id);
+            }
             try {
                 Permissions.getInstance().writeAuthorityList();
                 return true;

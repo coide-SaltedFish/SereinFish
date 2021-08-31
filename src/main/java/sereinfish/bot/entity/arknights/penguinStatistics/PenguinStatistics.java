@@ -218,7 +218,7 @@ public class PenguinStatistics {
         font = font.deriveFont(42);
         graphics2D.setFont(font);
         metrics = FontDesignMetrics.getMetrics(font);
-        String titleNames[] = {"作战", "掉落数", "样本数", "百分比", "单件估算理智", "最短通关用时", "统计区间"};
+        String titleNames[] = {"作战", "掉落数", "样本数", "百分比", "理智", "最短通关用时", "统计区间"};
         int titleNameWidth = width / titleNames.length;
         for (int i = 0; i < titleNames.length; i++) {
             graphics2D.drawString(titleNames[i], 5 + i * titleNameWidth, y + (namesHeight + metrics.getAscent()) / 2);
@@ -332,8 +332,13 @@ public class PenguinStatistics {
         private Matrix[] matrix;
         private Stages[] stages;
         private Zone[] zones;
+        private Error error;
 
         public Matrix[] getMatrix(PenguinStatistics penguinStatistics) {
+            if (matrix == null){
+                return new Matrix[]{};
+            }
+
             for (int i = 0; i < matrix.length - 1; i++) {
                 for (int j = 0; j < matrix.length - 1 - i; j++) {
                     float dl_1 = ((float)  matrix[j].getQuantity() /  matrix[j].getTimes() * 100);
@@ -347,6 +352,33 @@ public class PenguinStatistics {
             }
 
             return matrix;
+        }
+
+        public Matrix[] getMatrix() {
+            if(matrix == null){
+                return new Matrix[]{};
+            }
+            return matrix;
+        }
+
+        public Stages[] getStages() {
+            if (stages == null){
+                return new Stages[]{};
+            }
+            return stages;
+        }
+
+        public Item[] getItems() {
+            if (items == null){
+                return new Item[]{};
+            }
+            return items;
+        }
+
+        @Getter
+        public class Error{
+            String type;
+            String details;
         }
 
         @Getter

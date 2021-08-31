@@ -33,7 +33,7 @@ public class ConfControls {
                 if (!confControlMap.containsKey(control.group())){
                     confControlMap.put(control.group(), new ArrayList<>());
                 }
-                confControlMap.get(control.group()).add(new Control(field, groupConf, control.group(), control.name(), control.type(), control.tip()));
+                confControlMap.get(control.group()).add(new Control(null, field, groupConf, control.group(), control.name(), control.type(), control.tip()));
             }
         }
     }
@@ -43,7 +43,10 @@ public class ConfControls {
      */
     @AllArgsConstructor
     @Getter
-    public class Control{
+    public static class Control{
+
+        ChangeValueListener listener;//监听器
+
         Field field;
         GroupConf groupConf;
         String group = "";//所属组
@@ -54,10 +57,16 @@ public class ConfControls {
         public void setValue(Object value){
             try {
                 field.set(groupConf, value);
+                if (listener != null){
+                    listener.change(this);
+                }
             } catch (IllegalAccessException e) {
                 field.setAccessible(true);
                 try {
                     field.set(groupConf, value);
+                    if (listener != null){
+                        listener.change(this);
+                    }
                 } catch (IllegalAccessException illegalAccessException) {
                     SfLog.getInstance().e(this.getClass(), illegalAccessException);
                 }
@@ -78,6 +87,23 @@ public class ConfControls {
                 SfLog.getInstance().e(this.getClass(), e);
             }
             return null;
+        }
+
+        public void setListener(ChangeValueListener listener) {
+            this.listener = listener;
+        }
+
+        public void update(){
+            if (listener != null){
+                listener.change(this);
+            }
+        }
+
+        /**
+         * 值变化监听器
+         */
+        public interface ChangeValueListener{
+            public void change(Control control);
         }
     }
 }
