@@ -11,6 +11,8 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
  * 操作消息数据库的命令
  */
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "消息数据库相关", permissions = Permissions.ADMIN)
 public class MsgDBController extends QQController {
 
     private int maxTime = 15000;
@@ -44,6 +47,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]读消息$\\")
+    @MenuItem(name = "读消息", usage = "[!！.]读消息", description = "返回对应消息的Rain码格式", permission = Permissions.ADMIN)
     public Message readMsg(Group group, Message message){
         GroupHistoryMsg groupHistoryMsg = null;
 
@@ -64,6 +68,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]查消息$\\ {group} {qq} {id}")
+    @MenuItem(name = "查消息", usage = "[!！.]查消息 {group} {qq} {id}", description = "在数据库中查找对应消息", permission = Permissions.ADMIN)
     public Message readMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -79,6 +84,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]查消息$\\ {id}")
+    @MenuItem(name = "查消息", usage = "[!！.]查消息 {id}", description = "在数据库中查找本群对应消息", permission = Permissions.ADMIN)
     public Message readMsg(Group group, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -94,6 +100,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]查消息$\\ {qq} {id}")
+    @MenuItem(name = "查消息", usage = "[!！.]查消息 {qq} {id}", description = "在数据库中查找本群对应消息", permission = Permissions.ADMIN)
     public Message readMsg(Group group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -109,6 +116,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]发消息$\\")
+    @MenuItem(name = "发消息", usage = "[!！.]发消息", description = "Bot会读取消息内容并Rain码解析后发出", permission = Permissions.ADMIN)
     public Message sendMsg(Message message,ContextSession session){
         Message message1 = MyYuQ.getMif().text("请输入消息内容").toMessage();
         message1.setReply(message.getSource());
@@ -123,6 +131,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]发消息$\\ {group}")
+    @MenuItem(name = "发消息", usage = "[!！.]发消息 {group}", description = "Bot会读取消息内容并Rain码解析后发出到指定群聊", permission = Permissions.ADMIN)
     public Message sendMsg(long group,Message message,ContextSession session){
         Group g = MyYuQ.getYuQ().getGroups().get(group);
         if (g != null){
@@ -148,6 +157,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]发消息$\\ {group} {qq} {id}")
+    @MenuItem(name = "发消息", usage = "[!！.]发消息 {group} {qq} {id}", description = "Bot会读取数据库消息内容并解析后发出", permission = Permissions.ADMIN)
     public Message sendMsg(long group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -163,6 +173,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]发消息$\\ {qq} {id}")
+    @MenuItem(name = "发消息", usage = "[!！.]发消息 {qq} {id}", description = "Bot会读取数据库本群消息内容并解析后发出", permission = Permissions.ADMIN)
     public Message sendMsg(Group group, long qq, int id){
         GroupHistoryMsg groupHistoryMsg = null;
         try {
@@ -178,6 +189,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]图片url$\\")
+    @MenuItem(name = "获取QQ消息图片链接", usage = "[!！.]图片url", description = "Bot会读取数据库本群消息内容并解析后发出", permission = Permissions.ADMIN)
     public Message getImageURL(ContextSession session){
         reply("请发送图片");
         Message msg = session.waitNextMessage(maxTime);
@@ -199,6 +211,7 @@ public class MsgDBController extends QQController {
     }
 
     @Action("\\^[!！.]最近消息$\\ {qq}")
+    @MenuItem(name = "最近消息", usage = "[!！.]最近消息", description = "获取指定对象的最近消息", permission = Permissions.ADMIN)
     public Message newMsg(Group group, long qq){
         GroupHistoryMsg groupHistoryMsg = null;
         try{

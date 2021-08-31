@@ -82,6 +82,8 @@ public class OnGroupMessageEvent {
             event.setCancel(true);
             return;
         }else {
+            RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());//复读
+
             //自动回复
             if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
                 try {
@@ -245,6 +247,7 @@ public class OnGroupMessageEvent {
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
             event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
+        RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 
         //撤回管理
         if (event.getSendTo() instanceof Group){

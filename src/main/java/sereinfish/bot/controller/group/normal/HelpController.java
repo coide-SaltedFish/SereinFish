@@ -1,7 +1,9 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
@@ -22,8 +24,10 @@ import java.io.IOException;
 @Menu(type = Menu.Type.GROUP, name = "帮助")
 public class HelpController {
 
-    @Action("\\^[.!！]help$\\")
-    @MenuItem(name = "帮助命令", usage = "[.!！]help", description = "用来获取帮助菜单")
+    @Action("help")
+    @Synonym({"指令", "帮助", "菜单"})
+    @QMsg(mastAtBot = true)
+    @MenuItem(name = "帮助命令", usage = "@bot help", description = "用来获取帮助菜单")
     public Message getHelpMenu(Member sender, Group group, Message message){
         Message msg = new Message().lineQ().text("获取中~").getMessage();
         msg.setReply(message.getSource());

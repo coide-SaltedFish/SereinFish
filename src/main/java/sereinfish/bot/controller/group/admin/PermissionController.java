@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.permissions.Permissions;
 
@@ -19,7 +20,7 @@ import java.util.Map;
  * 权限命令控制器
  */
 @GroupController
-@Menu(type = Menu.Type.GROUP, name = "权限", permissions = Permissions.ADMIN)
+@Menu(type = Menu.Type.GROUP, name = "权限")
 public class PermissionController {
 
     @Before
@@ -31,6 +32,7 @@ public class PermissionController {
 
     @Action("权限添加 {permissionName} {qq}")
     @QMsg(mastAtBot = true, reply = true)
+    @MenuItem(name = "权限添加", usage = "@Bot 权限添加 {permissionName} {qq}", description = "为指定对象添加指定权限")
     public Message add(Group group, Member sender, String permissionName,Member qq){
         //查找权限
         try{
@@ -60,6 +62,7 @@ public class PermissionController {
     }
 
     @Action("权限列表")
+    @MenuItem(name = "权限列表", usage = "@Bot 权限列表", description = "获取权限命令可用权限列表")
     @QMsg(mastAtBot = true, reply = true)
     public Message permissionList(){
         MessageLineQ messageLineQ = new Message().lineQ().textLine("权限命令可用权限列表如下：");

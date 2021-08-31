@@ -1,14 +1,15 @@
 package sereinfish.bot.event.group.repeater;
 
+import com.alibaba.fastjson.JSONArray;
+import com.icecreamqaq.yuq.entity.Contact;
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.Getter;
-import net.mamoe.mirai.Mirai;
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.message.code.MiraiCode;
 import net.mamoe.mirai.message.data.MessageChain;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.BotUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,21 +40,21 @@ public class RepeaterManager {
 
     /**
      * 添加消息记录
-     * @param group
+     * @param contact
      * @param message
      */
-    public void add(Group group, MessageChain message){
-        String msg = message.toString().replaceAll("\\[mirai:source:\\[[0-9]+],\\[[0-9]+]]", "");
+    public void add(Contact contact, Message message){
+        JSONArray msg = BotUtils.messageToJsonArray(message);
 
-        if (groupArrayListMap.containsKey(group.getId())){
-            ReMsg reMsg = groupArrayListMap.get(group.getId());
-            if (reMsg.msg.equals(msg)){
+        if (groupArrayListMap.containsKey(contact.getId())){
+            ReMsg reMsg = groupArrayListMap.get(contact.getId());
+            if (BotUtils.equalsMessageJsonArray(reMsg.getMsg(), msg)){
                 reMsg.num++;
             }else {
-                groupArrayListMap.put(group.getId(),new ReMsg(group, message,1));
+                groupArrayListMap.put(contact.getId(),new ReMsg(contact, message,1));
             }
         }else {
-            groupArrayListMap.put(group.getId(),new ReMsg(group, message,1));
+            groupArrayListMap.put(contact.getId(),new ReMsg(contact, message,1));
         }
 
         check();
@@ -64,12 +65,12 @@ public class RepeaterManager {
      */
     public void check(){
         for (Map.Entry<Long,ReMsg> entry:groupArrayListMap.entrySet()){
-            GroupConf conf = ConfManager.getInstance().get(entry.getValue().getGroup().getId());
+            GroupConf conf = ConfManager.getInstance().get(entry.getValue().getContact().getId());
 
             if (conf.isEnable() && conf.isReReadEnable()){
                 if (!entry.getValue().isRepeater && entry.getValue().num >= conf.getReReadNum()){
                     entry.getValue().isRepeater = true;
-                    entry.getValue().getGroup().sendMessage(entry.getValue().getChain());
+                    entry.getValue().getContact().sendMessage(entry.getValue().getMessage());
                 }
             }
         }
@@ -77,16 +78,16 @@ public class RepeaterManager {
 
     @Getter
     class ReMsg{
-        private Group group;
-        private MessageChain chain;
+        private Contact contact;
+        private Message message;
         private boolean isRepeater = false;
-        private String msg;
+        private JSONArray msg;
         private int num;
 
-        public ReMsg(Group group, MessageChain chain, int num) {
-            this.group = group;
-            this.chain = chain;
-            this.msg = chain.toString().replaceAll("\\[mirai:source:\\[[0-9]+],\\[[0-9]+]]", "");
+        public ReMsg(Contact contact, Message message, int num) {
+            this.contact = contact;
+            this.message = message;
+            this.msg = BotUtils.messageToJsonArray(message);
             this.num = num;
         }
     }

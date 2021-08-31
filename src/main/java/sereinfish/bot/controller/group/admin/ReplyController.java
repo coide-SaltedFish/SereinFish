@@ -14,6 +14,8 @@ import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
@@ -27,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "问答", permissions = Permissions.GROUP_ADMIN)
 public class ReplyController extends QQController {
     private int maxTime = 25000;
     int page_num = 4;//一页的记录数
@@ -57,6 +60,7 @@ public class ReplyController extends QQController {
 
     @Action("\\^[!！.]添加问答$\\")
     @Synonym({"\\^[!！.]问答添加$\\"})
+    @MenuItem(name = "添加问答", usage = "[!！.]添加问答", description = "为Bot添加精确问答", permission = Permissions.GROUP_ADMIN)
     public Message addReply(Member sender, DataBase dataBase, Group group, ContextSession session){
         try{
             reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
@@ -86,74 +90,75 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\^[!！.]问答添加$\\ 问{key}答{re}")
-    @Synonym("\\^[!！.]添加问答$\\ 问{key}答{re}")
-    public Message addReply(DataBase dataBase, Group group, Member sender, Message message, String key,String re){
-        String msg = Message.Companion.toCodeString(message);
-        String msgInfo = msg.substring(msg.indexOf(" 问"));
-        key = msgInfo.substring(2,msgInfo.indexOf("答"));
-        re = msgInfo.substring(msgInfo.indexOf("答") + 1);
-
-        try{
-            ReplyDao replyDao = new ReplyDao(dataBase);
-            Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
-            if (replyDao.exist(reply.getUuid())){
-                return MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在");
-            }else {
-                replyDao.insert(reply);
-                return MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功");
-            }
-        } catch (IllegalAccessException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        } catch (MarkIllegalLengthException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        }
-    }
-
-    @Action("\\^[!！.]问答查询$\\ {page} \"{key}\"")
-    @Synonym("\\^[!！.]问答查询$\\ {page} {key}")
-    public Message queryReply(DataBase dataBase, Group group, int page, String key){
-        if (page < 1){
-            return MyYuQ.getMif().text("不合法的页数：" + page).toMessage();
-        }
-
-        int page_num = 4;//一页的记录数
-        try {
-            ReplyDao replyDao = new ReplyDao(dataBase);
-            ArrayList<Reply> replies = replyDao.query(key, group.getId());
-            if (replies.size() == 0){
-                return MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage();
-            }
-
-            int page_max = replies.size() / page_num + (replies.size() % page_num == 0 ? 0:1);
-            if (page > page_max){
-                return MyYuQ.getMif().text("页数太大，最大页数：" + page_max).toMessage();
-            }
-            StringBuilder stringBuilder = new StringBuilder("关键词" + key + "记录查找如下（" + page + "/" + page_max + "）:\n");
-            stringBuilder.append("ID\tKEY\tReply");
-            for (int i = page_num * (page - 1); i < replies.size() && i < page_num * (page - 1) + page_num; i++){
-                Reply reply = replies.get(i);
-                stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
-            }
-            return MyYuQ.getMif().text(stringBuilder.toString()).toMessage();
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        } catch (IllegalAccessException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        } catch (MarkIllegalLengthException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
-        }
-    }
+//    @Action("\\^[!！.]问答添加$\\ 问{key}答{re}")
+//    @Synonym("\\^[!！.]添加问答$\\ 问{key}答{re}")
+//    public Message addReply(DataBase dataBase, Group group, Member sender, Message message, String key,String re){
+//        String msg = Message.Companion.toCodeString(message);
+//        String msgInfo = msg.substring(msg.indexOf(" 问"));
+//        key = msgInfo.substring(2,msgInfo.indexOf("答"));
+//        re = msgInfo.substring(msgInfo.indexOf("答") + 1);
+//
+//        try{
+//            ReplyDao replyDao = new ReplyDao(dataBase);
+//            Reply reply = new Reply(sender.getId(),group.getId(),Reply.BOOLEAN_TRUE,Reply.BOOLEAN_FALSE,key,re);
+//            if (replyDao.exist(reply.getUuid())){
+//                return MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在");
+//            }else {
+//                replyDao.insert(reply);
+//                return MyYuQ.getMif().at(sender).toMessage().plus("\n添加成功");
+//            }
+//        } catch (IllegalAccessException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        } catch (SQLException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        } catch (MarkIllegalLengthException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        }
+//    }
+//
+//    @Action("\\^[!！.]问答查询$\\ {page} \"{key}\"")
+//    @Synonym("\\^[!！.]问答查询$\\ {page} {key}")
+//    public Message queryReply(DataBase dataBase, Group group, int page, String key){
+//        if (page < 1){
+//            return MyYuQ.getMif().text("不合法的页数：" + page).toMessage();
+//        }
+//
+//        int page_num = 4;//一页的记录数
+//        try {
+//            ReplyDao replyDao = new ReplyDao(dataBase);
+//            ArrayList<Reply> replies = replyDao.query(key, group.getId());
+//            if (replies.size() == 0){
+//                return MyYuQ.getMif().text("未查找到相关记录：" + key).toMessage();
+//            }
+//
+//            int page_max = replies.size() / page_num + (replies.size() % page_num == 0 ? 0:1);
+//            if (page > page_max){
+//                return MyYuQ.getMif().text("页数太大，最大页数：" + page_max).toMessage();
+//            }
+//            StringBuilder stringBuilder = new StringBuilder("关键词" + key + "记录查找如下（" + page + "/" + page_max + "）:\n");
+//            stringBuilder.append("ID\tKEY\tReply");
+//            for (int i = page_num * (page - 1); i < replies.size() && i < page_num * (page - 1) + page_num; i++){
+//                Reply reply = replies.get(i);
+//                stringBuilder.append("\n" + reply.getId() + "\t" + reply.getKey() + "\t" + reply.getReply());
+//            }
+//            return MyYuQ.getMif().text(stringBuilder.toString()).toMessage();
+//        } catch (SQLException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        } catch (IllegalAccessException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        } catch (MarkIllegalLengthException e) {
+//            SfLog.getInstance().e(this.getClass(),e);
+//            return MyYuQ.getMif().text("失败：" + e.getMessage()).toMessage();
+//        }
+//    }
 
     @Action("\\^[!！.]问答查询$\\ {key}")
+    @MenuItem(name = "问答查询", usage = "[!！.]问答查询 {key}", description = "查询对应问题的信息", permission = Permissions.GROUP_ADMIN)
     public Message queryReply(DataBase dataBase, Group group, String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
@@ -183,6 +188,7 @@ public class ReplyController extends QQController {
     }
 
     @Action("\\^[!！.]问答删除$\\ {id}")
+    @MenuItem(name = "问答删除", usage = "[!！.]问答删除 {id}", description = "删除指定问题", permission = Permissions.GROUP_ADMIN)
     public Message delete(DataBase dataBase, String id){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);

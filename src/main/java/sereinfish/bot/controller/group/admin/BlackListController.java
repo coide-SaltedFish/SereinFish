@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.entity.DataBase;
@@ -64,6 +65,7 @@ public class BlackListController {
      */
     @Action("\\^[.!！]黑名单添加$\\ {qq} {remake}")
     @Synonym({"\\^[.!！]加黑$\\ {qq} {remake}"})
+    @MenuItem(name = "黑名单添加", usage = "[.!！]黑名单添加 {qq} {remake}", description = "添加到本群黑名单", permission = Permissions.GROUP_ADMIN)
     public Message add(Group group, DataBase dataBase, long qq, String remake){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
@@ -92,6 +94,7 @@ public class BlackListController {
      */
     @Action("\\^[.!！]黑名单删除$\\ {qq}")
     @Synonym({"\\^[.!！]删黑$\\ {qq}"})
+    @MenuItem(name = "黑名单删除", usage = "[.!！]黑名单删除 {qq}", description = "移出本群黑名单", permission = Permissions.GROUP_ADMIN)
     public Message delete(DataBase dataBase, Group group, long qq){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);
@@ -152,6 +155,7 @@ public class BlackListController {
      */
     @Action("\\^[.!！]本群黑名单$\\")
     @Synonym("\\^[.!！]黑名单$\\")
+    @MenuItem(name = "查看本群黑名单", usage = "[.!！]黑名单", description = "查看本群黑名单", permission = Permissions.GROUP_ADMIN)
     public Message query(DataBase dataBase, Group group){
         try {
             BlackListDao blackListDao = new BlackListDao(dataBase);

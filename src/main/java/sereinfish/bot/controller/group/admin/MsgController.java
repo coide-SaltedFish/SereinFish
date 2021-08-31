@@ -16,6 +16,8 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.file.FileHandle;
@@ -37,6 +39,7 @@ import java.util.Date;
  * 消息相关命令处理
  */
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "Bot相关指令", permissions = Permissions.GROUP_ADMIN)
 public class MsgController extends QQController {
     int maxTime = 25 * 1000;
 
@@ -55,12 +58,14 @@ public class MsgController extends QQController {
 
     @Action("\\^[!！.]版本$\\")
     @QMsg(reply = true)
+    @MenuItem(name = "获取Bot版本", usage = "[!！.]版本", description = "返回当前Bot版本", permission = Permissions.GROUP_ADMIN)
     public Message version(){
         return MyYuQ.getMif().text(MyYuQ.getVersionInfo()).toMessage();
     }
 
     @Action("运行状态")
     @QMsg(reply = true,mastAtBot = true)
+    @MenuItem(name = "获取Bot运行状态", usage = "@Bot 运行状态", description = "返回当前Bot运行状态", permission = Permissions.GROUP_ADMIN)
     public Message appState(){
         StringBuilder str = new StringBuilder();
         str.append("程序运行时长：" + MyPerformance.getRunTime());
@@ -80,6 +85,7 @@ public class MsgController extends QQController {
     }
 
     @Action("\\^[.!！]消息转图片$\\")
+    @MenuItem(name = "消息转图片", usage = "[.!！]消息转图片", description = "输入消息并转为图片", permission = Permissions.GROUP_ADMIN)
     public Message testMsgImage(GroupConf groupConf, ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"msg_temp");//文件缓存路径
@@ -99,6 +105,7 @@ public class MsgController extends QQController {
     }
 
     @Action("\\^[.！!]base64转图片$\\")
+    @MenuItem(name = "base64转图片", usage = "[.!！]base64转图片", description = "输入base64并转为图片", permission = Permissions.GROUP_ADMIN)
     public Message base64ToImage(ContextSession session){
         try {
             File imageFile = new File(FileHandle.imageCachePath,"base64ToImage_temp");//文件缓存路径
@@ -120,6 +127,7 @@ public class MsgController extends QQController {
     }
 
     @Action("\\^[.！!]玩家头像$\\ {uuid}")
+    @MenuItem(name = "Mc玩家头像获取", usage = "[.!！]玩家头像", description = "获取对应uuid的Mc玩家头像", permission = Permissions.GROUP_ADMIN)
     public Message getMcPlayerHeadImage(String uuid){
         File imageFile = new File(FileHandle.imageCachePath,"mcPlayerHeadImage_temp");//文件缓存路径
         try {
@@ -142,6 +150,7 @@ public class MsgController extends QQController {
     @Action("撤回")
     @Synonym({"reCall", "recall"})
     @QMsg(mastAtBot = true)
+    @MenuItem(name = "撤回", usage = "@Bot 撤回", description = "撤回最近的Bot消息", permission = Permissions.GROUP_ADMIN)
     public String recall(Group group){
         GroupReCallMessageManager.MsgInfo msgInfo = GroupReCallMessageManager.getInstance().getRecentMsg(group.getId());
         if (msgInfo != null){
@@ -159,6 +168,7 @@ public class MsgController extends QQController {
     @Action("撤回所有")
     @Synonym({"reAllCall", "reallcall"})
     @QMsg(mastAtBot = true)
+    @MenuItem(name = "撤回所有", usage = "@Bot 撤回所有", description = "撤回最近的所有Bot消息", permission = Permissions.GROUP_ADMIN)
     public String reAllCall(Group group){
         try {
             for (GroupReCallMessageManager.MsgInfo msgInfo:GroupReCallMessageManager.getInstance().getAllRecentMsg(group.getId())){

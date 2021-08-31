@@ -11,6 +11,8 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.mc.rcon.Rcon;
@@ -21,6 +23,7 @@ import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 import java.io.IOException;
 
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "Rcon相关指令", permissions = Permissions.OP)
 public class McRconCmd extends QQController {
 
     private int maxTime = 15000;
@@ -36,6 +39,7 @@ public class McRconCmd extends QQController {
     }
 
     @Action("\\^[.!！][rR][cC][Ee]$\\ {var}")
+    @MenuItem(name = "Rcon短指令指行", usage = "[.!！][rR][cC][Ee] {var}", description = "执行一个不包含空格的rcon指令", permission = Permissions.OP)
     public String rconCmdExecute(GroupConf groupConf, String var){
         //前置检查
         if (groupConf.isRconEnable()){
@@ -72,6 +76,7 @@ public class McRconCmd extends QQController {
      * @return
      */
     @Action("\\^[.!！][rR][cC][Ee][Ss]$\\")
+    @MenuItem(name = "Rcon指令指行", usage = "[.!！][rR][cC][Ee]", description = "执行一个rcon指令", permission = Permissions.OP)
     public String rconsCmdExecute(ContextSession session, Member sender, GroupConf groupConf){
         //前置检查
         if (groupConf.isRconEnable()){
