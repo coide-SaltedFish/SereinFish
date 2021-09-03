@@ -2,6 +2,7 @@ package sereinfish.bot.event.group;
 
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
+import com.IceCreamQAQ.Yu.event.EventBus;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
@@ -12,9 +13,13 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
+import kotlin.UninitializedPropertyAccessException;
+import net.mamoe.mirai.event.EventHandler;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.event.myEvent.BotNameEvent;
+import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
 import sereinfish.bot.database.ex.IllegalModeException;
@@ -31,6 +36,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -45,6 +51,9 @@ import java.util.List;
  */
 @EventListener
 public class OnGroupMessageEvent {
+
+    @Inject
+    private EventBus eventBus;
 
     @Event
     public void messageEvent(MessageEvent event){
@@ -82,7 +91,7 @@ public class OnGroupMessageEvent {
             event.setCancel(true);
             return;
         }else {
-            RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());//复读
+            //RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());//复读
 
             //自动回复
             if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
@@ -113,8 +122,17 @@ public class OnGroupMessageEvent {
 
         }
 
-        //bot名称
         Message message = event.getMessage();
+        //单独@bot或者bot名字
+        if (message.getCodeStr().trim().equals("<Rain:At:" + MyYuQ.getYuQ().getBotId() + ">")
+                || message.getCodeStr().trim().equals(MyYuQ.getBotName())){
+            //到bot名字事件
+            BotNameEvent botNameEvent = new BotNameEvent(event);
+            eventBus.post(botNameEvent);
+        }
+
+
+        //bot名称
         if (message.getBody().size() > 0){
             if(message.getBody().get(0) instanceof Text){
                 Text text = (Text) message.getBody().get(0);
@@ -142,26 +160,54 @@ public class OnGroupMessageEvent {
                     message.setBody(messageItems);
 
                     //path修改
-                    MessageItem pathItem = message.getPath().get(0);
-                    if (pathItem instanceof Text){
-                        if (text.getText().startsWith(botName)){
-                            noNameMsg = text.getText().substring(botName.length());
-                            while (noNameMsg.startsWith(" ")){
-                                noNameMsg = noNameMsg.substring(1);
-                            }
-                            noNameMsg = noNameMsg.replaceAll("[ \n\r]+", " ");
+                    if (message.getPath().size() > 0){
+                        MessageItem pathItem = message.getPath().get(0);
+                        if (pathItem instanceof Text){
+                            if (text.getText().startsWith(botName)){
+                                noNameMsg = text.getText().substring(botName.length());
+                                while (noNameMsg.startsWith(" ")){
+                                    noNameMsg = noNameMsg.substring(1);
+                                }
+                                noNameMsg = noNameMsg.replaceAll("[ \n\r]+", " ");
 
-                            String[] paths = noNameMsg.split(" ");
-                            message.getPath().remove(0);
-                            message.getPath().add(0, new Message().lineQ().text(paths[0]).getMessage().getBody().get(0));
+                                String[] paths = noNameMsg.split(" ");
+                                message.getPath().remove(0);
+                                message.getPath().add(0, new Message().lineQ().text(paths[0]).getMessage().getBody().get(0));
+                            }
                         }
                     }
+
 
 //                    for (MessageItem messageItem:message.getPath()){
 //                        System.out.println(messageItem.toPath());
 //                    }
                 }
             }
+        }
+    }
+
+    /**
+     * bot名字事件
+     * @param event
+     */
+    @Event
+    public void botNameEvent(BotNameEvent event){
+        if (MyYuQ.getRandom(1, 100) > 80){
+            //戳回去
+            event.getSender().click();
+        }else if (MyYuQ.getRandom(1, 100) > 90){
+            //不理
+            return;
+        }else {
+            String[] tips = {"嗯？",
+                    "输入[" + MyYuQ.getBotName() + " 指令]可以获取指令帮助哦",
+                    "在哦",
+                    "现在是：" + Time.dateToString(new Date(), "HH时mm分ss秒"),
+                    "怎么了?",
+                    "正在待命！",
+                    "...",
+                    "可以用" + MyYuQ.getBotName() + "的名字来代替指令开头的@哦"};
+            event.getContact().sendMessage(tips[MyYuQ.getRandom(0, tips.length - 1)]);
         }
     }
 
@@ -202,14 +248,20 @@ public class OnGroupMessageEvent {
                     //取消发送
                     event.setCancel(true);
                     event.getSendTo().sendMessage(MyYuQ.getMif().text("消息过长，正在处理").toMessage());
-                    File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
                     try {
+                        File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+
                         ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
-                    } catch (IOException e) {
+
+                        event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
+                    }catch (UninitializedPropertyAccessException e){
+                        event.getSendTo().sendMessage(MyYuQ.getMif().text("消息转图片失败，原消息发送中..").toMessage());
+                        event.setCancel(false);
+                    }catch (IOException e) {
                         SfLog.getInstance().e(this.getClass(),e);
-                        event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+                        event.getSendTo().sendMessage(MyYuQ.getMif().text("消息转图片失败，原消息发送中..").toMessage());
+                        event.setCancel(false);
                     }
-                    event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
                 }
             }
         }
@@ -247,7 +299,7 @@ public class OnGroupMessageEvent {
         if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
             event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
-        RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
+        //RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 
         //撤回管理
         if (event.getSendTo() instanceof Group){
@@ -463,8 +515,14 @@ public class OnGroupMessageEvent {
         }
     }
 
+    @EventHandler
+    public void event(com.IceCreamQAQ.Yu.event.events.Event event){
+        System.out.println(event.getClass().getTypeName());
+    }
+
     @Event
     public void clickBotEvent(ClickBotEvent event){
+        System.out.println(event.getClass().getTypeName());
         String msgs[] = {"唔","干嘛","rua","唉呀","哼"};
         event.getOperator().sendMessage(MyYuQ.getMif().text(msgs[MyYuQ.getRandom(0, msgs.length - 1)]).toMessage());
     }

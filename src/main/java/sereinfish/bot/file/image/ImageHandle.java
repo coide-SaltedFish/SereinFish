@@ -4,6 +4,7 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
 
+import kotlin.UninitializedPropertyAccessException;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.NetHandle;
@@ -121,7 +122,7 @@ public class ImageHandle {
      * @param message
      * @return
      */
-    public static BufferedImage messageToImage(Message message, GroupConf conf){
+    public static BufferedImage messageToImage(Message message, GroupConf conf) throws UninitializedPropertyAccessException{
         Color bgColor = Color.decode("#EEEEEE");//背景颜色
         Color paintColor = Color.decode("#212121");//画笔颜色
         String mFont = conf.getLongMsgToImageFont();
@@ -202,17 +203,15 @@ public class ImageHandle {
                 com.icecreamqaq.yuq.message.Image image = (com.icecreamqaq.yuq.message.Image) item;
                 BufferedImage msgImage = null;
                 try {
-                    URL url = null;
-                    if (image.getUrl().equals("") || image.getUrl() == null){
-                        url = new URL("http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId() + "/0");
-                    }else {
-                        url = new URL(image.getUrl());
-                    }
-                    msgImage = (BufferedImage) NetHandle.getImage(url);
-                } catch (IOException e) {
+                    URL url = new URL(image.getUrl());
+                    msgImage = NetHandle.getImage(url);
+                }catch (IOException e) {
                     //获取失败，返回一个错误图片
                     msgImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
-                    msgImage.createGraphics().drawString("图片加载失败",0,0);
+                    Graphics2D g = msgImage.createGraphics();
+                    g.setPaint(Color.BLACK);
+                    g.drawString("图片加载失败",0,0);
+                    g.dispose();
                 }
 
                 if (msgImage.getWidth() > lineMaxWidth){
@@ -242,8 +241,6 @@ public class ImageHandle {
                 graphics2D.dispose();
 
                 bufferedOldImage = bufferedImage;
-            }else {
-
             }
         }
         //绘制完毕，加上背景

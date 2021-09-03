@@ -222,43 +222,44 @@ public class QRCodeImage {
             return true;
         }else if (x < flagWidth && y > height - flagWidth - 1){
             return true;
-        }else if (x == flagWidth - 2 || y == flagWidth - 2){
-            return true;
         }
-        //校正图像
-        ArrayList<Integer[]> checkImages = new ArrayList<>();
-        int apNum = (qrWidth - 6) / 18  + 1;
-        for (int i = 0; i < apNum; i++){//y
-            for (int j = 0; j < apNum; j++){//x
-                if (j == i && j == 0){
-                    continue;
-                }
-                if (i == 0 && j == apNum - 1){
-                    continue;
-                }
-                if (i == apNum - 1 && j == 0){
-                    continue;
-                }
-                int yCorrection = (i - 1) * 2;
-                int xCorrection = (j - 1) * 2;
-
-                if (yCorrection < 0){
-                    yCorrection = 0;
-                }
-                if (xCorrection < 0){
-                    xCorrection = 0;
-                }
-
-                checkImages.add(new Integer[]{3 + (i * 20) + yCorrection, 3 + (j * 20) + xCorrection});
-            }
-        }
-
-        int apW = 6;
-        for (Integer[] checkImage:checkImages){
-            if (y > checkImage[0] && y < checkImage[0] + apW && x > checkImage[1] && x < checkImage[1] + apW){
-                return true;
-            }
-        }
+//        else if (x == flagWidth - 2 || y == flagWidth - 2){
+//            return true;
+//        }
+//        //校正图像
+//        ArrayList<Integer[]> checkImages = new ArrayList<>();
+//        int apNum = (qrWidth - 6) / 18  + 1;
+//        for (int i = 0; i < apNum; i++){//y
+//            for (int j = 0; j < apNum; j++){//x
+//                if (j == i && j == 0){
+//                    continue;
+//                }
+//                if (i == 0 && j == apNum - 1){
+//                    continue;
+//                }
+//                if (i == apNum - 1 && j == 0){
+//                    continue;
+//                }
+//                int yCorrection = (i - 1) * 2;
+//                int xCorrection = (j - 1) * 2;
+//
+//                if (yCorrection < 0){
+//                    yCorrection = 0;
+//                }
+//                if (xCorrection < 0){
+//                    xCorrection = 0;
+//                }
+//
+//                checkImages.add(new Integer[]{3 + (i * 20) + yCorrection, 3 + (j * 20) + xCorrection});
+//            }
+//        }
+//
+//        int apW = 6;
+//        for (Integer[] checkImage:checkImages){
+//            if (y > checkImage[0] && y < checkImage[0] + apW && x > checkImage[1] && x < checkImage[1] + apW){
+//                return true;
+//            }
+//        }
 
         return false;
     }

@@ -6,36 +6,28 @@ import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import net.mamoe.mirai.Bot;
 import okhttp3.OkHttpClient;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.FileSystems;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MyYuQ {
+    //TODO:钓鱼功能
+
     public static boolean isEnable = false;//功能启用标志
     public static final String appName = "SereinFish Bot";
     public static final int version = 100544;
@@ -111,6 +103,31 @@ public class MyYuQ {
 
     public static Web getWeb() {
         return web;
+    }
+
+    /**
+     * 去除html标签
+     * @param htmlStr
+     * @return
+     */
+    public static String delHTMLTag(String htmlStr){
+        String regEx_script="<script[^>]*?>[\\s\\S]*?<\\/script>"; //定义script的正则表达式
+        String regEx_style="<style[^>]*?>[\\s\\S]*?<\\/style>"; //定义style的正则表达式
+        String regEx_html="<[^>]+>"; //定义HTML标签的正则表达式
+
+        Pattern p_script=Pattern.compile(regEx_script,Pattern.CASE_INSENSITIVE);
+        Matcher m_script=p_script.matcher(htmlStr);
+        htmlStr=m_script.replaceAll(""); //过滤script标签
+
+        Pattern p_style=Pattern.compile(regEx_style,Pattern.CASE_INSENSITIVE);
+        Matcher m_style=p_style.matcher(htmlStr);
+        htmlStr=m_style.replaceAll(""); //过滤style标签
+
+        Pattern p_html=Pattern.compile(regEx_html,Pattern.CASE_INSENSITIVE);
+        Matcher m_html=p_html.matcher(htmlStr);
+        htmlStr=m_html.replaceAll(""); //过滤html标签
+
+        return htmlStr.trim(); //返回文本字符串
     }
 
     /**

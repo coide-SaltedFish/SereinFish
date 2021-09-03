@@ -9,8 +9,11 @@ import sereinfish.bot.mlog.SfLog;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * bot自身所带的定时任务
+ */
 @JobCenter
-public class Job {
+public class BotJob {
 
     @Cron("At::h::00")
     public void update(){

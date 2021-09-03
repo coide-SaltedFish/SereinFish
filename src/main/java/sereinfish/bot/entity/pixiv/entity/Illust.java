@@ -6,6 +6,7 @@ import lombok.Getter;
 public class Illust {
     private long id;
     private String title;
+    private String caption;
     private String type;
     private Image_urls image_urls;
     private int restrict;

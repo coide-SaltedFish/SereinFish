@@ -144,7 +144,7 @@ public class MsgController extends QQController {
     @QMsg(mastAtBot = true)
     public void clickMe(Member sender){
         SfLog.getInstance().d(this.getClass(), "戳：" + sender.getName());
-        //sender.click();
+        sender.click();
     }
 
     @Action("撤回")

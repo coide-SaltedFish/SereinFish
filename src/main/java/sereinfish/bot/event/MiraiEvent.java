@@ -28,7 +28,7 @@ public class MiraiEvent extends SimpleListenerHost {
     @EventHandler
     public void groupMessageEvent(GroupMessageEvent event){
         //复读
-        //RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());
+        RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());
     }
 
     /**
@@ -37,7 +37,7 @@ public class MiraiEvent extends SimpleListenerHost {
      */
     @EventHandler
     public void groupMessagePostSendEvent(GroupMessagePostSendEvent event){
-        //RepeaterManager.getInstance().add(event.getTarget(), event.getMessage());//复读
+        RepeaterManager.getInstance().add(event.getTarget(), event.getMessage());//复读
     }
 
 
