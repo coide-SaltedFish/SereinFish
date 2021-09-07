@@ -54,6 +54,7 @@ public class RandomController {
     }
 
     @Action("\\[.。!！][Rr][Aa]$\\ {name} {var}")
+    @MenuItem(name = "Ra", usage = "[.。!！]ra {name} {var}", description = "骰娘")
     public Message randomAppraisal(Member sender, String name, int var){
         if (var <= 0){
             return new Message().lineQ().at(sender).text("\n").text("设定值：" + var + " 不合理，请设置在0~100区间内").getMessage();
@@ -83,6 +84,7 @@ public class RandomController {
 
     @Action("抽一位幸运群友")
     @Synonym({"抽个幸运群友", "抽一个幸运群友", "抽个幸运群员", "抽一个幸运群员", "抽一位幸运群员"})
+    @MenuItem(name = "抽一位幸运群友", usage = "抽一位幸运群友", description = "抽一位幸运群友")
     @QMsg(mastAtBot = true)
     public Message randomMember(Group group){
         ArrayList<Member> members = new ArrayList<>();
@@ -99,6 +101,7 @@ public class RandomController {
 
     @Action("抽一位幸运管理")
     @Synonym({"抽个幸运管理", "抽一个幸运管理","抽一位幸运管理员","抽个幸运管理员", "抽一个幸运管理员"})
+    @MenuItem(name = "抽个幸运管理", usage = "抽个幸运管理", description = "抽个幸运管理")
     @QMsg(mastAtBot = true)
     public Message randomAdminMember(Group group){
         ArrayList<Member> members = new ArrayList<>();
@@ -113,6 +116,7 @@ public class RandomController {
 
     @Action("抽一位幸运群主")
     @Synonym({"抽个幸运群主", "抽一个幸运群主"})
+    @MenuItem(name = "抽一位幸运群主", usage = "抽一位幸运群主", description = "抽一位幸运群主")
     @QMsg(mastAtBot = true)
     public Message randomOwnerMember(Group group){
         Member member = group.getOwner();

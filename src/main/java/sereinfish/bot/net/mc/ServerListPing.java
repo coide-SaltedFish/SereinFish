@@ -392,7 +392,10 @@ public class ServerListPing {
                         SfLog.getInstance().e(ServerListPing.class, e);
                     }
                     graphics2D.drawImage(playerHeadImage, playerListStartX, playerListStartY, null);//绘制头像
-                    graphics2D.drawString(player.name, playerListStartX + 90 + 10, playerListStartY + (90 - metrics.getAscent() / 2));
+
+                    //绘制玩家名字
+                    //(90 - metrics.getAscent() / 2)
+                    drawString(graphics2D, Color.WHITE, font, player.name,playerListStartX + 90 + 10, playerListStartY + (90 - metrics.getHeight()) / 2);
 
                     playerListStartY += 100;
                 }
@@ -435,6 +438,32 @@ public class ServerListPing {
         }catch (Exception e){
             throw e;
         }
+    }
+
+    /**
+     * 文字绘制
+     * @param graphics2D
+     * @param font
+     * @param str
+     * @param x
+     * @param y
+     */
+    private static int drawString(Graphics2D graphics2D, Color color, Font font, String str, int x, int y){
+        graphics2D.setPaint(color);
+        graphics2D.setFont(font);
+        FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
+        int textX = x;
+        for (int i = 0; i < str.length(); i++){
+            String c = String.valueOf(str.charAt(i));
+            if (c.equals("§")){
+                i++;
+                graphics2D.setPaint(JsonColor.getColor(c + str.charAt(i)));
+            }else {
+                graphics2D.drawString(c, textX, y + metrics.getAscent());
+                textX += metrics.stringWidth(c);
+            }
+        }
+        return metrics.getHeight();
     }
     
     

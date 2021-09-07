@@ -38,6 +38,30 @@ public class FileHandle {
     public static File rconConfFile = new File(mcResPath, "rcon/conf.json");//rcon配置文件
 
     public static String JetBrainsMonoFontFile = "fonts/JetBrainsMono.ttc";//mc默认字体
+
+    static {
+        //初始化
+        if (dataPath.exists())
+            dataPath.mkdirs();
+        if (dataBasePath.exists())
+            dataBasePath.mkdirs();
+        if (configPath.exists())
+            configPath.mkdirs();
+        if (cachePath.exists())
+            cachePath.mkdirs();
+        if (groupHeadCachePath.exists())
+            groupHeadCachePath.mkdirs();
+        if (memberHeadCachePath.exists())
+            memberHeadCachePath.mkdirs();
+        if (imageCachePath.exists())
+            imageCachePath.mkdirs();
+        if (imageLoliconCachePath.exists())
+            imageLoliconCachePath.mkdirs();
+        if (groupDataPath.exists())
+            groupDataPath.mkdirs();
+        if (mcResPath.exists())
+            mcResPath.mkdirs();
+    }
     /**
      * 写入文件
      * @param file

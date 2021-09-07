@@ -28,3 +28,4 @@ start.bat
 build/classes/
 build/generated/
 /pwd.txt
+/cache/

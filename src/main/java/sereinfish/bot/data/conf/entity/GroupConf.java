@@ -158,6 +158,9 @@ public class GroupConf{
     @Control(group = "Mc服务器", name = "服务器名称", type = ControlType.Edit_Small_Plain, tip = "默认使用的Mc服务器名称")
     String mcServerName = "";
 
+    @Control(group = "青云客聊天Api", name = "启用", type = ControlType.CheckBox, tip = "启用青云客Api聊天功能")
+    boolean qingYunKeApiChat = false;
+
     @Control(group = "消息转图片", name = "启用长文本转图片功能", type = ControlType.CheckBox, tip = "bot在发送长文本时将自动把消息转换为图片发送")
     boolean longMsgToImageEnable = false;
 

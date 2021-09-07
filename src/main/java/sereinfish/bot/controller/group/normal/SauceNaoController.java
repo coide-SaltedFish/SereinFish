@@ -92,7 +92,8 @@ public class SauceNaoController extends QQController {
                 for (MessageItem messageItem:replayMsg.getBody()){
                     if (messageItem instanceof Image){
                         Image image = (Image) messageItem;
-                        sNSearch(sender, message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0");
+                        sNSearch(sender, message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-"
+                                + image.getId().substring(0, image.getId().lastIndexOf(".")).toUpperCase() + "/0");
                         break;
                     }
                 }

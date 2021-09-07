@@ -1,8 +1,10 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
+import com.IceCreamQAQ.Yu.annotation.Path;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.arknights.penguinStatistics.PenguinStatistics;
@@ -15,14 +17,16 @@ import sereinfish.bot.utils.OkHttpUtils;
 
 import javax.imageio.ImageIO;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "企鹅物流")
 public class ArkNightController {
 
-    @Action("\\^[!！.]企鹅物流$\\ {name}")
-    @MenuItem(name = "企鹅物流物品掉落查询", usage = "[!！.]企鹅物流 {name}", description = "在企鹅物流查询物品掉落数据")
+    @Action("方舟掉落 {name}")
+    @QMsg(mastAtBot = true)
+    @MenuItem(name = "企鹅物流物品掉落查询", usage = "@Bot 方舟掉落 {name}", description = "在企鹅物流查询物品掉落数据")
     public Message penguinStatisticsQuery(Group group, String name){
         group.sendMessage(MyYuQ.getMif().text(getWaitMsg()).toMessage());
         try {
@@ -41,6 +45,9 @@ public class ArkNightController {
                 }
                 //先保存为图片
                 File file = new File(FileHandle.imageCachePath,"penguinStatisticsQuery_temp");
+                if (!file.getParentFile().exists()){
+                    file.getParentFile().mkdirs();
+                }
                 try {
                     ImageIO.write(penguinStatistics.getDataImage(penguinWidgetData), "PNG", file);
                     return MyYuQ.getMif().imageByFile(file).toMessage();

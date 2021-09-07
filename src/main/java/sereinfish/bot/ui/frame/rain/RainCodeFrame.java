@@ -91,7 +91,7 @@ public class RainCodeFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //弹出文件选择框
-                new FileChooseDialog("选择字体文件", ".ttf(字体文件)", new FileChooseDialog.FileChooseListener() {
+                new FileChooseDialog("选择图片文件", "图片文件", new FileChooseDialog.FileChooseListener() {
                     @Override
                     public void cancel() {
 
@@ -104,7 +104,7 @@ public class RainCodeFrame extends JFrame {
                             textField_input.setText(f.getAbsolutePath());
                         }else{
                             try {
-                                textField_input.setText(DigestUtils.md5Hex(new FileInputStream(f)));
+                                textField_input.setText(DigestUtils.md5Hex(new FileInputStream(f)).toUpperCase());
                             } catch (IOException ioException) {
                                 SfLog.getInstance().e(RainCodeFrame.class, ioException);
                                 listener.error(RainCodeFrame.this, ioException.getMessage());
@@ -225,7 +225,7 @@ public class RainCodeFrame extends JFrame {
                     return "<Rain:Image:" + textField_input.getText() + ",file>";
                 }else {
                     if (file != null){
-                        return "<Rain:Image:" + textField_input.getText() + "." + file.getName().substring(file.getName().lastIndexOf(".")) + ">";
+                        return "<Rain:Image:" + textField_input.getText() + "." + file.getName().substring(file.getName().lastIndexOf(".") + 1) + ">";
                     }
                 }
 

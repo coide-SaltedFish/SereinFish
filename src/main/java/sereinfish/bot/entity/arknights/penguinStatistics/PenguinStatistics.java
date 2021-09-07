@@ -218,7 +218,7 @@ public class PenguinStatistics {
         font = font.deriveFont(42);
         graphics2D.setFont(font);
         metrics = FontDesignMetrics.getMetrics(font);
-        String titleNames[] = {"作战", "掉落数", "样本数", "百分比", "理智", "最短通关用时", "统计区间"};
+        String titleNames[] = {"作战", "掉落数", "样本数", "百分比", "单件期望理智", "理智", "最短通关用时", "统计区间"};
         int titleNameWidth = width / titleNames.length;
         for (int i = 0; i < titleNames.length; i++) {
             graphics2D.drawString(titleNames[i], 5 + i * titleNameWidth, y + (namesHeight + metrics.getAscent()) / 2);
@@ -259,11 +259,18 @@ public class PenguinStatistics {
 
             //单件期望理智
             graphics2D.setColor(Color.RED);
-            graphics2D.drawString(stages.getApCost() + "", 5 + titleNameWidth * 4, lineY);
+            float aveApCost = ((float) matrix.getTimes() / matrix.getQuantity()) * stages.getApCost();
+            graphics2D.drawString(String.format("%.2f", aveApCost), 5 + titleNameWidth * 4, lineY);
+            graphics2D.setColor(Color.BLACK);
+
+
+            //理智
+            graphics2D.setColor(Color.RED);
+            graphics2D.drawString(stages.getApCost() + "", 5 + titleNameWidth * 5, lineY);
             graphics2D.setColor(Color.BLACK);
 
             //最短通关用时
-            graphics2D.drawString(getminClearTime(stages.getMinClearTime()), 5 + titleNameWidth * 5, lineY);
+            graphics2D.drawString(getminClearTime(stages.getMinClearTime()), 5 + titleNameWidth * 6, lineY);
 
             //统计区间
             String timeRange = Time.dateToString(matrix.getStart(), "yy.MM.dd");
@@ -272,7 +279,7 @@ public class PenguinStatistics {
             } else {
                 timeRange += " 至今";
             }
-            graphics2D.drawString(timeRange, 5 + titleNameWidth * 6, lineY);
+            graphics2D.drawString(timeRange, 5 + titleNameWidth * 7, lineY);
 
             y += lineHeight;
             graphics2D.setColor(separateLineColor);

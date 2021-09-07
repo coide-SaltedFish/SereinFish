@@ -10,7 +10,10 @@ import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import com.icecreamqaq.yuq.message.Text;
 import okhttp3.OkHttpClient;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -279,6 +282,22 @@ public class MyYuQ {
         }catch (IllegalStateException e){
             throw e;
         }
+    }
+
+    /**
+     * 得到消息文本部分
+     * @param message
+     * @return
+     */
+    public static String getMsgText(Message message){
+        String msg = "";
+        for (MessageItem item:message.getBody()){
+            if (item instanceof Text){
+                Text text = (Text) item;
+                msg += text.getText();
+            }
+        }
+        return msg;
     }
 
     public static String getBotName() {

@@ -171,7 +171,7 @@ public class Permissions {
                 break;
             }
 
-            if (p > permission){
+            if (p < permission){
                 flag = true;
             }
 

@@ -98,7 +98,7 @@ public class ImageController extends QQController {
     public Message diu(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 2){
-            throw new DoNone();
+            throw new SkipMe();
         }
 
         return getDiu(sender.getId());
@@ -147,7 +147,7 @@ public class ImageController extends QQController {
     public Message pa_2(Member sender){
         //触发概率
         if (MyYuQ.getRandom(0,100) > 2){
-            throw new DoNone();
+            throw new SkipMe();
         }
         final long member = sender.getId();
 

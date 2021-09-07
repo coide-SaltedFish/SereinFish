@@ -6,6 +6,7 @@ import com.google.zxing.WriterException;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
@@ -14,6 +15,7 @@ import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -84,6 +86,60 @@ public class QrController {
         Message msg = messageLineQ.getMessage();
         msg.setReply(message.getSource());
         return msg;
+    }
+
+    @Action("图片转二维码")
+    @QMsg(mastAtBot = true)
+    public Message imageQR(Member sender, Group group, Message message){
+        String imageUrl = "";
+        //检查是不是回复
+        if (message.getReply() != null){
+            //检查回复的图片
+            GroupHistoryMsg groupHistoryMsg = null;
+            try {
+                groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
+                if (groupHistoryMsg == null){
+                    return new Message().lineQ().text("找不到该消息，可能是消息未被记录:" + message.getReply().getId()).getMessage();
+                }
+                Message replayMsg = groupHistoryMsg.getMessage();
+                for (MessageItem messageItem:replayMsg.getBody()){
+                    if (messageItem instanceof Image){
+                        Image image = (Image) messageItem;
+                        imageUrl = "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0";
+                        break;
+                    }
+                }
+            } catch (SQLException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return new Message().lineQ().at(sender).textLine("").text("发生错误了：" + e.getMessage()).getMessage();
+            }
+        }else {
+            //是本消息
+            for (MessageItem item:message.getBody()){
+                if (item instanceof Image){
+                    Image image = (Image) item;
+                    imageUrl = image.getUrl();
+                    break;
+                }
+            }
+        }
+        if (imageUrl.equals("")){
+            return new Message().lineQ().at(sender).textLine("").text("未能找到图片").getMessage();
+        }
+        //生成二维码
+        try {
+            File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+            BufferedImage qrImage = QRCodeImage.backgroundMatrix(QRCodeImage.generateQRCodeBitMatrix(imageUrl, 800, 800),
+                    ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                    0f,
+                    new Color(12, 90, 62));
+            ImageIO.write(qrImage, "png", imageFile);
+            return new Message().lineQ().at(sender).textLine("").imageByFile(imageFile).getMessage();
+        } catch (WriterException e) {
+            return new Message().lineQ().at(sender).textLine("").text("发生错误了：" + e.getMessage()).getMessage();
+        } catch (IOException e) {
+            return new Message().lineQ().at(sender).textLine("").text("发生错误了：" + e.getMessage()).getMessage();
+        }
     }
 
     @Action("扫码")

@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.entity.MessageAt;
 import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
+import com.icecreamqaq.yuq.message.At;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
@@ -18,7 +19,10 @@ import net.mamoe.mirai.event.EventHandler;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.entity.qingyunke.QingYunKeApi;
+import sereinfish.bot.entity.qingyunke.Result;
 import sereinfish.bot.event.myEvent.BotNameEvent;
+import sereinfish.bot.event.myEvent.NoActionResponseEvent;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
@@ -101,6 +105,7 @@ public class OnGroupMessageEvent {
                     if (str != null){
                         try{
                             event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
+                            event.setCancel(true);
                         }catch (SendMessageFailedByCancel e){
                             SfLog.getInstance().e(this.getClass(),"消息发送取消");
                         }
@@ -206,7 +211,8 @@ public class OnGroupMessageEvent {
                     "怎么了?",
                     "正在待命！",
                     "...",
-                    "可以用" + MyYuQ.getBotName() + "的名字来代替指令开头的@哦"};
+                    "可以用" + MyYuQ.getBotName() + "的名字来代替指令开头的@哦",
+                    "ko~ko~da~yo~"};
             event.getContact().sendMessage(tips[MyYuQ.getRandom(0, tips.length - 1)]);
         }
     }
@@ -515,9 +521,60 @@ public class OnGroupMessageEvent {
         }
     }
 
-    @EventHandler
-    public void event(com.IceCreamQAQ.Yu.event.events.Event event){
-        System.out.println(event.getClass().getTypeName());
+    /**
+     * 无Action响应事件
+     * @param event
+     */
+    @Event
+    public void noActionResponseEvent(NoActionResponseEvent event){
+        //判断功能是否启用
+        GroupConf groupConf = event.getGroupConf();
+        if (groupConf != null){
+            if (!groupConf.isQingYunKeApiChat()){
+                return;
+            }
+            SfLog.getInstance().w(this.getClass(), "聊天Api：群聊环境响应");
+        }else {
+            SfLog.getInstance().w(this.getClass(), "聊天Api：非群聊环境响应");
+        }
+
+        Message message = event.getMessage();
+        String strMsg = MyYuQ.getMsgText(message);
+        //判断消息是否开头@Bot或者包含Bot名称
+
+        At at = null;
+        if (message.getBody().size() > 0){
+            MessageItem firstItem = message.getBody().get(0);
+            if (firstItem instanceof At){
+                at = (At) firstItem;
+            }
+        }
+        //满足聊天条件
+        if ((at != null && at.getUser() == MyYuQ.getYuQ().getBotId())
+                || strMsg.contains(MyYuQ.getBotName())){
+            try {
+                Result result = QingYunKeApi.chat(strMsg);
+                if (result.getResult() != Result.SUCCESS){
+                    SfLog.getInstance().e(this.getClass(), "青云客Api请求异常>>" + result.getContent() + ":" + result.getResult());
+                }else {
+                    SfLog.getInstance().d(this.getClass(), "聊天Api消息返回");
+                    event.getContact().sendMessage(result.getMsg());
+                }
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(), "青云客Api请求异常", e);
+            }
+        }
+    }
+
+    /**
+     * 路由寻路后事件
+     * @param event
+     */
+    @Event
+    public void actionContextInvokeEventPost(ActionContextInvokeEvent.Post event){
+        if (event.getContext().getActionInvoker() == null){
+            eventBus.post(new NoActionResponseEvent(event));
+        }
     }
 
     @Event
