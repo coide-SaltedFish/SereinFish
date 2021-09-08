@@ -224,10 +224,16 @@ public class LoliconController {
         }
 
         isSending = true;
-        Message[] msgs = getLoliconMsgs(group, isGroupMsg, conf, uids, keyword, num);
+        try {
+            Message[] msgs = getLoliconMsgs(group, isGroupMsg, conf, uids, keyword, num);
+            isSending = false;
+            return msgs;
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), e);
+        }
         isSending = false;
 
-        return msgs;
+        return new Message[]{Message.Companion.toMessageByRainCode("出现了亿点点问题\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>")};
     }
 
     /**

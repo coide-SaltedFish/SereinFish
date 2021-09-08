@@ -533,13 +533,10 @@ public class OnGroupMessageEvent {
             if (!groupConf.isQingYunKeApiChat()){
                 return;
             }
-            SfLog.getInstance().w(this.getClass(), "聊天Api：群聊环境响应");
-        }else {
-            SfLog.getInstance().w(this.getClass(), "聊天Api：非群聊环境响应");
         }
 
         Message message = event.getMessage();
-        String strMsg = MyYuQ.getMsgText(message);
+        String strMsg = QingYunKeApi.getMsgText(message);
         //判断消息是否开头@Bot或者包含Bot名称
 
         At at = null;
@@ -552,6 +549,8 @@ public class OnGroupMessageEvent {
         //满足聊天条件
         if ((at != null && at.getUser() == MyYuQ.getYuQ().getBotId())
                 || strMsg.contains(MyYuQ.getBotName())){
+            SfLog.getInstance().w(this.getClass(), "聊天Api：聊天响应");
+            strMsg = strMsg.replace(MyYuQ.getBotName(), "菲菲");
             try {
                 Result result = QingYunKeApi.chat(strMsg);
                 if (result.getResult() != Result.SUCCESS){
