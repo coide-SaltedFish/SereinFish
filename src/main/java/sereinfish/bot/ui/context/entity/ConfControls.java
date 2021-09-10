@@ -57,21 +57,19 @@ public class ConfControls {
         public void setValue(Object value){
             try {
                 field.set(groupConf, value);
-                if (listener != null){
-                    listener.change(this);
-                }
+
             } catch (IllegalAccessException e) {
                 field.setAccessible(true);
                 try {
                     field.set(groupConf, value);
-                    if (listener != null){
-                        listener.change(this);
-                    }
                 } catch (IllegalAccessException illegalAccessException) {
                     SfLog.getInstance().e(this.getClass(), illegalAccessException);
                 }
             }
             groupConf.save();
+            if (listener != null){
+                listener.change(this);
+            }
         }
 
         public <T> T getValue(){

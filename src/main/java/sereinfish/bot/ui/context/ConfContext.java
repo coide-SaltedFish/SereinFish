@@ -73,16 +73,19 @@ public class ConfContext {
     public static JPanel getDataBaseComboBox(ConfControls.Control control){
         JPanel comboBox_panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        DataBaseConfig dataBaseConfig = control.getValue();
+        final DataBaseConfig[] dataBaseConfig = {control.getValue()};
 
         final JButton btn_dataBase = new JButton("选择数据库");
-        if (dataBaseConfig != null){
-            btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
+        if (dataBaseConfig[0] != null){
+            btn_dataBase.setText("数据库：" + dataBaseConfig[0].getBaseName());
         }
 
         control.setListener(control1 -> {
-            if (dataBaseConfig != null){
-                btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
+            dataBaseConfig[0] = control1.getValue();
+            if (dataBaseConfig[0] != null){
+                btn_dataBase.setText("数据库：" + dataBaseConfig[0].getBaseName());
+            }else {
+                btn_dataBase.setText("选择数据库");
             }
         });
 
@@ -140,7 +143,7 @@ public class ConfContext {
         checkBox.setSelected(control.getValue());//设置值
 
         control.setListener(control1 -> {
-            checkBox.setSelected(control.getValue());//设置值
+            checkBox.setSelected(control1.getValue());//设置值
         });
         //设置监听
         checkBox.addChangeListener(new ChangeListener() {
@@ -312,7 +315,7 @@ public class ConfContext {
         comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(control.getValue()));
 
         control.setListener(control1 -> {
-            comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(control.getValue()));
+            comboBox.setSelectedItem(Permissions.getInstance().getAuthorityName(control1.getValue()));
         });
 
         //设置点击事件
@@ -344,7 +347,9 @@ public class ConfContext {
         textField.setText(control.getValue().toString());
 
         control.setListener(control1 -> {
-            textField.setText(control.getValue().toString());
+            textField.setText(control1.getValue().toString());
+            panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+            panel.requestFocus();
         });
 
         //保存事件
@@ -404,7 +409,9 @@ public class ConfContext {
         textField.setText(var + "");
 
         control.setListener(control1 -> {
-            textField.setText(var + "");
+            textField.setText(control1.getValue() + "");
+            panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+            panel.requestFocus();
         });
 
         //保存事件

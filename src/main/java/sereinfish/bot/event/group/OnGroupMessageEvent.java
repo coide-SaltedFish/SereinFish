@@ -281,29 +281,35 @@ public class OnGroupMessageEvent {
     public void sendMessagePostEvent(SendMessageEvent.Post event){
         Message message = event.getMessage();
         message.setSource(event.getMessageSource());
+
         //检查消息是否发送成功
-        if (event.getMessageSource().getId() < 0){
-            Contact contact = event.getSendTo();
-            if (contact instanceof Group){
-                Group group = (Group) contact;
-                GroupConf conf = ConfManager.getInstance().get(group.getId());
+        try {
+            if (event.getMessageSource().getId() < 0){
+                Contact contact = event.getSendTo();
+                if (contact instanceof Group){
+                    Group group = (Group) contact;
+                    GroupConf conf = ConfManager.getInstance().get(group.getId());
 
-                event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
-                File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
-                try {
-                    ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
-                } catch (IOException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                    event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+                    event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
+                    File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+                    try {
+                        ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
+                    } catch (IOException e) {
+                        SfLog.getInstance().e(this.getClass(),e);
+                        event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
+                    }
+                    event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
+                    return;
                 }
-                event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
-                return;
             }
-        }
 
-        //消息记录
-        if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
-            event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            //消息记录
+            if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
+                event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            SfLog.getInstance().e(this.getClass(), e);
+            event.getSendTo().sendMessage("消息ID获取失败，消息发送失败:" + e.getMessage());
         }
         //RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 

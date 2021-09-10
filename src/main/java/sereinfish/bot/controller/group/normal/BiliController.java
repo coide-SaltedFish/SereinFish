@@ -8,10 +8,15 @@ import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.entity.bili.live.BiliLiveManager;
+import sereinfish.bot.entity.bili.live.entity.FollowConf;
+import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
+import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.Result;
 
@@ -73,6 +78,24 @@ public class BiliController {
                             "链接：" + map.get("url")
             );
         }else return Message.Companion.toMessage(result.getMessage());
+    }
+
+    @Action("加B站关注 {mid}")
+    @QMsg(mastAtBot = true, reply = true)
+    public String biliFollowAdd(Member sender, Group group, long mid){
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
+            throw new DoNone();
+        }
+
+        try {
+            UserInfo userInfo = BiliLiveManager.getUserInfo(mid);
+
+            FollowConf followConf = FollowConf.get(group.getId());
+            followConf.add(mid);
+            return "添加成功:\n" + userInfo.getData().getName();
+        } catch (IOException e) {
+            return "添加失败：" + e.getMessage();
+        }
     }
 
     public Result<Map<String, String>> bvToAv(String bv) throws IOException {

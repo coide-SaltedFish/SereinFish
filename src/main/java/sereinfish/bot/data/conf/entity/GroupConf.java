@@ -139,6 +139,8 @@ public class GroupConf{
     //bili
     @Control(group = "哔哩哔哩", name = "BV号解析", type = ControlType.CheckBox, tip = "启用BV号解析功能")
     boolean biliBvExplainEnable = false;
+    @Control(group = "哔哩哔哩", name = "用户更新关注", type = ControlType.CheckBox, tip = "在关注的B站UP主更新时发出提醒")
+    boolean biliFollowEnable = false;
     //Mc 服务器
     @Control(group = "Mc服务器", name = "启用RCON", type = ControlType.CheckBox, tip = "启用rcon相关功能")
     boolean rconEnable = false;

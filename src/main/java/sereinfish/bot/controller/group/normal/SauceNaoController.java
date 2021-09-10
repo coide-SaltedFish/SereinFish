@@ -22,6 +22,8 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.pixiv.Pixiv;
 import sereinfish.bot.entity.pixiv.entity.PixivEntity;
 import sereinfish.bot.entity.pixivcat.PixivCat;
@@ -47,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "SauceNao搜图")
 public class SauceNaoController extends QQController {
 
     private int maxTime = 15000;
@@ -64,7 +67,8 @@ public class SauceNaoController extends QQController {
         }
     }
 
-    @Action("\\^[!！.。]搜图\\")
+    @Action("\\^[!！.。]搜图$\\")
+    @MenuItem(name = "搜图", usage = "[!！.。]搜图", description = "使用SauceNao在设置的库内搜索图片")
     public void search(Member sender, Group group, Message message, GroupConf groupConf){
         if (message.getReply() == null){
             Image image = null;
@@ -106,6 +110,7 @@ public class SauceNaoController extends QQController {
 
     @Action("搜图")
     @QMsg(mastAtBot = true)
+    @MenuItem(name = "搜图", usage = "@Bot 搜图", description = "使用SauceNao在设置的库内搜索图片")
     public void atSearch(Member sender, Group group, Message message, GroupConf groupConf, ContextSession session){
         Message message1 = MyYuQ.getMif().text("请输入消息内容(" + (maxTime / 1000) + "s)").toMessage();
         message1.setReply(message.getSource());
@@ -126,6 +131,7 @@ public class SauceNaoController extends QQController {
     }
 
     @Action("搜头像 {member}")
+    @MenuItem(name = "搜图", usage = "@Bot 搜头像 {member}", description = "使用SauceNao在设置的库内搜索指定对象头像")
     @QMsg(mastAtBot = true)
     public void headImageSearch(Member sender, Group group, Message message, GroupConf groupConf, String member){
         long qq = -1;

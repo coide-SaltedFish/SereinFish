@@ -152,15 +152,11 @@ public class MsgController extends QQController {
     @QMsg(mastAtBot = true)
     @MenuItem(name = "撤回", usage = "@Bot 撤回", description = "撤回最近的Bot消息", permission = Permissions.GROUP_ADMIN)
     public String recall(Group group){
-        GroupReCallMessageManager.MsgInfo msgInfo = GroupReCallMessageManager.getInstance().getRecentMsg(group.getId());
-        if (msgInfo != null){
-            try {
-                SfLog.getInstance().d(this.getClass(), "消息撤回，发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME)  );
-                msgInfo.getMessage().recall();
-            }catch (Exception e){
-                SfLog.getInstance().e(this.getClass(), e);
-                return "异常：" + e.getMessage();
-            }
+        try {
+            GroupReCallMessageManager.getInstance().reCallRecentMsg(group.getId());
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), e);
+            return "异常：" + e.getMessage();
         }
         throw new DoNone();
     }
@@ -171,10 +167,7 @@ public class MsgController extends QQController {
     @MenuItem(name = "撤回所有", usage = "@Bot 撤回所有", description = "撤回最近的所有Bot消息", permission = Permissions.GROUP_ADMIN)
     public String reAllCall(Group group){
         try {
-            for (GroupReCallMessageManager.MsgInfo msgInfo:GroupReCallMessageManager.getInstance().getAllRecentMsg(group.getId())){
-                SfLog.getInstance().d(this.getClass(), "消息撤回，发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME));
-                msgInfo.getMessage().recall();
-            }
+            GroupReCallMessageManager.getInstance().reCallAllRecentMsg(group.getId());
         }catch (Exception e){
             SfLog.getInstance().e(this.getClass(), e);
             return "异常：" + e.getMessage();

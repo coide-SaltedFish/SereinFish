@@ -3,6 +3,7 @@ package sereinfish.bot.job;
 import com.IceCreamQAQ.Yu.annotation.Cron;
 import com.IceCreamQAQ.Yu.annotation.JobCenter;
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.entity.bili.live.BiliLiveManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 
@@ -14,6 +15,15 @@ import java.util.ArrayList;
  */
 @JobCenter
 public class BotJob {
+
+    /**
+     * B站关注更新检测
+     */
+    @Cron("40s")
+    public void biliFollow(){
+        SfLog.getInstance().d(this.getClass(),"定时任务：B站关注更新检测");
+        BiliLiveManager.getInstance().check();
+    }
 
     @Cron("At::h::00")
     public void update(){

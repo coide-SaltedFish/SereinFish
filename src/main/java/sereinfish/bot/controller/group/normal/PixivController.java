@@ -25,7 +25,6 @@ import sereinfish.bot.entity.pixivcat.PixivCat;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
-import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
@@ -33,8 +32,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Date;
 
 @Menu(type = Menu.Type.GROUP, name = "Pixiv")

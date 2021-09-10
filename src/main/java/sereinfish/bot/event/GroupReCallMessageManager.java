@@ -68,14 +68,24 @@ public class GroupReCallMessageManager {
      * @param group
      * @return
      */
-    public MsgInfo getRecentMsg(long group){
-        return map.get(group).pop();
+    public void reCallRecentMsg(long group) throws IllegalStateException{
+        MsgInfo msgInfo = map.get(group).pop();
+        if (msgInfo == null){
+            throw new IllegalStateException("未能找到最近消息：" + group);
+        }
+        int i = msgInfo.getMessage().recall();
+        SfLog.getInstance().d(this.getClass(), "消息撤回: " + i + " >>发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME));
     }
 
-    public Stack<MsgInfo> getAllRecentMsg(long group){
+    public void reCallAllRecentMsg(long group){
         Stack<MsgInfo> reStack = map.get(group);
         map.put(group, new Stack<>());
-        return reStack;
+        for (MsgInfo msgInfo:reStack){
+            if (msgInfo != null){
+                int i = msgInfo.getMessage().recall();
+                SfLog.getInstance().d(this.getClass(), "消息撤回: " + i + " >>发送时间：" + Time.dateToString(msgInfo.getTime(), Time.LOG_TIME));
+            }
+        }
     }
 
     /**
