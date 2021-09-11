@@ -258,6 +258,39 @@ public class ImageController extends QQController {
         return getRua(qq);
     }
 
+    @Action("蹭 {member}")
+    @MenuItem(name = "蹭", usage = "蹭 {member}", description = "生成蹭指定对象表情")
+    public Message ceng(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
+        }
+        return getCengGif(qq);
+    }
+
+
     @Action("摸")
     @Synonym({"rua"})
     @MenuItem(name = "rua", usage = "rua | 摸", description = "生成rua触发者表情")
@@ -597,6 +630,63 @@ public class ImageController extends QQController {
                 graphics2D.drawImage(headImage,imageHeadInfo[i][0],imageHeadInfo[i][1],imageHeadInfo[i][2],imageHeadInfo[i][3],null);
                 //画背景
                 graphics2D.drawImage(bgImage,0,0,bgWH,bgWH,null);
+                graphics2D.dispose();
+                animatedGifEncoder.addFrame(bufferedImage);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
+        }
+
+        if(animatedGifEncoder.finish()){
+            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+        }
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+    }
+
+    /**
+     * 得到一个蹭动图
+     * @return
+     */
+    private Message getCengGif(long m){
+        int bgW = 240;
+        int bgH = 240;
+        int delay = 50;//每张图之间的延迟
+
+        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,80);//得到头像
+        File imageFile = new File(FileHandle.imageCachePath,"ceng_temp_" + new Date().getTime());//文件缓存路径
+
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        animatedGifEncoder.setSize(bgW,bgH);
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+        animatedGifEncoder.setDelay(delay);
+        animatedGifEncoder.setRepeat(13);
+
+        //x,y,w,h
+        int imageHeadInfo[][] = {
+                {37,85,72,85},//1
+                {46,98,74,83},//2
+                {65,97,74,82},//3
+                {51,81,74,87},//4
+                {57,109,71,82},//5
+                {60,100,58,81},//6
+        };//头像位置信息
+
+        for (int i = 0; i < imageHeadInfo.length; i++){
+            BufferedImage bgImage;
+            try {
+                //得到背景
+                bgImage = ImageIO.read(getClass().getClassLoader().getResource("image/ceng/" + (i + 1) + ".png"));
+                //空白底
+                BufferedImage bufferedImage = new BufferedImage(bgW,bgH,BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics2D = bufferedImage.createGraphics();
+                graphics2D.setColor(Color.WHITE);
+                graphics2D.fillRect(0,0,bgW,bgH);
+                graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+                //先画头
+                graphics2D.drawImage(headImage,imageHeadInfo[i][0],imageHeadInfo[i][1],imageHeadInfo[i][2],imageHeadInfo[i][3],null);
+                //画背景
+                graphics2D.drawImage(bgImage,0,0,bgW,bgH,null);
                 graphics2D.dispose();
                 animatedGifEncoder.addFrame(bufferedImage);
             } catch (IOException e) {
