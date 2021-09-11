@@ -14,6 +14,7 @@ import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.file.FileHandle;
@@ -653,7 +654,7 @@ public class ImageController extends QQController {
         int bgH = 240;
         int delay = 50;//每张图之间的延迟
 
-        BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,80);//得到头像
+        BufferedImage headImage = ImageHandle.imageToBufferedImage(CacheManager.getMemberHeadImage(m));//得到头像
         File imageFile = new File(FileHandle.imageCachePath,"ceng_temp_" + new Date().getTime());//文件缓存路径
 
         AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
