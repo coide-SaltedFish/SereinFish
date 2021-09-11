@@ -3,4 +3,6 @@
 
 [点此跳转到YuQ](https://github.com/YuQWorks)
 
+[点此跳转到kukubot](https://github.com/kukume/kukubot)
+
 SereinFish Bot
