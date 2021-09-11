@@ -3,7 +3,7 @@ package sereinfish.bot.job.entity;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
-import sereinfish.bot.job.ex.MsgJobIllegalException;
+import sereinfish.bot.job.ex.MessageJobIllegalException;
 import sereinfish.bot.myYuq.MyYuQ;
 
 @AllArgsConstructor
@@ -23,20 +23,20 @@ public class JobMsg{
     /**
      * 得到接收对象
      * @return
-     * @throws MsgJobIllegalException
+     * @throws MessageJobIllegalException
      */
-    public Contact getRecipient() throws MsgJobIllegalException {
+    public Contact getRecipient() throws MessageJobIllegalException {
         if (isGroup){
             if(MyYuQ.getYuQ().getGroups().containsKey(recipient)){
                 return MyYuQ.getYuQ().getGroups().get(recipient);
             }else {
-                throw new MsgJobIllegalException("未知的群组：" + recipient);
+                throw new MessageJobIllegalException("未知的群组：" + recipient);
             }
         }else {
             if (MyYuQ.getYuQ().getFriends().containsKey(recipient)){
                 return MyYuQ.getYuQ().getFriends().get(recipient);
             }else {
-                throw new MsgJobIllegalException("未知的好友：" + recipient);
+                throw new MessageJobIllegalException("未知的好友：" + recipient);
             }
         }
     }

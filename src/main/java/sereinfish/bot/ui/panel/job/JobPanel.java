@@ -4,18 +4,13 @@ import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.job.JobSFManager;
 import sereinfish.bot.job.MyJob;
 import sereinfish.bot.job.conf.JobConf;
-import sereinfish.bot.job.ex.MsgJobIllegalException;
+import sereinfish.bot.job.ex.MessageJobIllegalException;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.dialog.TipDialog;
 import sereinfish.bot.ui.frame.MainFrame;
-import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.frame.job.InsertJobFrame;
-import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
 import sereinfish.bot.ui.list.CellManager;
-import sereinfish.bot.ui.list.cellRenderer.GroupListCellRenderer;
 import sereinfish.bot.ui.list.cellRenderer.JobListCellRenderer;
-import sereinfish.bot.ui.list.model.GroupListModel;
 import sereinfish.bot.ui.list.model.JobListModel;
 
 import javax.swing.*;
@@ -23,9 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  * 定时任务面板
@@ -81,9 +73,9 @@ public class JobPanel extends JPanel {
                         } catch (JobSFManager.JobNotFindException jobNotFindException) {
                             SfLog.getInstance().e(this.getClass(), jobNotFindException);
                             new TipDialog(MainFrame.getMainFrame(),"错误",jobNotFindException.getMessage(),true);
-                        } catch (MsgJobIllegalException msgJobIllegalException) {
-                            SfLog.getInstance().e(this.getClass(), msgJobIllegalException);
-                            new TipDialog(MainFrame.getMainFrame(),"错误",msgJobIllegalException.getMessage(),true);
+                        } catch (MessageJobIllegalException messageJobIllegalException) {
+                            SfLog.getInstance().e(this.getClass(), messageJobIllegalException);
+                            new TipDialog(MainFrame.getMainFrame(),"错误", messageJobIllegalException.getMessage(),true);
                         }
                         loadList();
                         frame.setVisible(false);

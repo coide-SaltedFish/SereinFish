@@ -14,7 +14,7 @@ import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
-import sereinfish.bot.entity.bili.live.BiliLiveManager;
+import sereinfish.bot.entity.bili.live.BiliManager;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
@@ -35,7 +35,6 @@ import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 
 /**
@@ -169,7 +168,7 @@ public class InitEvent{
         SfLog.getInstance().d(this.getClass(),"定时任务管理器初始化完成");
 
         //初始化B站管理器
-        BiliLiveManager.init();
+        BiliManager.init();
         SfLog.getInstance().d(this.getClass(),"Bili管理器初始化完成");
 
         //设置LookAndFeel

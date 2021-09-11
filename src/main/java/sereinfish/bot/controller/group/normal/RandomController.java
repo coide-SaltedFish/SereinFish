@@ -1,18 +1,30 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
+import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 @GroupController
 @Menu(name = "骰子")
@@ -84,7 +96,7 @@ public class RandomController {
 
     @Action("抽一位幸运群友")
     @Synonym({"抽个幸运群友", "抽一个幸运群友", "抽个幸运群员", "抽一个幸运群员", "抽一位幸运群员"})
-    @MenuItem(name = "抽一位幸运群友", usage = "抽一位幸运群友", description = "抽一位幸运群友")
+    @MenuItem(name = "抽一位幸运群友", usage = "@Bot 抽一位幸运群友", description = "抽一位幸运群友")
     @QMsg(mastAtBot = true)
     public Message randomMember(Group group){
         ArrayList<Member> members = new ArrayList<>();
@@ -101,7 +113,7 @@ public class RandomController {
 
     @Action("抽一位幸运管理")
     @Synonym({"抽个幸运管理", "抽一个幸运管理","抽一位幸运管理员","抽个幸运管理员", "抽一个幸运管理员"})
-    @MenuItem(name = "抽个幸运管理", usage = "抽个幸运管理", description = "抽个幸运管理")
+    @MenuItem(name = "抽个幸运管理", usage = "@Bot 抽个幸运管理", description = "抽个幸运管理")
     @QMsg(mastAtBot = true)
     public Message randomAdminMember(Group group){
         ArrayList<Member> members = new ArrayList<>();
@@ -116,12 +128,65 @@ public class RandomController {
 
     @Action("抽一位幸运群主")
     @Synonym({"抽个幸运群主", "抽一个幸运群主"})
-    @MenuItem(name = "抽一位幸运群主", usage = "抽一位幸运群主", description = "抽一位幸运群主")
+    @MenuItem(name = "抽一位幸运群主", usage = "@Bot 抽一位幸运群主", description = "抽一位幸运群主")
     @QMsg(mastAtBot = true)
     public Message randomOwnerMember(Group group){
         Member member = group.getOwner();
         return new Message().lineQ().textLine("抽中了:" + member.getNameCard() + "[" + member.getId() + "]").imageByUrl(member.getAvatar()).getMessage();
     }
 
+
+    @Action("抽个禁言")
+    @QMsg(mastAtBot = true)
+    @MenuItem(name = "抽个禁言", usage = "@Bot 抽个禁言", description = "抽个禁言")
+    public void randomBan(Group group, Member sender) throws IOException {
+        int banTimes[] = {60, 300, 600, 1800, 3600, 7200, 86400, 259200, 2592000};
+        int banTime = banTimes[MyYuQ.getRandom(0, banTimes.length - 1)];
+
+        File imageFile = new File(FileHandle.imageCachePath, "/random_ban_" + new Date().getTime());
+        URL url = getClass().getClassLoader().getResource("image/ban/" + banTime);
+        if (url == null){
+            SfLog.getInstance().e(this.getClass(), "资源文件丢失：image/ban/" + banTime);
+            return;
+        }
+
+        BufferedImage bufferedImage = ImageIO.read(url);
+        ImageIO.write(bufferedImage, "png", imageFile);
+
+        MessageLineQ messageLineQ = new Message().lineQ();
+        messageLineQ.at(sender);
+        messageLineQ.textLine("");
+        if (banTime > 60 * 60 * 24){
+            messageLineQ.textLine("恭喜中大奖！！！");
+        }else {
+            messageLineQ.textLine("恭喜中奖！！！");
+        }
+        messageLineQ.imageByFile(imageFile);
+
+        group.sendMessage(messageLineQ.getMessage());
+
+        if (group.getBot().isAdmin() || group.getBot().isOwner()){
+            sender.ban(banTime);
+            SfLog.getInstance().w(this.getClass(), "禁言：" + sender);
+
+            //设置定时任务，1分钟后取消
+            MyYuQ.getJobManager().registerTimer(new Runnable() {
+                @Override
+                public void run() {
+                    if(sender.isBan()){
+                        sender.unBan();//取消禁言
+                        SfLog.getInstance().w(this.getClass(), "取消禁言：" + sender);
+                    }
+                }
+            }, 60 * 1000);
+        }else {
+            group.sendMessage(new Message().lineQ().at(sender).textLine("").textLine("已经给你塞上口球了").text("时间没到之前不能说话哦"));
+        }
+    }
+
+    @Catch(error = IOException.class)
+    public String iOException(IOException e){
+        return "发生错误：" + e.getMessage();
+    }
 
 }

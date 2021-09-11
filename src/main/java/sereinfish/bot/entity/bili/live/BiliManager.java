@@ -6,10 +6,12 @@ import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bili.live.entity.FollowConf;
+import sereinfish.bot.entity.bili.live.entity.info.Contribution;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.utils.OkHttpUtils;
 
 import java.io.IOException;
@@ -22,24 +24,24 @@ import java.io.IOException;
  *
  *
  */
-public class BiliLiveManager {
+public class BiliManager {
     private boolean isConfInit = false;//配置是否初始化
 
-    public static BiliLiveManager manager;
+    public static BiliManager manager;
 
-    private BiliLiveManager(){
+    private BiliManager(){
         initConf();
     }
 
-    public static BiliLiveManager getInstance(){
+    public static BiliManager getInstance(){
         if (manager == null){
             throw new NullPointerException("哔哩哔哩直播相关功能管理器尚未初始化");
         }
         return manager;
     }
 
-    public static BiliLiveManager init(){
-        manager = new BiliLiveManager();
+    public static BiliManager init(){
+        manager = new BiliManager();
         return manager;
     }
 
@@ -58,9 +60,77 @@ public class BiliLiveManager {
     }
 
     /**
+     * 得到用户最新发布的视频
+     * @param mid
+     * @throws IOException
+     */
+    public static Contribution getUserVideos(long mid) throws IOException {
+        String api = "http://api.bilibili.com/x/space/arc/search?mid=" + mid + "&order=pubdate&pn=1&ps=1";
+        String json = OkHttpUtils.getStr(api);
+        Contribution contribution = MyYuQ.toClass(json, Contribution.class);
+        return contribution;
+    }
+
+    /**
      * 更新查询
      */
     public void check(){
+        liveCheck();
+        contributionCheck();
+    }
+
+    /**
+     * 新投稿检测
+     */
+    private void contributionCheck(){
+        for (Group group:MyYuQ.getGroups()){
+            GroupConf groupConf = ConfManager.getInstance().get(group.getId());
+            try {
+                FollowConf followConf = FollowConf.get(group.getId());
+                if (groupConf.isBiliFollowEnable()){
+                    //读取配置列表
+                    for (int i = 0; i < followConf.getFollows().size(); i++) {
+                        FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
+                        //获取最新视频
+                        Contribution contribution = getUserVideos(biliUser.getMid());
+                        if (contribution.getCode() == Contribution.SUCCESS){
+                            Contribution.Data.List.VList vList[] = contribution.getData().getList().getVlist();
+                            if (vList != null && vList.length > 0){
+                                //如果得到的时间大于之前查询的时间
+                                if (vList[0].getCreated() > biliUser.getLastVideosTime()){
+                                    if (isConfInit){
+                                        //发送更新消息
+                                        group.sendMessage(getVideosUpdateTip(vList[0]));
+                                    }
+                                    //更新配置文件
+                                    biliUser.setLastVideosTime(vList[0].getCreated());
+                                }
+                            }else {
+                                SfLog.getInstance().w(this.getClass(), "视频列表为空："
+                                        + biliUser.getMid()
+                                        + ">>"
+                                        + vList);
+                            }
+                        }else {
+                            SfLog.getInstance().e(this.getClass(), "视频更新列表请求失败:"
+                                    + biliUser.getMid() + ">>"
+                                    + contribution.getCode()
+                                    + ":"
+                                    + contribution.getMessage());
+                        }
+                    }
+                }
+                followConf.save();
+            } catch (IOException e) {
+                SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
+            }
+        }
+    }
+
+    /**
+     * 直播检测
+     */
+    private void liveCheck(){
         for (Group group:MyYuQ.getGroups()){
             GroupConf groupConf = ConfManager.getInstance().get(group.getId());
             try {
@@ -105,10 +175,50 @@ public class BiliLiveManager {
 
                 followConf.save();//配置保存
             } catch (IOException e) {
-                SfLog.getInstance().e(BiliLiveManager.class, "配置读取失败", e);
+                SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
             }
-
         }
+    }
+
+    /**
+     * 得到视频更新提示
+     * @param vList
+     * @return
+     */
+    public Message getVideosUpdateTip(Contribution.Data.List.VList vList){
+        MessageLineQ messageLineQ = new Message().lineQ();
+
+        messageLineQ.textLine("UP主：" + vList.getAuthor());//up
+        if (vList.getIs_union_video() == 1){
+            messageLineQ.textLine("发布了新的投稿视频[合作视频]");
+        }else {
+            messageLineQ.textLine("发布了新的投稿视频");
+        }
+
+        messageLineQ.imageByUrl(vList.getPic());//封面
+        messageLineQ.textLine("投稿时间：" + Time.dateToString(vList.getCreated() * 1000, "yyyy-MM-dd HH:mm:ss"));
+
+        messageLineQ.textLine("标题：");
+        messageLineQ.textLine(vList.getTitle());
+        messageLineQ.textLine("描述：");
+        String desc = vList.getDescription();
+        int maxLen = 40;
+        if (desc.length() > maxLen){
+            desc = desc.substring(0, maxLen) + "...\n";
+        }
+        while(!desc.equals(desc.replace("\n\n","\n"))){
+            desc = desc.replace("\n\n","\n");
+        }
+
+        if (!desc.endsWith("\n")){
+            desc += "\n";
+        }
+        messageLineQ.textLine(desc);
+        messageLineQ.textLine("视频长度：" + vList.getLength());
+        messageLineQ.textLine("链接：");
+        messageLineQ.text("https://www.bilibili.com/video/" + vList.getBvid());
+
+        return messageLineQ.getMessage();
     }
 
     /**
@@ -120,7 +230,7 @@ public class BiliLiveManager {
         messageLineQ.textLine(userInfo.getData().getName());
         messageLineQ.textLine("开播辣！！");
         messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
-        messageLineQ.textLine(userInfo.getData().getLive_room().getTitle());
+        messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
         messageLineQ.textLine("点击链接立刻进行围观：");
         messageLineQ.text(userInfo.getData().getLive_room().getUrl());
         return messageLineQ.getMessage();
@@ -132,10 +242,11 @@ public class BiliLiveManager {
      */
     private Message getLiveCloseTip(UserInfo userInfo){
         MessageLineQ messageLineQ = new Message().lineQ();
-        messageLineQ.textLine(userInfo.getData().getName() + " 下播了");
+        messageLineQ.textLine(userInfo.getData().getName());
+        messageLineQ.textLine("下播了");
         messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
         if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){
-            messageLineQ.textLine(userInfo.getData().getLive_room().getTitle());
+            messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
             messageLineQ.textLine("现在正在进行轮播:");
             messageLineQ.text(userInfo.getData().getLive_room().getUrl());
         }else {

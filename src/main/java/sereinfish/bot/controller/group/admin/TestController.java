@@ -3,13 +3,14 @@ package sereinfish.bot.controller.group.admin;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Catch;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
-import sereinfish.bot.entity.bili.live.BiliLiveManager;
+import sereinfish.bot.entity.bili.live.BiliManager;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
 import sereinfish.bot.mlog.SfLog;
@@ -41,7 +42,7 @@ public class TestController {
     public Message getBiliUserInfo(Group group, long uid) throws IOException {
         group.sendMessage(MyYuQ.getBotName() + ">" + Time.dateToString(new Date(), Time.RUN_TIME) + ">>命令响应");
 
-        UserInfo userInfo = BiliLiveManager.getUserInfo(uid);
+        UserInfo userInfo = BiliManager.getUserInfo(uid);
         MessageLineQ messageLineQ = new Message().lineQ();
         messageLineQ.imageByUrl(userInfo.getData().getFace());
         messageLineQ.textLine("名称：" + userInfo.getData().getName());
@@ -65,6 +66,17 @@ public class TestController {
             messageLineQ.text("直播间还未开启");
         }
         return messageLineQ.getMessage();
+    }
+
+    @Action("获取UP最新视频 {mid}")
+    @QMsg(mastAtBot = true)
+    public Message clickMe(long mid){
+        try {
+            return BiliManager.getInstance().getVideosUpdateTip(BiliManager.getUserVideos(mid).getData().getList().getVlist()[0]);
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+        }
+        throw new DoNone();
     }
 
     @Action("戳 {sb}")

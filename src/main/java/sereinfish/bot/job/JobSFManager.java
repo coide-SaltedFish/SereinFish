@@ -6,7 +6,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.job.conf.JobConf;
 import sereinfish.bot.job.entity.JobMsg;
 import sereinfish.bot.job.entity.JobType;
-import sereinfish.bot.job.ex.MsgJobIllegalException;
+import sereinfish.bot.job.ex.MessageJobIllegalException;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -38,7 +38,7 @@ public class JobSFManager {
                 }
             } catch (JobNotFindException e) {
                 SfLog.getInstance().e(this.getClass(), "定时任务添加失败：" + group,e);
-            } catch (MsgJobIllegalException e) {
+            } catch (MessageJobIllegalException e) {
                 SfLog.getInstance().e(this.getClass(), "定时任务添加失败：" + group,e);
             } catch (IOException e) {
                 SfLog.getInstance().e(this.getClass(), "定时任务添加失败：" + group,e);
@@ -63,7 +63,7 @@ public class JobSFManager {
      * 添加计划任务
      * @param myJob
      */
-    public void add(long group, MyJob myJob) throws JobNotFindException, MsgJobIllegalException {
+    public void add(long group, MyJob myJob) throws JobNotFindException, MessageJobIllegalException {
         Runnable run = getRun(myJob);
 
         String id = jobManager.registerTimer(run, myJob.getAtTime(), true);
@@ -93,7 +93,7 @@ public class JobSFManager {
      * @param myJob
      * @return
      */
-    private Runnable getRun(MyJob myJob) throws JobNotFindException, MsgJobIllegalException {
+    private Runnable getRun(MyJob myJob) throws JobNotFindException, MessageJobIllegalException {
         if (myJob.getType() == JobType.updateQQHeadImage){
             return new JobEntity.updateQQHeadImage();
         }else if(myJob.getType() == JobType.sendMsgJob){//

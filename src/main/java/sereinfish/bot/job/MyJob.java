@@ -1,17 +1,10 @@
 package sereinfish.bot.job;
 
-import com.IceCreamQAQ.Yu.job.Job;
-import com.icecreamqaq.yuq.entity.Contact;
-import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import sereinfish.bot.job.entity.JobMsg;
-import sereinfish.bot.job.ex.MsgJobIllegalException;
 import sereinfish.bot.myYuq.MyYuQ;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor

@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.alibaba.fastjson.JSONObject;
 import com.icecreamqaq.yuq.FunKt;
@@ -12,10 +13,12 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.entity.bili.live.BiliLiveManager;
+import sereinfish.bot.entity.bili.live.BiliManager;
 import sereinfish.bot.entity.bili.live.entity.FollowConf;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.Result;
@@ -81,6 +84,7 @@ public class BiliController {
     }
 
     @Action("加B站关注 {mid}")
+    @Synonym("加b站关注 {mid}")
     @QMsg(mastAtBot = true, reply = true)
     public String biliFollowAdd(Member sender, Group group, long mid){
         if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
@@ -88,14 +92,60 @@ public class BiliController {
         }
 
         try {
-            UserInfo userInfo = BiliLiveManager.getUserInfo(mid);
+            UserInfo userInfo = BiliManager.getUserInfo(mid);
 
             FollowConf followConf = FollowConf.get(group.getId());
-            followConf.add(mid);
-            return "添加成功:\n" + userInfo.getData().getName();
+            return followConf.add(mid) + "\n" + userInfo.getData().getName();
         } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), e);
             return "添加失败：" + e.getMessage();
         }
+    }
+
+    @Action("取消B站关注 {mid}")
+    @Synonym("取消b站关注 {mid}")
+    @QMsg(mastAtBot = true, reply = true)
+    public String biliFollowDelete(Member sender, Group group, long mid){
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
+            throw new DoNone();
+        }
+
+        try {
+            FollowConf followConf = FollowConf.get(group.getId());
+            return followConf.delete(mid);
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+            return "删除失败：" + e.getMessage();
+        }
+    }
+
+    @Action("B站关注列表")
+    @Synonym("b站关注列表")
+    @QMsg(mastAtBot = true)
+    public Message biliFollowList(Member sender, Group group){
+        if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
+            throw new DoNone();
+        }
+
+        MessageLineQ messageLineQ = new Message().lineQ();
+        messageLineQ.textLine("本群关注UP主列表如下：");
+        try {
+            FollowConf followConf = FollowConf.get(group.getId());
+
+            for (FollowConf.BiliUser biliUser:followConf.getFollows()){
+                UserInfo userInfo = BiliManager.getUserInfo(biliUser.getMid());
+                messageLineQ.imageByUrl(userInfo.getData().getFace());
+                messageLineQ.textLine("名称：" + userInfo.getData().getName());
+                messageLineQ.textLine("MID:" + userInfo.getData().getMid());
+            }
+
+            messageLineQ.text("にゃ～");
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+            return new Message().lineQ().text("获取失败").getMessage();
+        }
+
+        return messageLineQ.getMessage();
     }
 
     public Result<Map<String, String>> bvToAv(String bv) throws IOException {

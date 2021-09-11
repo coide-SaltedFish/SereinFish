@@ -3,11 +3,10 @@ package sereinfish.bot.entity.bili.live.entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import sereinfish.bot.entity.bili.live.BiliLiveManager;
+import sereinfish.bot.entity.bili.live.BiliManager;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.job.conf.JobConf;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -29,10 +28,16 @@ public class FollowConf {
      * 添加
      * @param mid
      */
-    public void add(long mid) throws IOException {
+    public String add(long mid) throws IOException {
+        for (BiliUser biliUser:follows){
+            if (biliUser.getMid() == mid){
+                return "用户已存在";
+            }
+        }
+
         BiliUser biliUser = new BiliUser(mid, BiliUser.TYPE_LIVE, BiliUser.LIVE_CLOSE, new Date().getTime());
         //更新配置
-        UserInfo userInfo = BiliLiveManager.getUserInfo(mid);
+        UserInfo userInfo = BiliManager.getUserInfo(mid);
         if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
             biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_ENABLE);
         }else if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){
@@ -43,6 +48,27 @@ public class FollowConf {
         follows.add(biliUser);
         save();
         SfLog.getInstance().d(this.getClass(),"Bili关注配置初始化完成");
+
+        return "添加成功";
+    }
+
+    /**
+     * 取消关注
+     * @param mid
+     * @return
+     */
+    public String delete(long mid) throws IOException {
+        for (int i = 0; i < follows.size(); i++){
+            BiliUser biliUser = follows.get(i);
+            if (biliUser.getMid() == mid){
+                UserInfo userInfo = BiliManager.getUserInfo(mid);
+                follows.remove(i);
+
+                return "已取消关注:\n" + userInfo.getData().getName();
+            }
+        }
+
+        return "用户未关注";
     }
 
     /**
@@ -97,6 +123,6 @@ public class FollowConf {
 
         int lastLiveState;//上次查询直播状态
 
-        long nearestTime;//最近检测到的更新时间点
+        long lastVideosTime;//上次查询视频更新的时间戳
     }
 }

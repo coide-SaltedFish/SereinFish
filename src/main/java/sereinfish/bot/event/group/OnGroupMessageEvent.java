@@ -302,14 +302,14 @@ public class OnGroupMessageEvent {
                     return;
                 }
             }
-
-            //消息记录
-            if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
-                event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
-            }
         }catch (ArrayIndexOutOfBoundsException e){
             SfLog.getInstance().e(this.getClass(), e);
             event.getSendTo().sendMessage("消息ID获取失败，消息发送失败:" + e.getMessage());
+        }
+
+        //消息记录
+        if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
+            event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
         //RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 
