@@ -1,5 +1,7 @@
 # 关于
 
+SereinFish Bot
+
 # 如何部署
 
 注意：当前版本Bot仅支持Windows环境部署
