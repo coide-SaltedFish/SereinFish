@@ -23,6 +23,7 @@ YuQ.Mirai.user.qq = 这里写QQ号
 
 YuQ.Mirai.user.pwd = 这里写QQ密码
 
+[更多配置项](https://yuqworks.github.io/YuQ-Doc/guide/basic-configuration.html)
 ### 4.获取设备标识文件 device.json
 推荐方法：使用[mcl](https://github.com/iTXTech/mcl-installer/releases)按照提示进行登录
 
