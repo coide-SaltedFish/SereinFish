@@ -17,7 +17,7 @@ SereinFish Bot
 ### 3.在conf文件夹中新建 YuQ.properties 文件并编写其内容
 #### YuQ.properties 文件编写
 
-YuQ.bot.name = Bot名字 #这是可选的，如果需要编写，请使用uncode编码
+YuQ.bot.name = Bot名字 #这是可选的，如果需要编写，请使用unicode编码
 
 YuQ.Mirai.user.qq = 这里写QQ号
 
