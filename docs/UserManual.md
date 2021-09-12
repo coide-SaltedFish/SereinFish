@@ -32,5 +32,7 @@ YuQ.Mirai.user.pwd = [这里写QQ密码]
 [java.exe路径] [本程序包名称(注：请带上后缀名:.jar)]
 
 ## 启动
-双击start.bat文件即可一键启动Bot，等待程序初始化完成即可
+双击start.bat文件一键启动Bot
+
+等待程序初始化完成即可
 
