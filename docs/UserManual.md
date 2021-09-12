@@ -6,6 +6,7 @@
 
 ## 运行环境
 首先请确保已经正确安装Java程序运行环境
+
 推荐使用[Java 1.8 SDK](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
 
 ## 配置启动文件
@@ -15,11 +16,14 @@
 #### YuQ.properties 文件编写
 
 YuQ.bot.name = [Bot名字] [#这是可选的，如果需要编写，请使用uncode编码]
+
 YuQ.Mirai.user.qq = [这里写QQ号]
+
 YuQ.Mirai.user.pwd = [这里写QQ密码]
 
 ### 4.获取设备标识文件 device.json
 推荐方法：使用[mcl](https://github.com/iTXTech/mcl-installer/releases)按照提示进行登录
+
 然后在mcl目录找到：\bots\QQ号\device.json 并复制到本程序包目录
 
 ### 5.编写start.bat文件(可选)
