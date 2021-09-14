@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
@@ -58,9 +59,10 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\^[!！.]添加问答$\\")
-    @Synonym({"\\^[!！.]问答添加$\\"})
-    @MenuItem(name = "添加问答", usage = "[!！.]添加问答", description = "为Bot添加精确问答", permission = Permissions.GROUP_ADMIN)
+    @Action("添加问答")
+    @Synonym({"问答添加"})
+    @QMsg(mastAtBot = true)
+    @MenuItem(name = "添加问答", usage = "@Bot 添加问答", description = "为Bot添加精确问答", permission = Permissions.GROUP_ADMIN)
     public Message addReply(Member sender, DataBase dataBase, Group group, ContextSession session){
         try{
             reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
@@ -157,8 +159,9 @@ public class ReplyController extends QQController {
 //        }
 //    }
 
-    @Action("\\^[!！.]问答查询$\\ {key}")
-    @MenuItem(name = "问答查询", usage = "[!！.]问答查询 {key}", description = "查询对应问题的信息", permission = Permissions.GROUP_ADMIN)
+    @Action("问答查询 {key}")
+    @MenuItem(name = "问答查询", usage = "@Bot 问答查询 {key}", description = "查询对应问题的信息", permission = Permissions.GROUP_ADMIN)
+    @QMsg(mastAtBot = true)
     public Message queryReply(DataBase dataBase, Group group, String key){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);
@@ -187,8 +190,9 @@ public class ReplyController extends QQController {
         }
     }
 
-    @Action("\\^[!！.]问答删除$\\ {id}")
-    @MenuItem(name = "问答删除", usage = "[!！.]问答删除 {id}", description = "删除指定问题", permission = Permissions.GROUP_ADMIN)
+    @Action("问答删除 {id}")
+    @MenuItem(name = "问答删除", usage = "@Bot 问答删除 {id}", description = "删除指定问题", permission = Permissions.GROUP_ADMIN)
+    @QMsg(mastAtBot = true)
     public Message delete(DataBase dataBase, String id){
         try {
             ReplyDao replyDao = new ReplyDao(dataBase);

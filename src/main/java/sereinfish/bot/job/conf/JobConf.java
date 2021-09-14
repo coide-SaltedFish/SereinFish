@@ -1,7 +1,6 @@
 package sereinfish.bot.job.conf;
 
 import lombok.Getter;
-import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.job.MyJob;
 import sereinfish.bot.mlog.SfLog;

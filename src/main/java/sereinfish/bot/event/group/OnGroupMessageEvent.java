@@ -9,16 +9,15 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.entity.MessageAt;
 import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
-import com.icecreamqaq.yuq.message.At;
-import com.icecreamqaq.yuq.message.Message;
-import com.icecreamqaq.yuq.message.MessageItem;
-import com.icecreamqaq.yuq.message.Text;
+import com.icecreamqaq.yuq.message.*;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import kotlin.UninitializedPropertyAccessException;
 import net.mamoe.mirai.event.EventHandler;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.entity.msg.LeavingMessage;
+import sereinfish.bot.entity.msg.MyMessage;
 import sereinfish.bot.entity.qingyunke.QingYunKeApi;
 import sereinfish.bot.entity.qingyunke.Result;
 import sereinfish.bot.event.myEvent.BotNameEvent;
@@ -94,38 +93,39 @@ public class OnGroupMessageEvent {
         if (!conf.isEnable()){
             event.setCancel(true);
             return;
-        }else {
-            //RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());//复读
-
-            //自动回复
-            if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
-                try {
-                    ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                    String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
-                    if (str != null){
-                        try{
-                            event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
-                            event.setCancel(true);
-                        }catch (SendMessageFailedByCancel e){
-                            SfLog.getInstance().e(this.getClass(),"消息发送取消");
-                        }
-                        SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
-                    }
-                }catch (SQLServerException e){
-                    SfLog.getInstance().e(this.getClass(), e.getMessage());
-                }catch (SQLException e) {
-                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-                } catch (IllegalModeException e) {
-                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-                } catch (ClassNotFoundException e) {
-                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-                } catch (MarkIllegalLengthException e) {
-                    SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-                }
-            }
-            //刷屏检测
-
         }
+        //RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());//复读
+
+        //留言
+        LeavingMessage.checkRunnable(event.getGroup().getId(), event.getSender().getId());
+
+        //自动回复
+        if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
+            try {
+                ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
+                String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
+                if (str != null){
+                    try{
+                        event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
+                        event.setCancel(true);
+                    }catch (SendMessageFailedByCancel e){
+                        SfLog.getInstance().e(this.getClass(),"消息发送取消");
+                    }
+                    SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
+                }
+            }catch (SQLServerException e){
+                SfLog.getInstance().e(this.getClass(), e.getMessage());
+            }catch (SQLException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (IllegalModeException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (ClassNotFoundException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (MarkIllegalLengthException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            }
+        }
+        //刷屏检测
 
         Message message = event.getMessage();
         //单独@bot或者bot名字
@@ -282,41 +282,49 @@ public class OnGroupMessageEvent {
         Message message = event.getMessage();
         message.setSource(event.getMessageSource());
 
+        MessageSource messageSource = event.getMessageSource();
+        Contact contact = event.getSendTo();
+
         //检查消息是否发送成功
         try {
-            if (event.getMessageSource().getId() < 0){
-                Contact contact = event.getSendTo();
-                if (contact instanceof Group){
-                    Group group = (Group) contact;
-                    GroupConf conf = ConfManager.getInstance().get(group.getId());
-
-                    event.getSendTo().sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
-                    File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
-                    try {
-                        ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
-                    } catch (IOException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                        event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：" + e.getMessage()).toMessage());
-                    }
-                    event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
+            messageSource.getId();
+        }catch (ArrayIndexOutOfBoundsException e){
+            if (event.getMessage() instanceof MyMessage) {
+                MyMessage myMessage = (MyMessage) event.getMessage();
+                if (myMessage.isFlag()){
+                    SfLog.getInstance().e(this.getClass(), "消息发送失败,无法发送");
+                    contact.sendMessage(MyYuQ.getMif().text("消息发送失败,无法发送").toMessage());
                     return;
                 }
             }
-        }catch (ArrayIndexOutOfBoundsException e){
-            SfLog.getInstance().e(this.getClass(), e);
-            event.getSendTo().sendMessage("消息ID获取失败，消息发送失败:" + e.getMessage());
+
+            if (contact instanceof Group){
+                Group group = (Group) contact;
+                GroupConf conf = ConfManager.getInstance().get(group.getId());
+
+                group.sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
+                File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
+                try {
+                    ImageIO.write(ImageHandle.messageToImage(message, conf), "png", imageFile);
+                } catch (IOException e1) {
+                    SfLog.getInstance().e(this.getClass(),e1);
+                    group.sendMessage(MyYuQ.getMif().text("错误：" + e1.getMessage()).toMessage());
+                }
+                group.sendMessage(new MyMessage(true).lineQ().imageByFile(imageFile));
+                return;
+            }
         }
 
         //消息记录
-        if(!GroupHistoryMsgDBManager.getInstance().add(event.getSendTo().getId(), MyYuQ.getYuQ().getBotId(), event.getMessage())){
-            event.getSendTo().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+        if(!GroupHistoryMsgDBManager.getInstance().add(contact.getId(), MyYuQ.getYuQ().getBotId(), message)){
+            contact.sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
         }
         //RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 
         //撤回管理
-        if (event.getSendTo() instanceof Group){
-            Group group = (Group) event.getSendTo();
-            GroupReCallMessageManager.getInstance().add(group.getId(), event.getMessage());
+        if (contact instanceof Group){
+            Group group = (Group) contact;
+            GroupReCallMessageManager.getInstance().add(group.getId(), message);
         }
     }
 

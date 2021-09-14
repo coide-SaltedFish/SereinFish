@@ -25,8 +25,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Date;
 import java.util.Map;
 
@@ -294,10 +293,24 @@ public class ImageController extends QQController {
 
     @Action("\\[.!！]读懂世界$\\")
     @MenuItem(name = "读懂世界", usage = "[.!！]读懂世界", description = "生成今日热点新闻图片")
-    public Message readTheWorld(){
+    public Message readTheWorld(Group group){
         try {
-            return MyYuQ.getMif().imageByInputStream(OkHttpUtils.getByteStream("http://api.03c3.cn/zb/")).toMessage();
-        } catch (IOException e) {
+//            File file = new File(FileHandle.imageCachePath, "/" + new Date().getTime());
+//            FileOutputStream outputStream = new FileOutputStream(file);
+            InputStream inputStream = OkHttpUtils.getByteStream("https://api.03c3.cn/zb/index.php");
+
+//            byte[] b = new byte[1024];
+//            int length;
+//            while((length = inputStream.read(b)) != -1){
+//                outputStream.write(b,0,length);
+//            }
+//            System.out.println(inputStream.available());
+//            System.out.println(length);
+//            inputStream.close();
+//            outputStream.close();
+
+            return MyYuQ.getMif().imageByInputStream(inputStream).toMessage();
+        } catch (Exception e) {
             SfLog.getInstance().e(this.getClass(),e);
             return MyYuQ.getMif().text("在读取世界数据时出现了一点错误").toMessage();
         }

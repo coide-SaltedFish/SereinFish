@@ -18,6 +18,8 @@ import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bili.live.BiliManager;
 import sereinfish.bot.entity.bili.live.entity.FollowConf;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
+import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
  * bilibili 相关
  */
 @GroupController
+@Menu(type = Menu.Type.GROUP, name = "哔哩哔哩")
 public class BiliController {
 
     @Before
@@ -86,6 +89,7 @@ public class BiliController {
     @Action("加B站关注 {mid}")
     @Synonym("加b站关注 {mid}")
     @QMsg(mastAtBot = true, reply = true)
+    @MenuItem(name = "加B站关注", usage = "加B站关注 {mid}", description = "Bot会关注up主的一些动态并发到群里", permission = Permissions.GROUP_ADMIN)
     public String biliFollowAdd(Member sender, Group group, long mid){
         if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             throw new DoNone();
@@ -105,6 +109,7 @@ public class BiliController {
     @Action("取消B站关注 {mid}")
     @Synonym("取消b站关注 {mid}")
     @QMsg(mastAtBot = true, reply = true)
+    @MenuItem(name = "取消B站关注", usage = "取消B站关注 {mid}", description = "取消Bot的对指定up的B站关注", permission = Permissions.GROUP_ADMIN)
     public String biliFollowDelete(Member sender, Group group, long mid){
         if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             throw new DoNone();
@@ -122,6 +127,7 @@ public class BiliController {
     @Action("B站关注列表")
     @Synonym("b站关注列表")
     @QMsg(mastAtBot = true)
+    @MenuItem(name = "B站关注列表", usage = "B站关注列表", description = "查看Bot的关注列表", permission = Permissions.GROUP_ADMIN)
     public Message biliFollowList(Member sender, Group group){
         if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             throw new DoNone();

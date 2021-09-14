@@ -36,6 +36,8 @@ public class JobSFManager {
                 for (MyJob myJob:jobConf.getMyJobs()){
                     add(group.getId(), myJob);
                 }
+
+                jobConf.save();
             } catch (JobNotFindException e) {
                 SfLog.getInstance().e(this.getClass(), "定时任务添加失败：" + group,e);
             } catch (MessageJobIllegalException e) {

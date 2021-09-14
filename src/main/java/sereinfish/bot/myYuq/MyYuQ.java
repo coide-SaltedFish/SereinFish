@@ -276,12 +276,8 @@ public class MyYuQ {
      * @return
      */
     public static String uploadImage(Group group, File file) throws IOException {
-        try {
-            group.uploadImage(file);
-            return DigestUtils.md5Hex(new FileInputStream(file));
-        }catch (IllegalStateException e){
-            throw e;
-        }
+        group.uploadImage(file);
+        return DigestUtils.md5Hex(new FileInputStream(file));
     }
 
     /**

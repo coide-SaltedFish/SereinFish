@@ -63,7 +63,7 @@ public class FollowConf {
             if (biliUser.getMid() == mid){
                 UserInfo userInfo = BiliManager.getUserInfo(mid);
                 follows.remove(i);
-
+                save();
                 return "已取消关注:\n" + userInfo.getData().getName();
             }
         }

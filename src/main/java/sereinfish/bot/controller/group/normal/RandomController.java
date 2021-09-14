@@ -165,20 +165,19 @@ public class RandomController {
 
         group.sendMessage(messageLineQ.getMessage());
 
-        if (group.getBot().isAdmin() || group.getBot().isOwner()){
+        if ((group.getBot().isAdmin() || group.getBot().isOwner())
+                && (!sender.isOwner() && !sender.isOwner())){
             sender.ban(banTime);
             SfLog.getInstance().w(this.getClass(), "禁言：" + sender);
 
-            //设置定时任务，1分钟后取消
+            //设置定时任务，45秒后取消
             MyYuQ.getJobManager().registerTimer(new Runnable() {
                 @Override
                 public void run() {
-                    if(sender.isBan()){
-                        sender.unBan();//取消禁言
-                        SfLog.getInstance().w(this.getClass(), "取消禁言：" + sender);
-                    }
+                    sender.unBan();//取消禁言
+                    SfLog.getInstance().w(this.getClass(), "取消禁言：" + sender);
                 }
-            }, 60 * 1000);
+            }, 45 * 1000);
         }else {
             group.sendMessage(new Message().lineQ().at(sender).textLine("").textLine("已经给你塞上口球了").text("时间没到之前不能说话哦"));
         }
