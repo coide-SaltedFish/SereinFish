@@ -17,11 +17,15 @@ SereinFish Bot
 ### 3.在conf文件夹中新建 YuQ.properties 文件并编写其内容
 #### YuQ.properties 文件编写
 
+```xml
+
 YuQ.bot.name = Bot名字 #这是可选的，如果需要编写，请使用unicode编码
 
 YuQ.Mirai.user.qq = 这里写QQ号
 
 YuQ.Mirai.user.pwd = 这里写QQ密码
+
+```
 
 [更多配置项](https://yuqworks.github.io/YuQ-Doc/guide/basic-configuration.html)
 ### 4.获取设备标识文件 device.json
