@@ -35,7 +35,7 @@ public class FollowConf {
             }
         }
 
-        BiliUser biliUser = new BiliUser(mid, BiliUser.TYPE_LIVE, BiliUser.LIVE_CLOSE, new Date().getTime());
+        BiliUser biliUser = new BiliUser(mid, BiliUser.TYPE_LIVE, BiliUser.LIVE_CLOSE, new Date().getTime(), new Date().getTime());
         //更新配置
         UserInfo userInfo = BiliManager.getUserInfo(mid);
         if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
@@ -122,7 +122,7 @@ public class FollowConf {
         int type;//类型
 
         int lastLiveState;//上次查询直播状态
-
         long lastVideosTime;//上次查询视频更新的时间戳
+        long lastDynamicTime;//上次查询动态的时间戳
     }
 }

@@ -1,15 +1,16 @@
 package sereinfish.bot.file;
 
 import sereinfish.bot.entity.mc.GamerInfo;
+import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.image.ImageHandle;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.OkHttpUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -112,5 +113,104 @@ public class NetHandle {
         }
         bos.close();
         return new String(bos.toByteArray(),"utf-8");
+    }
+
+    public static File imagePixivDownload(Illust illust, int page) throws IOException {
+        File imageFile = new File(FileHandle.imageCachePath,illust.getId() + "_p" + page);
+        if (!imageFile.getParentFile().exists()){
+            imageFile.getParentFile().mkdirs();
+        }
+        //判断缓存是否存在
+        if (imageFile.exists() && imageFile.isFile()){
+            SfLog.getInstance().d(NetHandle.class, "返回缓存图片:" + illust.getId());
+            return imageFile;
+        }
+        String url = illust.getProxyUrl(page);
+        SfLog.getInstance().d(NetHandle.class, "开始从网络获取图片文件:" + illust.getId() + ":" + url);
+
+        FileOutputStream downloadFile = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = OkHttpUtils.getByteStream(url);
+            int index;
+            byte[] bytes = new byte[1024];
+            downloadFile = new FileOutputStream(imageFile);
+            while ((index = inputStream.read(bytes)) != -1) {
+                downloadFile.write(bytes, 0, index);
+                downloadFile.flush();
+            }
+        } catch (IOException e){
+            downloadFile.close();
+            downloadFile = null;
+            if(imageFile.delete()){
+                SfLog.getInstance().d(NetHandle.class, "下载出错，文件已删除");
+            }else {
+                SfLog.getInstance().d(NetHandle.class, "下载出错，且文件删除失败");
+            }
+
+            throw e;
+        }
+
+        finally {
+            if (downloadFile != null){
+                downloadFile.close();
+            }
+            if (inputStream != null){
+                inputStream.close();
+            }
+        }
+
+        SfLog.getInstance().d(NetHandle.class, "文件写入缓存完成:" + illust.getId() + ":" + url);
+
+        return imageFile;
+    }
+
+    public static File imageDownload(String url, String name) throws IOException {
+        File imageFile = new File(FileHandle.imageCachePath,name);
+        if (!imageFile.getParentFile().exists()){
+            imageFile.getParentFile().mkdirs();
+        }
+        //判断缓存是否存在
+        if (imageFile.exists() && imageFile.isFile()){
+            SfLog.getInstance().d(NetHandle.class, "返回缓存图片:" + imageFile);
+            return imageFile;
+        }
+        SfLog.getInstance().d(NetHandle.class, "开始从网络获取图片文件:" + url);
+
+        FileOutputStream downloadFile = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = OkHttpUtils.getByteStream(url);
+            int index;
+            byte[] bytes = new byte[1024];
+            downloadFile = new FileOutputStream(imageFile);
+            while ((index = inputStream.read(bytes)) != -1) {
+                downloadFile.write(bytes, 0, index);
+                downloadFile.flush();
+            }
+        } catch (IOException e){
+            downloadFile.close();
+            downloadFile = null;
+            if(imageFile.delete()){
+                SfLog.getInstance().d(NetHandle.class, "下载出错，文件已删除");
+            }else {
+                SfLog.getInstance().d(NetHandle.class, "下载出错，且文件删除失败");
+            }
+
+            throw e;
+        }
+
+        finally {
+            if (downloadFile != null){
+                downloadFile.close();
+            }
+            if (inputStream != null){
+                inputStream.close();
+            }
+        }
+
+        SfLog.getInstance().d(NetHandle.class, "文件写入缓存完成:" + url);
+
+        return imageFile;
     }
 }

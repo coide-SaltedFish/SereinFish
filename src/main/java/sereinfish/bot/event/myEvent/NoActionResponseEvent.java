@@ -1,6 +1,7 @@
 package sereinfish.bot.event.myEvent;
 
 import com.IceCreamQAQ.Yu.event.events.Event;
+import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.event.ActionContextInvokeEvent;
@@ -23,6 +24,10 @@ public class NoActionResponseEvent extends Event{
 
     public Contact getSender(){
         return event.getContext().getSender();
+    }
+
+    public BotActionContext getBotActionContact(){
+        return event.getContext();
     }
 
     public GroupConf getGroupConf(){

@@ -26,7 +26,7 @@ import java.io.IOException;
 public class ArkNightController {
 
     @Action("方舟掉落 {name}")
-    @Synonym("企鹅物流")
+    @Synonym("企鹅物流 {name}")
     @QMsg(mastAtBot = true)
     @MenuItem(name = "企鹅物流物品掉落查询", usage = "@Bot 方舟掉落 {name}", description = "在企鹅物流查询物品掉落数据")
     public Message penguinStatisticsQuery(Group group, String name){

@@ -19,7 +19,7 @@ public class BotJob {
     /**
      * B站关注更新检测
      */
-    @Cron("40s")
+    @Cron("30s")
     public void biliFollow(){
         SfLog.getInstance().d(this.getClass(),"定时任务：B站关注更新检测");
         BiliManager.getInstance().check();

@@ -6,6 +6,8 @@ import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bili.live.entity.FollowConf;
+import sereinfish.bot.entity.bili.live.entity.dynamic.Dynamic;
+import sereinfish.bot.entity.bili.live.entity.dynamic.DynamicCard;
 import sereinfish.bot.entity.bili.live.entity.info.Contribution;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
@@ -72,11 +74,25 @@ public class BiliManager {
     }
 
     /**
+     * 得到用户的动态
+     * @param mid
+     * @return
+     */
+    public static Dynamic getUserDynamic(long mid) throws IOException {
+        String api = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?visitor_uid=0&host_uid=" + mid + "&offset_dynamic_id=0&need_top=1";
+
+        String json = OkHttpUtils.getStr(api, OkHttpUtils.addReferer("https://space.bilibili.com/$id/dynamic"));
+        Dynamic dynamic = MyYuQ.toClass(json, Dynamic.class);
+        return dynamic;
+    }
+
+    /**
      * 更新查询
      */
     public void check(){
         liveCheck();
         contributionCheck();
+        checkDynamic();
     }
 
     /**
@@ -178,6 +194,87 @@ public class BiliManager {
                 SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
             }
         }
+    }
+
+    /**
+     * 动态更新检测
+     */
+    private void checkDynamic(){
+        for (Group group:MyYuQ.getGroups()){
+            GroupConf groupConf = ConfManager.getInstance().get(group.getId());
+            try {
+                FollowConf followConf = FollowConf.get(group.getId());
+
+                //检查功能是否启用
+                if (groupConf.isBiliFollowEnable()){
+                    //读取配置列表
+                    for (int i = 0; i < followConf.getFollows().size(); i++){
+                        FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
+                        //获取动态状态
+                        Dynamic.Data.Card card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(0);
+                        if (card.getDynamicCard() != null){
+                            if (isConfInit){//初始化后进行
+                                if (card.getDesc().getTimestamp() > biliUser.getLastDynamicTime()){
+                                    //发送
+                                    group.sendMessage(getDynamicUpdateTip(card));
+                                }
+                            }
+                            //更新配置
+                            biliUser.setLastDynamicTime(card.getDesc().getTimestamp());
+                        }else {
+                            SfLog.getInstance().w(BiliManager.class, "动态为空:" + biliUser.getMid());
+                        }
+                    }
+                }
+
+                followConf.save();//配置保存
+            } catch (IOException e) {
+                SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
+            }
+        }
+    }
+
+    /**
+     * 得到动态更新提示
+     * @param card
+     * @return
+     */
+    public Message getDynamicUpdateTip(Dynamic.Data.Card card){
+        MessageLineQ messageLineQ = new Message().lineQ();
+
+        messageLineQ.textLine("UP主：" + card.getUserName());
+        if (card.getDynamicCard().isExtend()){
+            messageLineQ.textLine("刚刚转发了一条来自[" + card.getDynamicCard().getOrigin().getUserName() + "]的动态：");
+            messageLineQ.textLine("发布日期：");
+            messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+            messageLineQ.textLine("内容：");
+            messageLineQ.textLine(card.getDynamicCard().getDescription());
+            messageLineQ.textLine("转发内容：");
+            if (card.getDynamicCard().getOrigin().isExtend()){
+                messageLineQ.textLine(card.getDynamicCard().getOrigin().getDescription());
+            }else {
+                if (card.getDynamicCard().getOrigin().getItem() != null && card.getDynamicCard().getOrigin().getItem().getDescription() != null){
+                    messageLineQ.textLine(card.getDynamicCard().getOrigin().getItem().getDescription());
+                }
+            }
+            for (DynamicCard.Item.Picture picture:card.getDynamicCard().getOrigin().getPictures()){
+                messageLineQ.imageByUrl(picture.getImg_src());
+            }
+        }else {
+            messageLineQ.textLine("刚刚发布了一条动态:");
+            messageLineQ.textLine("发布日期：");
+            messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+            messageLineQ.textLine("内容：");
+            messageLineQ.textLine(card.getDynamicCard().getDescription());
+            for (DynamicCard.Item.Picture picture:card.getDynamicCard().getPictures()){
+                messageLineQ.imageByUrl(picture.getImg_src());
+            }
+
+        }
+        messageLineQ.textLine("链接：");
+        messageLineQ.textLine("https://t.bilibili.com/" + card.getDesc().getDynamic_id());
+        messageLineQ.text("にゃ～");
+        return messageLineQ.getMessage();
     }
 
     /**

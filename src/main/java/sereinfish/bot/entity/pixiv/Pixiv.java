@@ -9,7 +9,9 @@ import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.utils.OkHttpUtils;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class Pixiv {
 
@@ -38,29 +40,14 @@ public class Pixiv {
      * @throws IOException
      */
     public static Rank getRank(String mode, int page, int size) throws IOException {
+        Calendar calendar = Calendar.getInstance();
+
         String api = "https://api.obfs.dev/api/pixiv/rank?mode=" + mode
-                + "&date=" + Time.dateToString(new Date().getTime() - (24 * 60 * 60 * 1000), "yyyy-MM-dd")
+                + "&date=" + String.format("%d-%d-%d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH) - 1)
                 + "&page=" + page
                 + "&size=" + size;
         SfLog.getInstance().d(Pixiv.class, "开始获取数据：" + api);
         String json = OkHttpUtils.getStr(api);
         return MyYuQ.toClass(json, Rank.class);
-    }
-
-    /**
-     * 判断是否包含r18标签
-     * @param tags
-     * @return
-     */
-    public static boolean isR18(Illust.Tag tags[]){
-        for (Illust.Tag tag:tags){
-            if (tag.getName() != null && tag.getName().equals("R-18")){
-                return true;
-            }
-            if (tag.getTranslated_name() != null && tag.getTranslated_name().equals("R-18")){
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -130,8 +130,8 @@ public class ImageHandle {
         int margin = conf.getLongMsgToImageMargins();//生成图像边距
         int maxWidth = 1080;//最大图片宽度大小
         int maxLineWidth = maxWidth - (margin * 2);//最大行宽
-        int lineMaxWidth = 0;//最大文字宽度
-        int lineHeight = 0;//行高
+        int lineMaxWidth = 1;//最大文字宽度
+        int lineHeight = 1;//行高
 
         BufferedImage bufferedOldImage = null;
         //设置字体

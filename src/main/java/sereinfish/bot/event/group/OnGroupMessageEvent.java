@@ -98,33 +98,6 @@ public class OnGroupMessageEvent {
 
         //留言
         LeavingMessage.checkRunnable(event.getGroup().getId(), event.getSender().getId());
-
-        //自动回复
-        if (conf.isAutoReplyEnable() && conf.isDataBaseEnable()){
-            try {
-                ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                String str = replyDao.queryKey(event.getGroup().getId(),Message.Companion.toCodeString(event.getMessage()));
-                if (str != null){
-                    try{
-                        event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(str));
-                        event.setCancel(true);
-                    }catch (SendMessageFailedByCancel e){
-                        SfLog.getInstance().e(this.getClass(),"消息发送取消");
-                    }
-                    SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
-                }
-            }catch (SQLServerException e){
-                SfLog.getInstance().e(this.getClass(), e.getMessage());
-            }catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (IllegalModeException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (ClassNotFoundException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (MarkIllegalLengthException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            }
-        }
         //刷屏检测
 
         Message message = event.getMessage();
@@ -541,8 +514,37 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void noActionResponseEvent(NoActionResponseEvent event){
-        //判断功能是否启用
         GroupConf groupConf = event.getGroupConf();
+        //自动回复
+        if (groupConf.isAutoReplyEnable() && groupConf.isDataBaseEnable()){
+            try {
+                ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(groupConf.getDataBaseConfig().getID()));
+                String str = replyDao.queryKey(event.getContact().getId(),Message.Companion.toCodeString(event.getMessage()));
+                if (str != null){
+                    try{
+                        for (Message message:MyYuQ.sfCodeToMessage(event.getBotActionContact(), str)){
+                            event.getContact().sendMessage(message);
+                        }
+                        return;
+                    }catch (SendMessageFailedByCancel e){
+                        SfLog.getInstance().e(this.getClass(),"消息发送取消");
+                    }
+                    SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
+                }
+            }catch (SQLServerException e){
+                SfLog.getInstance().e(this.getClass(), e.getMessage());
+            }catch (SQLException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (IllegalModeException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (ClassNotFoundException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            } catch (MarkIllegalLengthException e) {
+                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
+            }
+        }
+
+        //判断功能是否启用
         if (groupConf != null){
             if (!groupConf.isQingYunKeApiChat()){
                 return;
@@ -551,8 +553,8 @@ public class OnGroupMessageEvent {
 
         Message message = event.getMessage();
         String strMsg = QingYunKeApi.getMsgText(message);
-        //判断消息是否开头@Bot或者包含Bot名称
 
+        //判断消息是否开头@Bot或者包含Bot名称
         At at = null;
         if (message.getBody().size() > 0){
             MessageItem firstItem = message.getBody().get(0);

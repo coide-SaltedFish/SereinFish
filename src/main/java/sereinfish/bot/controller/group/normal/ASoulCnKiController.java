@@ -62,21 +62,14 @@ public class ASoulCnKiController {
                 .post(requestBody)
                 .build();
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                SfLog.getInstance().e(this.getClass(), e);
-                group.sendMessage(MyYuQ.getMif().text("发生错误了捏：" + e.getMessage()).toMessage());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String string = response.body().string();
-                ASoulCnKi.ASoulCnKiResult aSoulCnKiResult = MyYuQ.toClass(string, ASoulCnKi.ASoulCnKiResult.class);
-                group.sendMessage(MyYuQ.getMif().text(ASoulCnKi.getReport(aSoulCnKiResult)).toMessage());
-            }
-        });
-
-        throw new DoNone();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            String string = response.body().string();
+            ASoulCnKi.ASoulCnKiResult aSoulCnKiResult = MyYuQ.toClass(string, ASoulCnKi.ASoulCnKiResult.class);
+            return ASoulCnKi.getReport(aSoulCnKiResult);
+        } catch (IOException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+            return "发生错误了捏：" + e.getMessage();
+        }
     }
 }

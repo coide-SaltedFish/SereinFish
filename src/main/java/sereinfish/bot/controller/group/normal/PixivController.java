@@ -15,6 +15,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.pixiv.Pixiv;
@@ -23,6 +25,7 @@ import sereinfish.bot.entity.pixiv.entity.PixivEntity;
 import sereinfish.bot.entity.pixiv.entity.Rank;
 import sereinfish.bot.entity.pixivcat.PixivCat;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.utils.QRCodeImage;
@@ -41,7 +44,11 @@ public class PixivController {
     private boolean isRun = false;
 
     @Before
-    public void before(){
+    public void before(GroupConf groupConf){
+        if (!groupConf.isPixivEnable()){
+            throw new DoNone();
+        }
+
         if (isRun){
             throw new Message().lineQ().text("模块正在运行").getMessage().toThrowable();
         }
@@ -52,12 +59,12 @@ public class PixivController {
     @Synonym({"获取Pixiv日榜", "\\^[Pp]站日榜$\\"})
     @QMsg(mastAtBot = true)
     @MenuItem(name = "获取Pixiv日榜前7", usage = "@Bot 获取Pixiv日榜", description = "获取Pixiv日榜前7")
-    public Message getDayRank(Group group){
+    public Message getDayRank(Group group, GroupConf groupConf){
         isRun = true;
         group.sendMessage("开始获取~");
         try {
-            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_DAY, 1, 7);
-            analysisRank(rank, group, 7);
+            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_DAY, 1, groupConf.getPixivRankGetMaxNum());
+            analysisRank(rank, group, groupConf);
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);
             isRun = false;
@@ -70,12 +77,12 @@ public class PixivController {
     @Synonym({"获取Pixiv周榜", "\\^[Pp]站周榜$\\"})
     @QMsg(mastAtBot = true)
     @MenuItem(name = "获取Pixiv周榜前7", usage = "@Bot 获取Pixiv周榜", description = "获取Pixiv周榜前7")
-    public Message getWeekRank(Group group){
+    public Message getWeekRank(Group group, GroupConf groupConf){
         isRun = true;
         group.sendMessage("开始获取~");
         try {
-            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_WEEK, 1, 7);
-            analysisRank(rank, group, 7);
+            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_WEEK, 1, groupConf.getPixivRankGetMaxNum());
+            analysisRank(rank, group, groupConf);
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);
             isRun = false;
@@ -88,12 +95,12 @@ public class PixivController {
     @Synonym({"获取Pixiv月榜", "\\^[Pp]站月榜$\\"})
     @QMsg(mastAtBot = true)
     @MenuItem(name = "获取Pixiv月榜前7", usage = "@Bot 获取Pixiv月榜", description = "获取Pixiv月榜前7")
-    public Message getMonthRank(Group group){
+    public Message getMonthRank(Group group, GroupConf groupConf){
         isRun = true;
         group.sendMessage("开始获取~");
         try {
-            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_MONTH, 1, 7);
-            analysisRank(rank, group, 7);
+            Rank rank = Pixiv.getRank(Pixiv.RANK_MODE_MONTH, 1, groupConf.getPixivRankGetMaxNum());
+            analysisRank(rank, group, groupConf);
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);
             isRun = false;
@@ -105,12 +112,12 @@ public class PixivController {
     @Action("获取Pixiv {type} 榜")
     @QMsg(mastAtBot = true)
     @MenuItem(name = "获取Pixiv指定榜前7", usage = "@Bot 获取Pixiv {type} 榜", description = "获取Pixiv指定榜前7")
-    public Message getTypeRank(Group group, String type){
+    public Message getTypeRank(Group group, GroupConf groupConf, String type){
         isRun = true;
         group.sendMessage("开始获取~");
         try {
-            Rank rank = Pixiv.getRank(type, 1, 7);
-            analysisRank(rank, group, 7);
+            Rank rank = Pixiv.getRank(type, 1, groupConf.getPixivRankGetMaxNum());
+            analysisRank(rank, group, groupConf);
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);
             isRun = false;
@@ -122,79 +129,70 @@ public class PixivController {
     @Action("\\^[pP]站图片$\\ {uid}")
     @QMsg(mastAtBot = true, reply = true)
     @MenuItem(name = "获取P站指定uid的图片", usage = "@Bot P站图片 {uid}", description = "获取P站指定uid的图片")
-    public Message getPixivImageUid(Group group, Member sender, Message message, long uid){
-
-        System.out.println(uid);
+    public Message getPixivImageUid(GroupConf groupConf, Group group, Member sender, Message message, long uid){
+        int showNum = groupConf.getPixivGetMaxNum();
         group.sendMessage("开始获取~");
         //获取代理
         try {
             PixivEntity pixivEntity = Pixiv.getIllust(uid);
+            SfLog.getInstance().d(this.getClass(), "图片信息获取完成");
             if (pixivEntity.isError()){
                 return new Message().lineQ().textLine("出现错误了：").text(pixivEntity.getError().getUser_message()).getMessage();
             }else {
                 Illust illust = pixivEntity.getIllust();
-                //获取代理
-                PixivCat.getPixivCat("https://www.pixiv.net/artworks/" + uid, new Callback() {
-                    @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        Message msg = new Message().lineQ().textLine("出现了错误：").text(e.getMessage()).getMessage();
-                        msg.setReply(message.getSource());
-                        group.sendMessage(msg);
+                MessageLineQ messageLineQ = new Message().lineQ();
+                messageLineQ.textLine("图片[" + uid + "]：");
+                //是否R18
+                if (illust.isR18()){
+                    messageLineQ.textLine("要找的图片带有R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
+                    int num = illust.getPageMax();
+                    if (num > showNum){
+                        num = showNum;
+                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
                     }
 
-                    @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        String string = response.body().string();
-                        PixivCat pixivCat = MyYuQ.toClass(string, PixivCat.class);
-
-                        String proxyUrl;
-
-                        if (pixivCat.getOriginal_urls_proxy() != null){
-                            proxyUrl = pixivCat.getOriginal_urls_proxy()[illust.getRestrict()];
-                        }else if(pixivCat.getOriginal_url_proxy() != null){
-                            proxyUrl = pixivCat.getOriginal_url_proxy();
-                        }else {
-                            Message msg = new Message().lineQ().text("唔，找不到预览图").getMessage();
-                            msg.setReply(message.getSource());
-                            group.sendMessage(msg);
-                            return;
+                    for(int i = 0; i < num; i++){
+                        String proxyUrl = illust.getProxyUrl(i);
+                        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+                        try {
+                            SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
+                            BufferedImage image = QRCodeImage.backgroundMatrix(
+                                    QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                    ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                    0.0f,
+                                    Color.BLACK);
+                            ImageIO.write(image, "png", imageFile);
+                            messageLineQ.imageByFile(imageFile);
+                        } catch (WriterException e) {
+                            SfLog.getInstance().e(this.getClass(), e);
+                            messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                        }catch (IOException e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                            messageLineQ.text("唔，二维码图片生成失败了：IOException");
                         }
-                        MessageLineQ messageLineQ = new Message().lineQ();
-                        messageLineQ.textLine("图片[" + uid + "]：");
-                        //是否R18
-                        if (Pixiv.isR18(illust.getTags())){
-                            messageLineQ.textLine("要找的图片带有R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
-                            File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
-                            try {
-                                BufferedImage image = QRCodeImage.backgroundMatrix(
-                                        QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
-                                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
-                                        0.0f,
-                                        Color.BLACK);
-                                ImageIO.write(image, "png", imageFile);
-                                messageLineQ.imageByFile(imageFile);
-                            } catch (WriterException e) {
-                                SfLog.getInstance().e(this.getClass(), e);
-                                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
-                            }catch (IOException e){
-                                SfLog.getInstance().e(this.getClass(), e);
-                                messageLineQ.text("唔，二维码图片生成失败了：IOException");
-                            }
-                        }else {
-                            messageLineQ.imageByUrl(proxyUrl);
-                        }
-                        Message msg = messageLineQ.getMessage();
-                        msg.setReply(message.getSource());
-                        group.sendMessage(msg);
-                        return;
                     }
-                });
+                    Message message1 = messageLineQ.getMessage();
+                    message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
+                    return message1;
+                }else {
+                    int num = illust.getPageMax();
+                    if (num > showNum){
+                        num = showNum;
+                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
+                    }
+
+                    for(int i = 0; i < num; i++) {
+                        String proxyUrl = illust.getProxyUrl(i);
+                        SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
+
+                        messageLineQ.imageByFile(NetHandle.imagePixivDownload(illust, i));
+                    }
+                }
+                return messageLineQ.getMessage();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return new Message().lineQ().textLine("出现了错误：").text(e.getMessage()).getMessage();
         }
-
-        throw new DoNone();
     }
 
 
@@ -203,7 +201,7 @@ public class PixivController {
      * @param rank
      * @return
      */
-    private void analysisRank(Rank rank, Group group, int size){
+    private void analysisRank(Rank rank, Group group, GroupConf groupConf){
         MessageLineQ messageLineQ = new Message().lineQ();
 
         if (rank.getIllusts() == null || rank.getIllusts().length == 0){
@@ -211,102 +209,67 @@ public class PixivController {
             isRun = false;
             return;
         }
+        int size = groupConf.getPixivRankGetMaxNum();
+
         int len = rank.getIllusts().length;
         if (size > len){
             size = len;
         }
 
         group.sendMessage("共 " + size + " 条数据，努力加载中...");
-        final int[] index = {0};
 
         int finalSize = size;
-        new Thread(new Runnable() {
+        MyYuQ.getJobManager().registerTimer(new Runnable() {
             @Override
             public void run() {
+                boolean isR18 = false;
                 for (int i = 0; i < finalSize; i++){
+
                     Illust illust = rank.getIllusts()[i];
-                    final boolean[] isEnd = {false};
                     messageLineQ.textLine("标题：" + illust.getTitle());//标题
-                    messageLineQ.textLine("描述：").textLine(MyYuQ.delHTMLTag(illust.getCaption()));//描述
+                    String caption = MyYuQ.delHTMLTag(illust.getCaption());
+                    if (caption.length() > 20){
+                        caption = caption.substring(0, 20) + "...";
+                    }
+                    messageLineQ.textLine("描述：").textLine(caption);//描述
                     messageLineQ.textLine("图片：");
                     //获取链接
-                    PixivCat.getPixivCat("https://www.pixiv.net/artworks/" + illust.getId(), new Callback() {
-                        @Override
-                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                            messageLineQ.textLine("代理数据获取失败了:" + e);
-                            isEnd[0] = true;
-                            index[0]++;
-                            if (index[0] == finalSize){
-                                group.sendMessage(messageLineQ.getMessage());
-                                isRun = false;
-                            }
-                        }
+                    String proxyUrl = illust.getProxyUrl();
 
-                        @Override
-                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                            index[0]++;
-
-                            String string = response.body().string();
-//                            System.out.println(string);
-                            PixivCat pixivCat = MyYuQ.toClass(string, PixivCat.class);
-
-                            if (pixivCat.isSuccess()){
-                                String proxyUrl = "";
-                                if (pixivCat.getOriginal_urls_proxy() != null){
-                                    proxyUrl = pixivCat.getOriginal_urls_proxy()[illust.getRestrict()];
-                                }else if(pixivCat.getOriginal_url_proxy() != null){
-                                    proxyUrl = pixivCat.getOriginal_url_proxy();
-                                }else {
-                                    messageLineQ.textLine("唔，找不到预览图");
-                                    if (index[0] == finalSize){
-                                        isEnd[0] = true;
-                                        group.sendMessage(messageLineQ.getMessage());
-                                    }
-                                    isRun = false;
-                                    return;
-                                }
-                                //r18
-                                if (Pixiv.isR18(illust.getTags())){
-                                    File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
-                                    try {
-                                        BufferedImage image = QRCodeImage.backgroundMatrix(
-                                                QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
-                                                ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
-                                                0.0f,
-                                                Color.BLACK);
-                                        ImageIO.write(image, "png", imageFile);
-                                        messageLineQ.imageByFile(imageFile);
-                                    } catch (WriterException e) {
-                                        SfLog.getInstance().e(this.getClass(), e);
-                                        messageLineQ.text("唔，二维码图片生成失败了：WriterException");
-                                    }catch (IOException e){
-                                        SfLog.getInstance().e(this.getClass(), e);
-                                        messageLineQ.text("唔，二维码图片生成失败了：IOException");
-                                    }
-                                }else {
-                                    messageLineQ.imageByUrl(proxyUrl);
-                                }
-                            }else {
-                                messageLineQ.textLine("代理获取失败：" + pixivCat.getError());
-                            }
-
-                            isEnd[0] = true;
-                            if (index[0] == finalSize){
-                                group.sendMessage(messageLineQ.getMessage());
-                                isRun = false;
-                            }
-                        }
-                    });
-
-                    while (!isEnd[0]){
+                    //r18
+                    if (illust.isR18()){
+                        isR18 = true;
+                        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
                         try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
+                            BufferedImage image = QRCodeImage.backgroundMatrix(
+                                    QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                    ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                    0.0f,
+                                    Color.BLACK);
+                            ImageIO.write(image, "png", imageFile);
+                            messageLineQ.imageByFile(imageFile);
+                        } catch (WriterException e) {
                             SfLog.getInstance().e(this.getClass(), e);
+                            messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                        }catch (IOException e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                            messageLineQ.text("唔，二维码图片生成失败了：IOException");
+                        }
+                    }else {
+                        try {
+                            messageLineQ.imageByFile(NetHandle.imagePixivDownload(illust, 0));
+                        } catch (IOException e) {
+                            messageLineQ.textLine("图片加载失败：" + e.getMessage());
                         }
                     }
                 }
+                Message message = messageLineQ.getMessage();
+                if (isR18){
+                    message.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
+                }
+                group.sendMessage(message);
+                isRun = false;
             }
-        }).start();
+        }, 0);
     }
 }

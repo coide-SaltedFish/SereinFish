@@ -8,14 +8,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.icecreamqaq.yuq.RainBot;
 import com.icecreamqaq.yuq.YuQ;
+import com.icecreamqaq.yuq.controller.BotActionContext;
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.Text;
+import it.sauronsoftware.jave.*;
 import okhttp3.OkHttpClient;
 import org.apache.commons.codec.digest.DigestUtils;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.mlog.SfLog;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -271,13 +277,13 @@ public class MyYuQ {
 
     /**
      * 上传图片
-     * @param group
+     * @param contact
      * @param file
      * @return
      */
-    public static String uploadImage(Group group, File file) throws IOException {
-        group.uploadImage(file);
-        return DigestUtils.md5Hex(new FileInputStream(file));
+    public static String uploadImage(Contact contact, File file) throws IOException {
+        contact.uploadImage(file);
+        return DigestUtils.md5Hex(new FileInputStream(file)).toUpperCase();
     }
 
     /**
@@ -294,6 +300,103 @@ public class MyYuQ {
             }
         }
         return msg;
+    }
+
+    /**
+     * 消息处理
+     * @param str
+     * @return
+     */
+    public static Message[] sfCodeToMessage(BotActionContext actionContext, String str){
+        //语音
+        Pattern pattern=Pattern.compile("<sf:voice:File:.*>",Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()){
+            String path = matcher.group(0).replace("<sf:voice:File:", "");
+            path = path.substring(0, path.length() - 1);
+            File file = new File(path);
+            if (file.exists() && file.isFile()){
+                try {
+                    File voiceFile = voiceTo(file, "libamr_wb","amr");
+                    return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(voiceFile)).getMessage()};
+                } catch (FileNotFoundException e) {
+                    SfLog.getInstance().e(MyYuQ.class, e);
+                } catch (EncoderException e) {
+                    SfLog.getInstance().e(MyYuQ.class, e);
+                    try {
+                        return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(file)).getMessage()};
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        SfLog.getInstance().e(MyYuQ.class, e);
+                    }
+                }
+            }
+        }
+        //消息引用
+
+        double i = 5e10;
+
+        //多条消息
+        if (str.split("<sf:split>").length > 1){
+            String[] strs = str.split("<sf:split>");
+            ArrayList<Message> msgs = new ArrayList<>();
+            for (String msgStr:strs){
+                for (Message message:sfCodeToMessage(actionContext, msgStr)){
+                    msgs.add(message);
+                }
+            }
+
+            return msgs.toArray(new Message[]{});
+        }
+
+        //触发者At
+        str = str.replace("<sf:triggerAt>","<Rain:At:" + actionContext.getSender().getId() + ">");
+        //触发者qq
+        str = str.replace("<sf:triggerQq>", actionContext.getSender().getId() + "");
+        //触发者名字
+        str = str.replace("<sf:triggerName>",actionContext.getSender().getName());
+        //触发者头像
+        if (str.contains("<sf:triggerHead>")){
+            try {
+                String md5 = uploadImage(actionContext.getSource(), NetHandle.imageDownload(actionContext.getSender().getAvatar(), actionContext.getSender().getId() + ""));
+                str = str.replace("<sf:triggerHead>", "<Rain:Image:" + md5 + ".jpg>");
+            } catch (IOException e) {
+                SfLog.getInstance().e(MyYuQ.class, e);
+            }
+        }
+
+        //回复触发消息
+        Message message = Message.Companion.toMessageByRainCode(str);
+        if (str.startsWith("<sf:reply>")){
+            str = str.replace("<sf:reply>", "");
+            message = Message.Companion.toMessageByRainCode(str);
+            message.setReply(actionContext.getMessage().getSource());
+        }
+
+        return new Message[]{message};
+    }
+
+    /**
+     * 语音文件转换
+     * @return
+     */
+    public static File voiceTo(File file, String codec,String format) throws EncoderException {
+        File target = new File(FileHandle.voiceCachePath, file.getName().substring(0, file.getName().lastIndexOf(".")) + "." + format);
+        AudioAttributes audioAttributes = new AudioAttributes();
+        audioAttributes.setCodec(codec);//编码器
+
+        audioAttributes.setBitRate(12200);//比特率
+        audioAttributes.setChannels(1);//声道；1单声道，2立体声
+        audioAttributes.setSamplingRate(8000);//采样率（重要！！！）
+
+        EncodingAttributes encodingAttributes = new EncodingAttributes();
+        encodingAttributes.setFormat(format);//格式
+        encodingAttributes.setAudioAttributes(audioAttributes);//音频设置
+
+        Encoder encoder = new Encoder();
+
+        encoder.encode(file, target, encodingAttributes);
+
+        return target;
     }
 
     public static String getBotName() {

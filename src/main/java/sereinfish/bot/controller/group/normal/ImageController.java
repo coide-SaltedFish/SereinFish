@@ -10,6 +10,10 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.MessageUtils;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
@@ -280,7 +284,7 @@ public class ImageController extends QQController {
                 throw new SkipMe();
             }
         }
-        return getCengGif(qq);
+        return getCengGif(group, qq);
     }
 
 
@@ -436,7 +440,7 @@ public class ImageController extends QQController {
         AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
         //保存的目标图片
         animatedGifEncoder.start(imageFile.getAbsolutePath());
-        animatedGifEncoder.setRepeat(decoder.getLoopCount());
+        animatedGifEncoder.setRepeat(0);
         animatedGifEncoder.setDelay(decoder.getDelay(0));
         for (int i = 0; i < decoder.getFrameCount(); i++) {
             BufferedImage image = decoder.getFrame(i);
@@ -488,7 +492,7 @@ public class ImageController extends QQController {
         AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
         //保存的目标图片
         animatedGifEncoder.start(imageFile.getAbsolutePath());
-        animatedGifEncoder.setRepeat(decoder.getLoopCount());
+        animatedGifEncoder.setRepeat(0);
         animatedGifEncoder.setDelay(decoder.getDelay(0));
 
         for (int i = 0; i < decoder.getFrameCount(); i++) {
@@ -563,7 +567,7 @@ public class ImageController extends QQController {
         animatedGifEncoder.setSize(w,h);
         animatedGifEncoder.start(imageFile.getAbsolutePath());
         animatedGifEncoder.setDelay(delay);
-        animatedGifEncoder.setRepeat(paIndex);
+        animatedGifEncoder.setRepeat(0);
 
         for (int i = 0; i < paIndex; i++){
             BufferedImage bgImage;
@@ -595,7 +599,7 @@ public class ImageController extends QQController {
      */
     public Message getMuaGif(long m){
         int bgWH = 240;//背景宽高
-        int delay = 50;//每张图之间的延迟
+        int delay = 100;//每张图之间的延迟
         BufferedImage headImage = (BufferedImage) ImageHandle.getMemberHeadImage(m,80);//得到头像
         File imageFile = new File(FileHandle.imageCachePath,"mua_temp");//文件缓存路径
 
@@ -603,7 +607,7 @@ public class ImageController extends QQController {
         animatedGifEncoder.setSize(bgWH,bgWH);
         animatedGifEncoder.start(imageFile.getAbsolutePath());
         animatedGifEncoder.setDelay(delay);
-        animatedGifEncoder.setRepeat(13);
+        animatedGifEncoder.setRepeat(0);
 
         //x,y,w,h
         int imageHeadInfo[][] = {
@@ -655,7 +659,7 @@ public class ImageController extends QQController {
      * 得到一个蹭动图
      * @return
      */
-    private Message getCengGif(long m){
+    private Message getCengGif(Group group, long m){
         int bgW = 240;
         int bgH = 240;
         int delay = 50;//每张图之间的延迟
@@ -667,7 +671,7 @@ public class ImageController extends QQController {
         animatedGifEncoder.setSize(bgW,bgH);
         animatedGifEncoder.start(imageFile.getAbsolutePath());
         animatedGifEncoder.setDelay(delay);
-        animatedGifEncoder.setRepeat(13);
+        animatedGifEncoder.setRepeat(0);
 
         //x,y,w,h
         int imageHeadInfo[][] = {
@@ -703,7 +707,12 @@ public class ImageController extends QQController {
         }
 
         if(animatedGifEncoder.finish()){
-            return MyYuQ.getMif().imageByFile(imageFile).toMessage();
+            try {
+                String md5 = MyYuQ.uploadImage(group, imageFile);
+                return Message.Companion.toMessageByRainCode("<Rain:Image:" + md5 + ".gif>");
+            } catch (IOException e) {
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
         }
         return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
     }

@@ -1,11 +1,13 @@
 package sereinfish.bot.event;
 
+import com.IceCreamQAQ.Yu.job.Job;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 
 import java.util.*;
@@ -19,23 +21,6 @@ public class GroupReCallMessageManager {
     private static GroupReCallMessageManager reCallMessageManager;
 
     private GroupReCallMessageManager(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true){
-                    delete(1000 * 50 * 2);
-                    sleep(1000);
-                }
-            }
-
-            public void sleep(int ms){
-                try {
-                    Thread.sleep(ms);
-                } catch (InterruptedException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                }
-            }
-        }).start();
     }
 
     public static GroupReCallMessageManager init(){
@@ -60,7 +45,14 @@ public class GroupReCallMessageManager {
             map.put(group, new Stack<>());
         }
 
-        map.get(group).push(new MsgInfo(new Date().getTime(), message));
+        MsgInfo msgInfo = new MsgInfo(new Date().getTime(), message);
+        map.get(group).push(msgInfo);
+        MyYuQ.getJobManager().registerTimer(new Runnable() {
+            @Override
+            public void run() {
+                map.get(group).remove(msgInfo);
+            }
+        }, 1000 * 55 * 2);
     }
 
     /**
@@ -87,23 +79,6 @@ public class GroupReCallMessageManager {
             }
         }
     }
-
-    /**
-     * 去除已超时消息
-     * @param t
-     */
-    public void delete(long t){
-        long time = new Date().getTime();
-        for (Map.Entry<Long, Stack<MsgInfo>> entry:map.entrySet()){
-            Stack<MsgInfo> messageMap = entry.getValue();
-            for (int i  = 0; i < messageMap.size(); i++){
-                if (messageMap.peek().getTime() <= time - t){
-                    MsgInfo msgInfo = messageMap.pop();
-                }
-            }
-        }
-    }
-
 
     @AllArgsConstructor
     @Getter

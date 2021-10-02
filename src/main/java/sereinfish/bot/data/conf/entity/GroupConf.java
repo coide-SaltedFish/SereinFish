@@ -99,6 +99,15 @@ public class GroupConf{
 
     @Control(group = "SauceNaoAPI", name = "查看索引列表", type = ControlType.WebLink, tip = "跳转到数据库掩码列表")
     String SauceNaoApiDbList = "https://saucenao.com/tools/examples/api/index_details.txt";
+    //pixiv
+    @Control(group = "Pixiv", name = "启用", type = ControlType.CheckBox, tip = "启用p站相关功能")
+    boolean pixivEnable = false;
+
+    @Control(group = "Pixiv", name = "最大获取数量", type = ControlType.Edit_IntNum, tip = "设置一次命令最大图片的发送数量")
+    int pixivGetMaxNum = 2;
+
+    @Control(group = "Pixiv", name = "榜单最大获取数量", type = ControlType.Edit_IntNum, tip = "设置一次命令榜单最大图片的发送数量")
+    int pixivRankGetMaxNum = 5;
 
     //Lolicon
     @Control(group = "Lolicon", name = "启用", type = ControlType.CheckBox, tip = "启用LoliconAPI")
