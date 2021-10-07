@@ -227,13 +227,14 @@ public class SauceNaoController extends QQController {
                                     messageLineQ.text("图片加载错误：" + pixivEntity.getError().getUser_message());
                                     group.sendMessage(messageLineQ.getMessage());
                                 }else {
-                                    try {
-                                        if (pixivEntity.getIllust().isR18()){
-                                            messageLineQ.textLine("预览图片包含R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
-                                        }
+                                    if (pixivEntity.getIllust().isR18()){
+                                        messageLineQ.textLine("预览图片包含R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
+                                    }
 
-                                        messageLineQ.textLine(String.format("共%d张，当前显示第%d张", pixivEntity.getIllust().getPageMax(), 1));
-                                        if (pixivEntity.getIllust().isR18()) {
+                                    messageLineQ.textLine(String.format("共%d张，当前显示第%d张", pixivEntity.getIllust().getPageMax(), 1));
+                                    if (pixivEntity.getIllust().isR18()) {
+                                        //消息发送
+                                        try {
                                             //原图
                                             messageLineQ.textLine("原图链接（也许是?）：");
                                             //生成二维码
@@ -245,7 +246,7 @@ public class SauceNaoController extends QQController {
                                                         0.3f,
                                                         Color.BLACK);
                                                 ImageIO.write(image, "png", imageFile);
-                                                messageLineQ.imageByFile(imageFile);
+
                                             } catch (WriterException e) {
                                                 SfLog.getInstance().e(this.getClass(), e);
                                                 messageLineQ.text("唔，二维码图片生成失败了：WriterException");
@@ -253,32 +254,26 @@ public class SauceNaoController extends QQController {
                                                 SfLog.getInstance().e(this.getClass(), e);
                                                 messageLineQ.text("唔，二维码图片生成失败了：IOException");
                                             }
+                                            messageLineQ.plus(group.uploadImage(imageFile));
                                             Message message1 = messageLineQ.getMessage();
                                             message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
                                             group.sendMessage(message1);
-
-                                            try {
-                                                group.sendMessage(messageLineQ.getMessage());
-                                            } catch (IllegalStateException e) {
-                                                SfLog.getInstance().e(this.getClass(), e);
-                                                group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                                group.sendMessage(noImage);
-                                            }
-                                        }else {
-                                            //原图
-                                            messageLineQ.textLine("原图（也许是?）：");
-                                            messageLineQ.imageByFile(NetHandle.imagePixivDownload(pixivEntity.getIllust(), 0));
-                                            try {
-                                                group.sendMessage(messageLineQ.getMessage());
-                                            } catch (IllegalStateException e) {
-                                                SfLog.getInstance().e(this.getClass(), e);
-                                                group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                                group.sendMessage(noImage);
-                                            }
+                                        } catch (IllegalStateException e) {
+                                            SfLog.getInstance().e(this.getClass(), e);
+                                            group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                            group.sendMessage(noImage);
                                         }
-                                    }catch (IllegalStateException e){
-                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                        group.sendMessage(messageLineQ.getMessage());
+                                    }else {
+                                        //原图
+                                        messageLineQ.textLine("原图（也许是?）：");
+                                        try {
+                                            messageLineQ.plus(group.uploadImage(NetHandle.imagePixivDownload(pixivEntity.getIllust(), 0)));
+                                            group.sendMessage(messageLineQ.getMessage());
+                                        } catch (IllegalStateException e) {
+                                            SfLog.getInstance().e(this.getClass(), e);
+                                            group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                            group.sendMessage(noImage);
+                                        }
                                     }
                                 }
                             }else {

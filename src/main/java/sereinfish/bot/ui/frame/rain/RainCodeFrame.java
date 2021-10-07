@@ -222,7 +222,7 @@ public class RainCodeFrame extends JFrame {
                 return "<Rain:Face:" + textField_input.getText() + ">";
             case MODE_IMAGE:
                 if (checkBox_isFile.isSelected()){
-                    return "<Rain:Image:" + textField_input.getText() + ",file>";
+                    return "<Rain:Image:" + textField_input.getText() + ",File>";
                 }else {
                     if (file != null){
                         return "<Rain:Image:" + textField_input.getText() + "." + file.getName().substring(file.getName().lastIndexOf(".") + 1) + ">";

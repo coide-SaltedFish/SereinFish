@@ -41,8 +41,8 @@ public class OkHttpUtil {
         Iterator iterator = this.header.keySet().iterator();
 
         while(iterator.hasNext()) {
-            String key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            String key = ((String)iterator.next());
+            String v = this.header.get(key);
             builder.addHeader(key, v);
         }
 
@@ -65,8 +65,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             builder.addHeader(key, v);
         }
 
@@ -90,8 +90,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -115,8 +115,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -140,8 +140,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -161,8 +161,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -187,8 +187,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -213,8 +213,8 @@ public class OkHttpUtil {
         String key = null;
 
         while(iterator.hasNext()) {
-            key = ((String)iterator.next()).toString();
-            String v = (String)this.header.get(key);
+            key = iterator.next();
+            String v = this.header.get(key);
             requestBuilder.addHeader(key, v);
         }
 
@@ -239,8 +239,8 @@ public class OkHttpUtil {
             String key = "";
 
             while(iterator.hasNext()) {
-                key = ((String)iterator.next()).toString();
-                formEncodingBuilder.add(key, (String)BodyParams.get(key));
+                key = iterator.next();
+                formEncodingBuilder.add(key, BodyParams.get(key));
             }
         }
 
@@ -250,9 +250,9 @@ public class OkHttpUtil {
 
     public OkHttpUtil init() {
         okhttp3.OkHttpClient.Builder ClientBuilder = new okhttp3.OkHttpClient.Builder();
-        ClientBuilder.readTimeout((long)this.READ_TIMEOUT, TimeUnit.SECONDS);
-        ClientBuilder.connectTimeout((long)this.CONNECT_TIMEOUT, TimeUnit.SECONDS);
-        ClientBuilder.writeTimeout((long)this.WRITE_TIMEOUT, TimeUnit.SECONDS);
+        ClientBuilder.readTimeout(this.READ_TIMEOUT, TimeUnit.SECONDS);
+        ClientBuilder.connectTimeout(this.CONNECT_TIMEOUT, TimeUnit.SECONDS);
+        ClientBuilder.writeTimeout(this.WRITE_TIMEOUT, TimeUnit.SECONDS);
         ClientBuilder.sslSocketFactory(this.createSSLSocketFactory());
         ClientBuilder.hostnameVerifier(new HostnameVerifier() {
             public boolean verify(String hostname, SSLSession session) {
@@ -268,7 +268,7 @@ public class OkHttpUtil {
 
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init((KeyManager[])null, new TrustManager[]{new OkHttpUtil.TrustAllCerts()}, new SecureRandom());
+            sc.init(null, new TrustManager[]{new OkHttpUtil.TrustAllCerts()}, new SecureRandom());
             ssfFactory = sc.getSocketFactory();
         } catch (Exception var3) {
         }

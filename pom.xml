@@ -26,15 +26,16 @@
         <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-jvm -->
         <dependency>
             <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core</artifactId>
-            <version>2.7.1-dev-1</version>
+            <artifactId>mirai-core-jvm</artifactId>
+            <version>2.7.1</version>
         </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/net.mamoe/mirai-core-jvm -->
         <dependency>
             <groupId>net.mamoe</groupId>
             <artifactId>mirai-core-jvm</artifactId>
-            <version>2.7.1-dev-1</version>
+            <version>2.7.1</version>
         </dependency>
 
 
@@ -78,18 +79,19 @@
             <version>1.0.6</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/ws.schild/jave-all-deps -->
-        <dependency>
-            <groupId>ws.schild</groupId>
-            <artifactId>jave-all-deps</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.10</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.madgag/animated-gif-lib -->
+        <dependency>
+            <groupId>com.madgag</groupId>
+            <artifactId>animated-gif-lib</artifactId>
+            <version>1.4</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
@@ -103,13 +105,6 @@
             <artifactId>dnsjava</artifactId>
             <version>3.4.0</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba</groupId>-->
-<!--            <artifactId>fastjson</artifactId>-->
-<!--            <version>1.2.78</version>-->
-<!--        </dependency>-->
 
         <!--        二维码-->
         <dependency>

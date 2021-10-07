@@ -157,7 +157,7 @@ public class MenuManager {
             textY += rowSpacing + drawString(graphics2D,
                     textColor,
                     font,
-                    "● " + menuEntity.menu.name() + " " + type +  " [" + Permissions.getInstance().getAuthorityName(menuEntity.menu.permissions()) + "]：",
+                    "● " + menuEntity.menu.name() + " " + type +  " " + Permissions.getInstance().getAuthorityName(menuEntity.menu.permissions()) + "：",
                     textX,
                     textY);
             //绘制指令

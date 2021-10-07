@@ -1,5 +1,6 @@
 package sereinfish.bot.file;
 
+import com.IceCreamQAQ.Yu.util.IO;
 import sereinfish.bot.entity.mc.GamerInfo;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.image.ImageHandle;
@@ -27,6 +28,33 @@ public class NetHandle {
      */
     public synchronized static BufferedImage getImage(URL url) throws IOException {
         return ImageIO.read(url);
+    }
+
+    /**
+     * 从网络得到图像
+     * 此处会对线程进行锁定以防止重复下载
+     * @param md5
+     * @return
+     */
+    public synchronized static BufferedImage getImage(String md5) throws IOException {
+        //先读缓存
+        File file = new File(FileHandle.imageCachePath,md5);
+        if (file.exists() && file.isFile()){
+            SfLog.getInstance().d(NetHandle.class, "返回缓存图片：" + md5);
+            return ImageIO.read(file);
+        }
+        URL url = MyYuQ.getImageUrl(md5);
+        BufferedImage bufferedImage = ImageIO.read(url);
+        try {
+            ImageIO.write(bufferedImage, "PNG", file);
+        }catch (IOException e){
+            if(file.delete()){
+                SfLog.getInstance().d(NetHandle.class, "缓存写入失败，已删除：" + md5);
+            }else {
+                SfLog.getInstance().d(NetHandle.class, "缓存写入失败且删除失败：" + md5);
+            }
+        }
+        return bufferedImage;
     }
 
     /**
@@ -140,7 +168,9 @@ public class NetHandle {
                 downloadFile.flush();
             }
         } catch (IOException e){
-            downloadFile.close();
+            if (downloadFile != null){
+                downloadFile.close();
+            }
             downloadFile = null;
             if(imageFile.delete()){
                 SfLog.getInstance().d(NetHandle.class, "下载出错，文件已删除");

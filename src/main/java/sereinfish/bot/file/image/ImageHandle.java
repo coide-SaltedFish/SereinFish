@@ -1,5 +1,6 @@
 package sereinfish.bot.file.image;
 
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
@@ -155,7 +156,6 @@ public class ImageHandle {
         //解析消息数据
         for (MessageItem item:message.getBody()){
 
-
             if (item instanceof Text){
                 Text text = (Text) item;
                 String str = text.getText();
@@ -182,7 +182,7 @@ public class ImageHandle {
                         BufferedImage bufferedImage = new BufferedImage(lineMaxWidth, lineHeight, BufferedImage.TYPE_4BYTE_ABGR);//本行画板
                         //绘制文本
                         Graphics2D graphics2D = bufferedImage.createGraphics();
-                        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);;//抗锯齿
+                        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);//抗锯齿
                         graphics2D.setFont(font);
                         if (bufferedOldImage != null){
                             graphics2D.drawImage(bufferedOldImage, 0, 0, null);//将旧数据绘制上去
@@ -203,14 +203,16 @@ public class ImageHandle {
                 com.icecreamqaq.yuq.message.Image image = (com.icecreamqaq.yuq.message.Image) item;
                 BufferedImage msgImage = null;
                 try {
-                    URL url = new URL(image.getUrl());
-                    msgImage = NetHandle.getImage(url);
+                    String md5 = image.getId().substring(0, image.getId().lastIndexOf("."));
+                    msgImage = NetHandle.getImage(md5);
                 }catch (IOException e) {
                     //获取失败，返回一个错误图片
                     msgImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
                     Graphics2D g = msgImage.createGraphics();
+                    g.setColor(Color.GRAY);
+                    g.fillRect(0,0, msgImage.getWidth(), msgImage.getHeight());
                     g.setPaint(Color.BLACK);
-                    g.drawString("图片加载失败",0,0);
+                    g.drawString("图片加载失败",0,msgImage.getHeight() / 2);
                     g.dispose();
                 }
 
@@ -218,7 +220,10 @@ public class ImageHandle {
                     if (msgImage.getWidth() > maxWidth){
                         lineMaxWidth = maxWidth;
                         //等比缩小图片
-                        int mwh = (int) (maxWidth * 1.0) / msgImage.getWidth() * msgImage.getHeight();
+                        int mwh = (int) ((maxWidth * 1.0) / (float) msgImage.getWidth() * msgImage.getHeight());
+                        if (mwh == 0){
+                            mwh = 1;
+                        }
                         BufferedImage msgImageTmp = new BufferedImage(maxWidth, mwh, BufferedImage.TYPE_4BYTE_ABGR);
                         Graphics2D graphics2D = msgImageTmp.createGraphics();
                         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿

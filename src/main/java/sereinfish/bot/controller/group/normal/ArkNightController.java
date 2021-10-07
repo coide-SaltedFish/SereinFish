@@ -7,6 +7,7 @@ import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import sereinfish.bot.entity.arknights.penguinStatistics.PenguinStatistics;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
@@ -52,8 +53,9 @@ public class ArkNightController {
                 }
                 try {
                     ImageIO.write(penguinStatistics.getDataImage(penguinWidgetData), "PNG", file);
-                    return MyYuQ.getMif().imageByFile(file).toMessage();
-                } catch (IOException e) {
+                    Image image = group.uploadImage(file);
+                    return new Message().lineQ().plus(image).getMessage();
+                } catch (Exception e) {
                     SfLog.getInstance().e(this.getClass(),e);
                     return MyYuQ.getMif().text("图片发送失败：" + e.getMessage()).toMessage();
                 }

@@ -16,16 +16,16 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.Text;
-import it.sauronsoftware.jave.*;
 import okhttp3.OkHttpClient;
 import org.apache.commons.codec.digest.DigestUtils;
-import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -137,6 +137,24 @@ public class MyYuQ {
         htmlStr=m_html.replaceAll(""); //过滤html标签
 
         return htmlStr.trim(); //返回文本字符串
+    }
+
+    /**
+     * 得到图片链接
+     * @param md5
+     * @return
+     */
+    public static URL getImageUrl(String md5) throws MalformedURLException {
+        return new URL("http://gchat.qpic.cn/gchatpic_new/0/-0-" + md5 + "/0");
+    }
+
+    /**
+     * 得到图片链接
+     * @param md5
+     * @return
+     */
+    public static String getImageUrlStr(String md5) throws MalformedURLException {
+        return "http://gchat.qpic.cn/gchatpic_new/0/-0-" + md5 + "/0";
     }
 
     /**
@@ -317,17 +335,9 @@ public class MyYuQ {
             File file = new File(path);
             if (file.exists() && file.isFile()){
                 try {
-                    File voiceFile = voiceTo(file, "libamr_wb","amr");
-                    return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(voiceFile)).getMessage()};
-                } catch (FileNotFoundException e) {
-                    SfLog.getInstance().e(MyYuQ.class, e);
-                } catch (EncoderException e) {
-                    SfLog.getInstance().e(MyYuQ.class, e);
-                    try {
-                        return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(file)).getMessage()};
-                    } catch (FileNotFoundException fileNotFoundException) {
-                        SfLog.getInstance().e(MyYuQ.class, e);
-                    }
+                    return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(file)).getMessage()};
+                } catch (FileNotFoundException fileNotFoundException) {
+                    SfLog.getInstance().e(MyYuQ.class, fileNotFoundException);
                 }
             }
         }
@@ -373,30 +383,6 @@ public class MyYuQ {
         }
 
         return new Message[]{message};
-    }
-
-    /**
-     * 语音文件转换
-     * @return
-     */
-    public static File voiceTo(File file, String codec,String format) throws EncoderException {
-        File target = new File(FileHandle.voiceCachePath, file.getName().substring(0, file.getName().lastIndexOf(".")) + "." + format);
-        AudioAttributes audioAttributes = new AudioAttributes();
-        audioAttributes.setCodec(codec);//编码器
-
-        audioAttributes.setBitRate(12200);//比特率
-        audioAttributes.setChannels(1);//声道；1单声道，2立体声
-        audioAttributes.setSamplingRate(8000);//采样率（重要！！！）
-
-        EncodingAttributes encodingAttributes = new EncodingAttributes();
-        encodingAttributes.setFormat(format);//格式
-        encodingAttributes.setAudioAttributes(audioAttributes);//音频设置
-
-        Encoder encoder = new Encoder();
-
-        encoder.encode(file, target, encodingAttributes);
-
-        return target;
     }
 
     public static String getBotName() {

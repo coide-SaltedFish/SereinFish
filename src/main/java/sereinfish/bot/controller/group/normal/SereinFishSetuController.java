@@ -9,12 +9,14 @@ import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.sereinfish.api.SereinFishSetu;
 import sereinfish.bot.entity.sereinfish.api.msg.ImageItem;
 import sereinfish.bot.entity.sereinfish.api.msg.re.ImageList;
 import sereinfish.bot.entity.sereinfish.api.msg.re.Msg;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.permissions.Permissions;
 
 import java.io.IOException;
@@ -73,9 +75,25 @@ public class SereinFishSetuController {
         setu(request, group, groupConf);
     }
 
-    @Action("涩图查询 {key}")
-    @QMsg(mastAtBot = true)
-    public void setu(GroupConf groupConf, Group group, String key){
+    @Action("涩图查询 {key} {numStr}")
+    @QMsg(mastAtBot = true, reply = true)
+    public Message setu(GroupConf groupConf, Group group, String key, String numStr){
+        int num = 1;
+        try{
+            num = Integer.decode(numStr);
+        }catch (NumberFormatException e){
+            SfLog.getInstance().e(this.getClass(), e);
+            return Message.Companion.toMessageByRainCode(numStr + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>");
+        }
+
+        if (num < 1){
+            group.sendMessage(new Message().lineQ().text(MyYuQ.getBotName() + "发现了一个错误，已自动纠正：[" + numStr + "]->[" + num + "]"));
+        }
+
+        if (num > 10){
+            group.sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"));
+        }
+
         SereinFishSetu.Request request = new SereinFishSetu.Request();
         request.setKey(key);
         //r18
@@ -87,8 +105,11 @@ public class SereinFishSetuController {
             type = SereinFishSetu.Request.TYPE_R18;
         }
         request.setType(type);
+        request.setNum(num);
 
         setu(request, group, groupConf);
+
+        return new Message().lineQ().text("にゃ～").getMessage();
     }
 
     @Action("涩图提交 {pid}")

@@ -324,7 +324,7 @@ public class BiliManager {
      */
     private Message getLiveOpenTip(UserInfo userInfo){
         MessageLineQ messageLineQ = new Message().lineQ();
-        messageLineQ.textLine(userInfo.getData().getName());
+        messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("开播辣！！");
         messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
         messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
@@ -339,7 +339,7 @@ public class BiliManager {
      */
     private Message getLiveCloseTip(UserInfo userInfo){
         MessageLineQ messageLineQ = new Message().lineQ();
-        messageLineQ.textLine(userInfo.getData().getName());
+        messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("下播了");
         messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
         if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){

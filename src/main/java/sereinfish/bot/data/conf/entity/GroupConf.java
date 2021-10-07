@@ -178,6 +178,12 @@ public class GroupConf{
     @Control(group = "消息转图片", name = "最大字数", type = ControlType.Edit_IntNum, tip = "超过自动转图片")
     int longMsgToImageTextLengthMax = 300;
 
+    @Control(group = "消息转图片", name = "图片数", type = ControlType.Edit_IntNum, tip = "超过自动转图片")
+    int longMsgToImageImageNumMax = 3;
+
+    @Control(group = "消息转图片", name = "行数", type = ControlType.Edit_IntNum, tip = "超过自动转图片")
+    int longMsgToImageLineNumMax = 50;
+
     @Control(group = "消息转图片", name = "文本转图片字体", type = ControlType.Font_ComboBox, tip = "文本转图片时的文本字体")
     String longMsgToImageFont = "微软雅黑";
 

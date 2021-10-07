@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 @GroupController
-@Menu(type = Menu.Type.GROUP, name = "小米运动")
+//@Menu(type = Menu.Type.GROUP, name = "小米运动")
 public class MiMotionController {
 
     @Before

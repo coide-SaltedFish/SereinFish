@@ -96,7 +96,7 @@ public class LinkDialog extends JDialog {
                 Map<String,String> map = new HashMap<>();
                 //得到所有值
                 for (String s:keys){
-                    String str = textFieldMap.get(s).getText().toString();
+                    String str = textFieldMap.get(s).getText();
                     if (str.equals("")){
                         setTip("不能为空：" + s,TIP_ERROR);
                         return;

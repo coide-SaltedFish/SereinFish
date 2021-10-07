@@ -9,6 +9,7 @@ import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import okhttp3.Call;
@@ -131,7 +132,35 @@ public class PixivController {
     @MenuItem(name = "获取P站指定uid的图片", usage = "@Bot P站图片 {uid}", description = "获取P站指定uid的图片")
     public Message getPixivImageUid(GroupConf groupConf, Group group, Member sender, Message message, long uid){
         int showNum = groupConf.getPixivGetMaxNum();
+        MessageLineQ messageLineQ = new Message().lineQ();
         group.sendMessage("开始获取~");
+
+        String pageStr = "";
+        if (message.getPath().size() >= 3){
+            pageStr = message.getPath().get(2).toPath();
+        }
+
+        boolean enablePage = false;
+        int page = 1;
+
+        if (pageStr != null && !pageStr.equals("")){
+            enablePage = true;
+        }
+
+        if (enablePage){
+            try {
+                page = Integer.decode(pageStr);
+            }catch (NumberFormatException e){
+                SfLog.getInstance().e(this.getClass(), e);
+                return new Message().lineQ().text(pageStr + "?不认识").getMessage();
+            }
+
+            if (page < 1){
+                page = 1;
+                messageLineQ.textLine("错误已自动纠正：[" + pageStr + "]->[" + page + "]");
+            }
+        }
+
         //获取代理
         try {
             PixivEntity pixivEntity = Pixiv.getIllust(uid);
@@ -140,29 +169,34 @@ public class PixivController {
                 return new Message().lineQ().textLine("出现错误了：").text(pixivEntity.getError().getUser_message()).getMessage();
             }else {
                 Illust illust = pixivEntity.getIllust();
-                MessageLineQ messageLineQ = new Message().lineQ();
                 messageLineQ.textLine("图片[" + uid + "]：");
+                if (page > illust.getPageMax()){
+                    page = 1;
+                    messageLineQ.textLine("错误已自动纠正：[" + pageStr + "]->[" + page + "]");
+                }
+
                 //是否R18
                 if (illust.isR18()){
+                    messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是第" + page + "张");
                     messageLineQ.textLine("要找的图片带有R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
-                    int num = illust.getPageMax();
-                    if (num > showNum){
-                        num = showNum;
-                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
-                    }
-
-                    for(int i = 0; i < num; i++){
-                        String proxyUrl = illust.getProxyUrl(i);
+                    if (enablePage){
+                        String proxyUrl = illust.getProxyUrl(page - 1);
                         File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
                         try {
-                            SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
+                            SfLog.getInstance().d(this.getClass(), "加载(" + page + "/" + illust.getPageMax() + ")：" + proxyUrl);
                             BufferedImage image = QRCodeImage.backgroundMatrix(
                                     QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
                                     ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
                                     0.0f,
                                     Color.BLACK);
                             ImageIO.write(image, "png", imageFile);
-                            messageLineQ.imageByFile(imageFile);
+                            try{
+                                Image image1 = group.uploadImage(imageFile);
+                                messageLineQ.plus(image1);
+                            }catch (Exception e){
+                                SfLog.getInstance().e(this.getClass(), e);
+                                messageLineQ.textLine("错误：" + e.getMessage());
+                            }
                         } catch (WriterException e) {
                             SfLog.getInstance().e(this.getClass(), e);
                             messageLineQ.text("唔，二维码图片生成失败了：WriterException");
@@ -170,22 +204,113 @@ public class PixivController {
                             SfLog.getInstance().e(this.getClass(), e);
                             messageLineQ.text("唔，二维码图片生成失败了：IOException");
                         }
+                    }else {
+                        //页数
+                        int num = illust.getPageMax();
+                        if (num > showNum){
+                            num = showNum;
+                            messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
+                        }else {
+                            messageLineQ.textLine("共" + illust.getPageMax() + "张");
+                        }
+                        for(int i = 0; i < num; i++){
+                            String proxyUrl = illust.getProxyUrl(i);
+                            File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+                            try {
+                                SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
+                                BufferedImage image = QRCodeImage.backgroundMatrix(
+                                        QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                        0.0f,
+                                        Color.BLACK);
+                                ImageIO.write(image, "png", imageFile);
+                                try{
+                                    Image image1 = group.uploadImage(imageFile);
+                                    messageLineQ.plus(image1);
+                                }catch (Exception e){
+                                    SfLog.getInstance().e(this.getClass(), e);
+                                    messageLineQ.textLine("错误：" + e.getMessage());
+                                }
+                            } catch (WriterException e) {
+                                SfLog.getInstance().e(this.getClass(), e);
+                                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                            }catch (IOException e){
+                                SfLog.getInstance().e(this.getClass(), e);
+                                messageLineQ.text("唔，二维码图片生成失败了：IOException");
+                            }
+                        }
                     }
                     Message message1 = messageLineQ.getMessage();
                     message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
                     return message1;
                 }else {
-                    int num = illust.getPageMax();
-                    if (num > showNum){
-                        num = showNum;
-                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
-                    }
-
-                    for(int i = 0; i < num; i++) {
-                        String proxyUrl = illust.getProxyUrl(i);
-                        SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
-
-                        messageLineQ.imageByFile(NetHandle.imagePixivDownload(illust, i));
+                    if (enablePage){
+                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是第" + page + "张");
+                        String proxyUrl = illust.getProxyUrl(page);
+                        SfLog.getInstance().d(this.getClass(), "加载(" + pageStr + "/" + illust.getPageMax() + ")：" + proxyUrl);
+                        File imageFile = NetHandle.imagePixivDownload(illust, page - 1);
+                        try{
+                            Image image1 = group.uploadImage(imageFile);
+                            messageLineQ.plus(image1);
+                        }catch (Exception e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                            try {
+                                BufferedImage image = QRCodeImage.backgroundMatrix(
+                                        QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                        0.0f,
+                                        Color.BLACK);
+                                ImageIO.write(image, "png", imageFile);
+                                try{
+                                    Image image1 = group.uploadImage(imageFile);
+                                    messageLineQ.plus(image1);
+                                }catch (Exception e1){
+                                    SfLog.getInstance().e(this.getClass(), e1);
+                                    messageLineQ.textLine("错误：" + e.getMessage());
+                                }
+                            } catch (WriterException writerException) {
+                                SfLog.getInstance().e(this.getClass(), e);
+                                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                            }
+                        }
+                    }else {
+                        //页数
+                        int num = illust.getPageMax();
+                        if (num > showNum){
+                            num = showNum;
+                            messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是前" + num + "张");
+                        }else {
+                            messageLineQ.textLine("共" + illust.getPageMax() + "张");
+                        }
+                        for(int i = 0; i < num; i++) {
+                            String proxyUrl = illust.getProxyUrl(i);
+                            SfLog.getInstance().d(this.getClass(), "加载(" + (i + 1) + "/" + num + ")：" + proxyUrl);
+                            File imageFile = NetHandle.imagePixivDownload(illust, i);
+                            try{
+                                Image image1 = group.uploadImage(imageFile);
+                                messageLineQ.plus(image1);
+                            }catch (Exception e){
+                                SfLog.getInstance().e(this.getClass(), e);
+                                try {
+                                    BufferedImage image = QRCodeImage.backgroundMatrix(
+                                            QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                            ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                            0.0f,
+                                            Color.BLACK);
+                                    ImageIO.write(image, "png", imageFile);
+                                    try{
+                                        Image image1 = group.uploadImage(imageFile);
+                                        messageLineQ.plus(image1);
+                                    }catch (Exception e1){
+                                        SfLog.getInstance().e(this.getClass(), e1);
+                                        messageLineQ.textLine("错误：" + e.getMessage());
+                                    }
+                                } catch (WriterException writerException) {
+                                    SfLog.getInstance().e(this.getClass(), e);
+                                    messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                                }
+                            }
+                        }
                     }
                 }
                 return messageLineQ.getMessage();
@@ -226,7 +351,9 @@ public class PixivController {
                 for (int i = 0; i < finalSize; i++){
 
                     Illust illust = rank.getIllusts()[i];
+                    messageLineQ.textLine((i + 1) + ".");
                     messageLineQ.textLine("标题：" + illust.getTitle());//标题
+                    messageLineQ.textLine("Pid：" + illust.getId());
                     String caption = MyYuQ.delHTMLTag(illust.getCaption());
                     if (caption.length() > 20){
                         caption = caption.substring(0, 20) + "...";
@@ -247,7 +374,9 @@ public class PixivController {
                                     0.0f,
                                     Color.BLACK);
                             ImageIO.write(image, "png", imageFile);
-                            messageLineQ.imageByFile(imageFile);
+//                            messageLineQ.imageByFile(imageFile);
+                            Image im = group.uploadImage(imageFile);
+                            messageLineQ.plus(im);
                         } catch (WriterException e) {
                             SfLog.getInstance().e(this.getClass(), e);
                             messageLineQ.text("唔，二维码图片生成失败了：WriterException");
@@ -257,7 +386,8 @@ public class PixivController {
                         }
                     }else {
                         try {
-                            messageLineQ.imageByFile(NetHandle.imagePixivDownload(illust, 0));
+                           Image image = group.uploadImage(NetHandle.imagePixivDownload(illust, 0));
+                            messageLineQ.plus(image);
                         } catch (IOException e) {
                             messageLineQ.textLine("图片加载失败：" + e.getMessage());
                         }
@@ -267,8 +397,8 @@ public class PixivController {
                 if (isR18){
                     message.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
                 }
-                group.sendMessage(message);
                 isRun = false;
+                group.sendMessage(message);
             }
         }, 0);
     }

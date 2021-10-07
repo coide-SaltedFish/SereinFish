@@ -11,6 +11,7 @@ import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.MessageLineQ;
@@ -20,11 +21,13 @@ import sereinfish.bot.entity.bili.live.entity.FollowConf;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
+import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.Result;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +47,7 @@ public class BiliController {
 
     @Action("\\^[Bb][Vv].*\\")
     @QMsg(at = true)
-    public Message bvToAv(Message message, GroupConf groupConf) throws IOException {
+    public Message bvToAv(Group group, Message message, GroupConf groupConf) throws IOException {
         //启用判断
         if (!groupConf.isBiliBvExplainEnable()){
             throw new DoNone();
@@ -78,11 +81,15 @@ public class BiliController {
                 desc += "\n";
             }
 
-            return mif.imageByUrl(map.get("pic")).plus(
-                    "标题：" + map.get("title") + "\n" +
-                            "描述：" + desc +
-                            "链接：" + map.get("url")
-            );
+            MessageLineQ messageLineQ = new Message().lineQ();
+            File imageFile = NetHandle.imageDownload(map.get("pic"), "bili_" + bv);
+            Image image = group.uploadImage(imageFile);
+            messageLineQ.plus(image);//封面
+            messageLineQ.textLine("标题：" + map.get("title"));
+            messageLineQ.textLine("描述：" + desc);
+            messageLineQ.textLine("链接：" + map.get("url"));
+
+            return messageLineQ.getMessage();
         }else return Message.Companion.toMessage(result.getMessage());
     }
 

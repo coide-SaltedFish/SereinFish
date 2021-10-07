@@ -67,21 +67,20 @@ public class MsgController extends QQController {
     @QMsg(reply = true,mastAtBot = true)
     @MenuItem(name = "获取Bot运行状态", usage = "@Bot 运行状态", description = "返回当前Bot运行状态", permission = Permissions.GROUP_ADMIN)
     public Message appState(){
-        StringBuilder str = new StringBuilder();
-        str.append("程序运行时长：" + MyPerformance.getRunTime());
-        str.append("\n进程号：" + MyPerformance.getPid());
-        str.append("\n处理器核心数：" + MyPerformance.getCoresNum());
-        //str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
-        str.append("\n本程序CPU使用率：" + String.format("%.2f",MyPerformance.getProcessCpuLoad() * 100) + "%");
-        str.append("\n总内存：" + MyPerformance.getTotalPhysicalMemorySize());
-        str.append("\n已使用内存：" + MyPerformance.getUsedPhysicalMemorySize());
-        str.append("\n操作系统：" + MyPerformance.getOSName());
-        str.append("\nJVM内存总量：" + MyPerformance.getJvmTotalMemory());
-        str.append("\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory());
-        str.append("\nJAVA版本：" + MyPerformance.getJavaVersion());
-        str.append("\nbot版本：" + MyYuQ.getVersion());
 
-        return MyYuQ.getMif().text(str.toString()).toMessage();
+        String str = "程序运行时长：" + MyPerformance.getRunTime() +
+                "\n进程号：" + MyPerformance.getPid() +
+                "\n处理器核心数：" + MyPerformance.getCoresNum() +
+                //str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
+                "\n本程序CPU使用率：" + String.format("%.2f", MyPerformance.getProcessCpuLoad() * 100) + "%" +
+                "\n总内存：" + MyPerformance.getTotalPhysicalMemorySize() +
+                "\n已使用内存：" + MyPerformance.getUsedPhysicalMemorySize() +
+                "\n操作系统：" + MyPerformance.getOSName() +
+                "\nJVM内存总量：" + MyPerformance.getJvmTotalMemory() +
+                "\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory() +
+                "\nJAVA版本：" + MyPerformance.getJavaVersion() +
+                "\nbot版本：" + MyYuQ.getVersion();
+        return MyYuQ.getMif().text(str).toMessage();
     }
 
     @Action("\\^[.!！]消息转图片$\\")

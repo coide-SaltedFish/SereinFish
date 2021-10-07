@@ -18,6 +18,7 @@ import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.entity.User;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
@@ -38,6 +39,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -217,6 +220,50 @@ public class TestController extends QQController {
             SfLog.getInstance().e(this.getClass(), e);
             return new Message().lineQ().text(e.getMessage()).getMessage();
         }
+    }
+
+    @Action("晚安")
+    @QMsg(mastAtBot = true, reply = true)
+    public String goodNight(Group group, Member sender){
+        try {
+            //判断时间
+            Date startTime = new SimpleDateFormat(Time.DAY_TIME).parse("23:00:00");
+            Date endTime = new Date(startTime.getTime() + 60 * 60 * 8 * 1000);
+
+            if (Time.isEffectiveDate(new Date(), startTime, endTime)){
+                long banTime = endTime.getTime() - new Date().getTime();
+
+                if (group.getBot().isAdmin() || group.getBot().isOwner()){
+                    group.sendMessage("晚安哦~");
+                    if (!sender.isOwner() && !sender.isAdmin()){
+                        sender.ban((int) banTime);
+                    }
+                    return "要保持充足的睡眠哦";
+                }else {
+                    return "晚安";
+                }
+            }else {
+                return "这个功能在晚上11点到第二天早上7点才启用哦";
+            }
+        } catch (ParseException e) {
+            return "出现了一点错误：" + e.getMessage();
+        }
+    }
+
+    @Action("判断消息相等")
+    @QMsg(mastAtBot = true, reply = true)
+    public String messageEqu(ContextSession session ){
+        try {
+            reply("输入第一条消息(" + (maxTime / 1000) + "s)");
+            Message msg1 = session.waitNextMessage(maxTime);
+            reply("输入第二条消息(" + (maxTime / 1000) + "s)");
+            Message msg2 = session.waitNextMessage(maxTime);
+
+            return "结果：" + msg1.bodyEquals(msg2);
+        }catch (WaitNextMessageTimeoutException e){
+            return "已超时取消";
+        }
+
     }
 
 

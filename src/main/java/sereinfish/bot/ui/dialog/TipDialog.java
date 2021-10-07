@@ -30,7 +30,7 @@ public class TipDialog extends JDialog {
     }
 
     public TipDialog(String title,String tip, boolean model){
-        this((JFrame) null,title,tip,model);
+        this(null,title,tip,model);
     }
 
     /**
@@ -70,6 +70,6 @@ public class TipDialog extends JDialog {
     }
 
     public void setTitle(String title){
-        setTitle(title);
+        super.setTitle(title);
     }
 }

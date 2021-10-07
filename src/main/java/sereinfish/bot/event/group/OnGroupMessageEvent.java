@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.MessageAt;
 import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.*;
+import com.icecreamqaq.yuq.message.Image;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import kotlin.UninitializedPropertyAccessException;
 import net.mamoe.mirai.event.EventHandler;
@@ -215,15 +216,26 @@ public class OnGroupMessageEvent {
             GroupConf conf = ConfManager.getInstance().get(group.getId());
             if (conf.isLongMsgToImageEnable()){
                 //判断消息是否过长
-                int length = 0;
                 Message message = event.getMessage();
+                int textLength = 0;//字数
+                int imageNum = 0;
+                int lineNum = 0;
+                String msgText = "";
+
                 for (MessageItem item:message.getBody()){
                     if (item instanceof Text){
                         Text text = (Text) item;
-                        length += text.getText().length();
+                        textLength += text.getText().length();
+                        msgText += "\n" + text.getText();
+                    }else if(item instanceof Image){
+                        imageNum++;
                     }
                 }
-                if (length >= conf.getLongMsgToImageTextLengthMax()){
+                lineNum = msgText.split("\n").length;
+
+                if (textLength >= conf.getLongMsgToImageTextLengthMax()
+                        || imageNum > conf.getLongMsgToImageImageNumMax()
+                        || lineNum > conf.getLongMsgToImageLineNumMax()){
                     //取消发送
                     event.setCancel(true);
                     event.getSendTo().sendMessage(MyYuQ.getMif().text("消息过长，正在处理").toMessage());
@@ -234,6 +246,7 @@ public class OnGroupMessageEvent {
 
                         event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
                     }catch (UninitializedPropertyAccessException e){
+                        SfLog.getInstance().e(this.getClass(), e);
                         event.getSendTo().sendMessage(MyYuQ.getMif().text("消息转图片失败，原消息发送中..").toMessage());
                         event.setCancel(false);
                     }catch (IOException e) {
@@ -260,7 +273,8 @@ public class OnGroupMessageEvent {
 
         //检查消息是否发送成功
         try {
-            messageSource.getId();
+            int id = messageSource.getId();
+            SfLog.getInstance().d(this.getClass(), "消息Id：" + id);
         }catch (ArrayIndexOutOfBoundsException e){
             if (event.getMessage() instanceof MyMessage) {
                 MyMessage myMessage = (MyMessage) event.getMessage();
@@ -276,6 +290,7 @@ public class OnGroupMessageEvent {
                 GroupConf conf = ConfManager.getInstance().get(group.getId());
 
                 group.sendMessage(MyYuQ.getMif().text("消息发送失败，转图片发送中，请稍候").toMessage());
+                SfLog.getInstance().w(this.getClass(), message.sourceMessage);
                 File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
                 try {
                     ImageIO.write(ImageHandle.messageToImage(message, conf), "png", imageFile);

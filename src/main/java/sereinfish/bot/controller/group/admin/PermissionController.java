@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.admin;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
@@ -73,13 +74,14 @@ public class PermissionController {
     }
 
     @Action("权限查询 {user}")
+    @Synonym("查询权限 {user}")
     @QMsg(mastAtBot = true, reply = true)
     @MenuItem(name = "查询权限", usage = "@Bot 权限查询 {user}", description = "获取用户的权限")
     public Message queryPermission(Group group, Member user){
         MessageLineQ messageLineQ = new Message().lineQ();
         messageLineQ.textLine("权限为：");
         for (int p : Permissions.getInstance().getMemberPermissions(group, user)) {
-            messageLineQ.text("[" + Permissions.getInstance().getAuthorityName(p) + "]");
+            messageLineQ.text(Permissions.getInstance().getAuthorityName(p));
         }
         return messageLineQ.getMessage();
     }

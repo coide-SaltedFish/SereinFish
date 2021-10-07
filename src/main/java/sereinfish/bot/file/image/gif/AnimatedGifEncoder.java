@@ -187,7 +187,7 @@ public class AnimatedGifEncoder {
 
     /**
      * Sets frame rate in frames per second. Equivalent to <code>setDelay(1000/fps)</code>.
-     *
+     * 以每秒帧数为单位设置帧速率。相当于设置延迟（1000/fps）</code>。
      * @param fps float frame rate (frames per second)
      */
     public void setFrameRate(float fps) {
@@ -230,7 +230,7 @@ public class AnimatedGifEncoder {
 
     /**
      * Initiates GIF file creation on the given stream. The stream is not closed automatically.
-     *
+     * 启动给定流上的GIF文件创建。该流不会自动关闭。
      * @param os OutputStream on which GIF images are written.
      * @return false if initial write failed.
      */

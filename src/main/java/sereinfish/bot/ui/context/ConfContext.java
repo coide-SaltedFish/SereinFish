@@ -99,7 +99,7 @@ public class ConfContext {
                     @Override
                     public void select(SelectDataBaseFrame frame, DataBase dataBase) {
                         control.setValue(dataBase.getDataBaseConfig());
-                        DataBaseConfig dataBaseConfig = (DataBaseConfig) control.getValue();
+                        DataBaseConfig dataBaseConfig = control.getValue();
                         try {
                             if (DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID()) != null){
                                 btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());

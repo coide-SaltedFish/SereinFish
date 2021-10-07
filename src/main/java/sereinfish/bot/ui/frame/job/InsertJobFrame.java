@@ -112,7 +112,7 @@ public class InsertJobFrame extends JFrame {
                         editFrame.close();
                     }
                 });
-                editFrame.setText((String) value);
+                editFrame.setText(value);
                 editFrame.setVisible(true);
             }
         });

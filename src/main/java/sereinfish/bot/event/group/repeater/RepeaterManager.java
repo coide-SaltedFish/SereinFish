@@ -1,15 +1,11 @@
 package sereinfish.bot.event.group.repeater;
 
-import com.alibaba.fastjson.JSONArray;
-import com.icecreamqaq.yuq.entity.Contact;
-import com.icecreamqaq.yuq.message.Message;
 import lombok.Getter;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.MessageChain;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.myYuq.MyYuQ;
-import sereinfish.bot.utils.BotUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +39,7 @@ public class RepeaterManager {
      * @param group
      * @param message
      */
-    public void add(Group group, MessageChain message){
+    public void add(long sender, Group group, MessageChain message){
         String msg = message.toString().replaceAll("\\[mirai:source:\\[-*[0-9]*],\\[-*[0-9]*]]", "");
 
         if (groupArrayListMap.containsKey(group.getId())){
@@ -55,6 +51,11 @@ public class RepeaterManager {
             }
         }else {
             groupArrayListMap.put(group.getId(),new ReMsg(group, message,1));
+        }
+
+        //如果是发送者是bot，则结束本次复读
+        if (sender == MyYuQ.getYuQ().getBotId()){
+            groupArrayListMap.get(group.getId()).isRepeater = true;
         }
 
         check();

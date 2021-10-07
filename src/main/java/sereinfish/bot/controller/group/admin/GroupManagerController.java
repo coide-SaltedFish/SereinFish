@@ -19,7 +19,7 @@ public class GroupManagerController {
 
     @Action("头衔 {sb} {str}")
     @QMsg(mastAtBot = true, reply = true)
-    @MenuItem(name = "设置头衔", usage = "头衔 {指定群员} {头衔内容}", description = "为指定对象设置头衔", permission = Permissions.GROUP_ADMIN)
+    @MenuItem(name = "设置头衔", usage = "头衔 {指定群员} {头衔内容}", description = "为指定对象设置头衔(需要Bot为群主)", permission = Permissions.GROUP_ADMIN)
     public String setPrefix(Group group, Member sender, Member sb, String str){
         if (!group.getBot().isOwner()){
             return "无权执行此操作";

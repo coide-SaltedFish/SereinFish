@@ -126,12 +126,13 @@ public class Permissions {
      * @return
      */
     public String getAuthorityName(int var){
+        String names = "";
         for (Map.Entry<String, Integer> entry:AuthorityList.entrySet()){
             if (entry.getValue() == var){
-                return entry.getKey();
+                names += "[" + entry.getKey() + "]";
             }
         }
-        return "未知";
+        return names;
     }
 
     /**

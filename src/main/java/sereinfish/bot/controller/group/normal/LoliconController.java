@@ -266,9 +266,8 @@ public class LoliconController {
                     //MD5发送方法
                     if (conf.isLoliconMD5ImageEnable()){
                         try {
-                            StringBuilder stringBuilderMd5 = new StringBuilder(DigestUtils.md5Hex(new FileInputStream(file)));
 
-                            Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + stringBuilderMd5 + ".jpg>");
+                            Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + DigestUtils.md5Hex(new FileInputStream(file)) + ".jpg>");
                             if (setu.isR18() || conf.isSetuMastReCallEnable()){
                                 reMsg.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
                             }
@@ -282,12 +281,11 @@ public class LoliconController {
                         Message message;
                         //上传图片
                         try {
-                            String imageMD5 = MyYuQ.uploadImage(group, file);
-                            message = Message.Companion.toMessageByRainCode("<Rain:Image:" + imageMD5 + ".jpg>");
+                            message = new Message().lineQ().plus(group.uploadImage(file)).getMessage();
                             if (setu.isR18() || conf.isSetuMastReCallEnable()){
                                 message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
                             }
-                        }catch (IOException e){
+                        }catch (Exception e){
                             SfLog.getInstance().e(this.getClass(), e);
                             message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
                         }

@@ -188,28 +188,6 @@ public class MsgDBController extends QQController {
         return Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg());
     }
 
-    @Action("\\^[!！.]图片url$\\")
-    @MenuItem(name = "获取QQ消息图片链接", usage = "[!！.]图片url", description = "Bot会读取数据库本群消息内容并解析后发出", permission = Permissions.ADMIN)
-    public Message getImageURL(ContextSession session){
-        reply("请发送图片");
-        Message msg = session.waitNextMessage(maxTime);
-        boolean flag = true;
-
-        for (MessageItem messageItem : msg.getBody()){
-            String msg_str = messageItem.toPath();
-            if (Pattern.matches(MyYuQ.FLAG_IMAGE,msg_str)){
-                flag = false;
-                String uuid = msg_str.split("img_|\\.")[1];
-                return MyYuQ.getMif().text("http://gchat.qpic.cn/gchatpic_new/0/-0-" + uuid + "/0").toMessage();
-            }
-        }
-
-        if (flag){
-            return MyYuQ.getMif().text("未发现图片").toMessage();
-        }
-        throw new DoNone();
-    }
-
     @Action("\\^[!！.]最近消息$\\ {qq}")
     @MenuItem(name = "最近消息", usage = "[!！.]最近消息", description = "获取指定对象的最近消息", permission = Permissions.ADMIN)
     public Message newMsg(Group group, long qq){

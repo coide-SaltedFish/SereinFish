@@ -181,7 +181,7 @@ public class PenguinStatistics {
 
         //绘制标题
         graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        ;//抗锯齿
+        //抗锯齿
         graphics2D.setColor(Color.BLACK);
         font = font.deriveFont(Font.BOLD, 36);
         graphics2D.setFont(font);

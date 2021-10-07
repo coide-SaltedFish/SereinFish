@@ -9,6 +9,7 @@ import net.mamoe.mirai.event.events.GroupMessagePostSendEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
 import org.jetbrains.annotations.NotNull;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
+import sereinfish.bot.myYuq.MyYuQ;
 
 public class MiraiEvent extends SimpleListenerHost {
 
@@ -28,7 +29,7 @@ public class MiraiEvent extends SimpleListenerHost {
     @EventHandler
     public void groupMessageEvent(GroupMessageEvent event){
         //复读
-        RepeaterManager.getInstance().add(event.getGroup(),event.getMessage());
+        RepeaterManager.getInstance().add(event.getSender().getId(), event.getGroup(),event.getMessage());
     }
 
     /**
@@ -37,7 +38,7 @@ public class MiraiEvent extends SimpleListenerHost {
      */
     @EventHandler
     public void groupMessagePostSendEvent(GroupMessagePostSendEvent event){
-        RepeaterManager.getInstance().add(event.getTarget(), event.getMessage());//复读
+        RepeaterManager.getInstance().add(MyYuQ.getYuQ().getBotId(), event.getTarget(), event.getMessage());//复读
     }
 
 

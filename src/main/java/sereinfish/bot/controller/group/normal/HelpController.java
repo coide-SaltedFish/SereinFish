@@ -6,6 +6,7 @@ import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.entity.bot.menu.MenuManager;
@@ -46,7 +47,9 @@ public class HelpController {
             }
             messageLineQ.textLine("");
             messageLineQ.textLine("可执行以下命令:");
-            messageLineQ.imageByFile(file);
+
+            Image image = group.uploadImage(file);
+            messageLineQ.plus(image);
 
             return messageLineQ.getMessage();
         } catch (IOException e) {

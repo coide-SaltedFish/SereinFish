@@ -44,7 +44,7 @@ public class Lolicon {
 
         public String getUrl(){
             String url = urls.toString().substring(1, urls.toString().length() - 1);
-            return url.toString().split("=")[1];
+            return url.split("=")[1];
         }
     }
 

@@ -36,9 +36,9 @@ public class BasicContext {
         comboBox.addItem("选择字体文件");
 
         if (!isSelect){
-            comboBox.addItem("文件：" + new File((String) var).getName());
+            comboBox.addItem("文件：" + new File(var).getName());
         }
-        comboBox.setSelectedItem("文件：" + new File((String) var).getName());
+        comboBox.setSelectedItem("文件：" + new File(var).getName());
 
         //设置点击事件
         comboBox.addItemListener(new ItemListener() {
