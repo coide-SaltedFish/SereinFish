@@ -4,7 +4,7 @@
 
 \<SF:[类型]:[参数]>
 
-注：类型文本不区分大小写
+注：除特殊注明外，类型文本不区分大小写
 
 ## \<SF:Reply>
 
@@ -79,10 +79,9 @@ public class Sender implements SFMsgCode {
     @Override
     public String code(SFMsgCodeContact codeContact) throws Exception {
         String para = codeContact.getParameter();
-        BotActionContext context = codeContact.getBotActionContext();
 
         if (para.equals("Name")){
-            return context.getSender().getName();
+            return codeContact.getSender().getName();
         }
     }
 }
