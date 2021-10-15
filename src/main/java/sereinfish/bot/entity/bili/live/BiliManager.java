@@ -1,6 +1,8 @@
 package sereinfish.bot.entity.bili.live;
 
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
+import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
@@ -11,6 +13,7 @@ import sereinfish.bot.entity.bili.live.entity.dynamic.DynamicCard;
 import sereinfish.bot.entity.bili.live.entity.info.Contribution;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
+import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
@@ -116,7 +119,11 @@ public class BiliManager {
                                 if (vList[0].getCreated() > biliUser.getLastVideosTime()){
                                     if (isConfInit){
                                         //发送更新消息
-                                        group.sendMessage(getVideosUpdateTip(vList[0]));
+                                        try {
+                                            group.sendMessage(getVideosUpdateTip(vList[0], group));
+                                        }catch (SendMessageFailedByCancel e){
+                                            SfLog.getInstance().e(this.getClass(), e);
+                                        }
                                     }
                                     //更新配置文件
                                     biliUser.setLastVideosTime(vList[0].getCreated());
@@ -166,14 +173,22 @@ public class BiliManager {
                             if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ENABLE){//如果之前在直播
                                 if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_CLOSE){
                                     //发送下播提醒
-                                    group.sendMessage(getLiveCloseTip(userInfo));
+                                    try {
+                                        group.sendMessage(getLiveCloseTip(userInfo, group));
+                                    }catch (SendMessageFailedByCancel e){
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                    }
                                 }
                             }else if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_CLOSE
                                     || biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ROUND_ENABLE){//如果之前没直播或在轮播
 
                                 if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
                                     //发送上播提醒
-                                    group.sendMessage(getLiveOpenTip(userInfo));
+                                    try {
+                                        group.sendMessage(getLiveOpenTip(userInfo, group));
+                                    }catch (Exception e){
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                    }
                                 }
 
                             }
@@ -216,7 +231,11 @@ public class BiliManager {
                             if (isConfInit){//初始化后进行
                                 if (card.getDesc().getTimestamp() > biliUser.getLastDynamicTime()){
                                     //发送
-                                    group.sendMessage(getDynamicUpdateTip(card));
+                                    try {
+                                        group.sendMessage(getDynamicUpdateTip(card, group));
+                                    }catch (SendMessageFailedByCancel e){
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                    }
                                 }
                             }
                             //更新配置
@@ -239,7 +258,7 @@ public class BiliManager {
      * @param card
      * @return
      */
-    public Message getDynamicUpdateTip(Dynamic.Data.Card card){
+    public Message getDynamicUpdateTip(Dynamic.Data.Card card, Contact contact){
         MessageLineQ messageLineQ = new Message().lineQ();
 
         messageLineQ.textLine("UP主：" + card.getUserName());
@@ -258,7 +277,11 @@ public class BiliManager {
                 }
             }
             for (DynamicCard.Item.Picture picture:card.getDynamicCard().getOrigin().getPictures()){
-                messageLineQ.imageByUrl(picture.getImg_src());
+                try{
+                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                }catch (Exception e){
+                    messageLineQ.textLine("图片获取失败：" + e.getMessage());
+                }
             }
         }else {
             messageLineQ.textLine("刚刚发布了一条动态:");
@@ -267,7 +290,11 @@ public class BiliManager {
             messageLineQ.textLine("内容：");
             messageLineQ.textLine(card.getDynamicCard().getDescription());
             for (DynamicCard.Item.Picture picture:card.getDynamicCard().getPictures()){
-                messageLineQ.imageByUrl(picture.getImg_src());
+                try{
+                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                }catch (Exception e){
+                    messageLineQ.textLine("图片获取失败：" + e.getMessage());
+                }
             }
 
         }
@@ -282,7 +309,7 @@ public class BiliManager {
      * @param vList
      * @return
      */
-    public Message getVideosUpdateTip(Contribution.Data.List.VList vList){
+    public Message getVideosUpdateTip(Contribution.Data.List.VList vList, Contact contact){
         MessageLineQ messageLineQ = new Message().lineQ();
 
         messageLineQ.textLine("UP主：" + vList.getAuthor());//up
@@ -292,7 +319,11 @@ public class BiliManager {
             messageLineQ.textLine("发布了新的投稿视频");
         }
 
-        messageLineQ.imageByUrl(vList.getPic());//封面
+        try {
+            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(vList.getPic(), System.currentTimeMillis() + "_cover")));
+        }catch (Exception e){
+            messageLineQ.textLine("封面获取失败了：" + e.getMessage());
+        }
         messageLineQ.textLine("投稿时间：" + Time.dateToString(vList.getCreated() * 1000, "yyyy-MM-dd HH:mm:ss"));
 
         messageLineQ.textLine("标题：");
@@ -322,11 +353,16 @@ public class BiliManager {
      * 上播提醒
      * @return
      */
-    private Message getLiveOpenTip(UserInfo userInfo){
+    private Message getLiveOpenTip(UserInfo userInfo, Contact contact){
         MessageLineQ messageLineQ = new Message().lineQ();
         messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("开播辣！！");
-        messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
+        try {
+            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover")));
+        }catch (Exception e){
+            messageLineQ.textLine("封面获取失败了：" + e.getMessage());
+        }
+
         messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
         messageLineQ.textLine("点击链接立刻进行围观：");
         messageLineQ.text(userInfo.getData().getLive_room().getUrl());
@@ -337,17 +373,21 @@ public class BiliManager {
      * 下播提醒
      * @return
      */
-    private Message getLiveCloseTip(UserInfo userInfo){
+    private Message getLiveCloseTip(UserInfo userInfo, Contact contact){
         MessageLineQ messageLineQ = new Message().lineQ();
         messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("下播了");
-        messageLineQ.imageByUrl(userInfo.getData().getLive_room().getCover());
+        try {
+            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover")));
+        }catch (Exception e){
+            messageLineQ.textLine("封面获取失败了：" + e.getMessage());
+        }
         if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){
             messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
             messageLineQ.textLine("现在正在进行轮播:");
             messageLineQ.text(userInfo.getData().getLive_room().getUrl());
         }else {
-            messageLineQ.text(userInfo.getData().getLive_room().getTitle());
+            messageLineQ.textLine("标题：" + userInfo.getData().getLive_room().getTitle());
         }
         return messageLineQ.getMessage();
     }

@@ -7,6 +7,7 @@ import com.IceCreamQAQ.Yu.util.Web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.icecreamqaq.yuq.RainBot;
+import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Contact;
@@ -16,7 +17,10 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.Text;
+import lombok.Data;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.codec.digest.DigestUtils;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
@@ -52,6 +56,7 @@ public class MyYuQ {
     private static OkHttpClient okHttpClient;
     private static Web web;
     private static String botName;
+    private static RainVersion rainVersion;
 
     public static final String BASE_PACK = "sereinfish.bot";//包名
 
@@ -139,6 +144,14 @@ public class MyYuQ {
         return htmlStr.trim(); //返回文本字符串
     }
 
+    public static RainVersion getRainVersion() {
+        return rainVersion;
+    }
+
+    public static void setRainVersion(RainVersion rainVersion) {
+        MyYuQ.rainVersion = rainVersion;
+    }
+
     /**
      * 得到图片链接
      * @param md5
@@ -212,35 +225,6 @@ public class MyYuQ {
             md5code = "0" + md5code;
         }
         return md5code;
-    }
-
-    /**
-     * 处理消息变量
-     * qq:被操作qq
-     * fromQQ：操作者qq
-     * group：来自的群
-     * name：被操作qq名称
-     * fromName：操作qq名称
-     * @return
-     */
-    public static String messageVariable(String msg, Member sender, Member operator, Group group){
-        //进行变量替换
-        if (sender != null){
-            msg = replace(msg,"<qq>",sender.getId()+"");
-            msg = replace(msg,"<name>",sender.getName());
-        }
-        //
-        if (operator != null){
-            msg = replace(msg,"<operatorQQ>",operator.getId()+"");
-            msg = replace(msg,"<operatorName>",operator.getName());
-        }
-        //group
-        if (group != null){
-            msg = replace(msg,"<groupID>",group.getId()+"");
-            msg = replace(msg,"<groupName>",group.getName());
-            msg = replace(msg,"<group>",group.toString());
-        }
-        return msg;
     }
 
     /**
@@ -321,68 +305,35 @@ public class MyYuQ {
     }
 
     /**
-     * 消息处理
-     * @param str
+     * 缩减字符串
+     * @param text
+     * @param len
      * @return
      */
-    public static Message[] sfCodeToMessage(BotActionContext actionContext, String str){
-        //语音
-        Pattern pattern=Pattern.compile("<sf:voice:File:.*>",Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(str);
-        if (matcher.find()){
-            String path = matcher.group(0).replace("<sf:voice:File:", "");
-            path = path.substring(0, path.length() - 1);
-            File file = new File(path);
-            if (file.exists() && file.isFile()){
-                try {
-                    return new Message[]{new Message().lineQ().voiceByInputStream(new FileInputStream(file)).getMessage()};
-                } catch (FileNotFoundException fileNotFoundException) {
-                    SfLog.getInstance().e(MyYuQ.class, fileNotFoundException);
-                }
-            }
+    public static String textLengthLimit(String text, int len){
+        if (len < 1){
+            len = 1;
         }
-        //消息引用
-
-        double i = 5e10;
-
-        //多条消息
-        if (str.split("<sf:split>").length > 1){
-            String[] strs = str.split("<sf:split>");
-            ArrayList<Message> msgs = new ArrayList<>();
-            for (String msgStr:strs){
-                for (Message message:sfCodeToMessage(actionContext, msgStr)){
-                    msgs.add(message);
-                }
-            }
-
-            return msgs.toArray(new Message[]{});
+        text = text.replace("\n", " ");
+        if (text.length() > len){
+            text = text.substring(0, len) + "...";
         }
 
-        //触发者At
-        str = str.replace("<sf:triggerAt>","<Rain:At:" + actionContext.getSender().getId() + ">");
-        //触发者qq
-        str = str.replace("<sf:triggerQq>", actionContext.getSender().getId() + "");
-        //触发者名字
-        str = str.replace("<sf:triggerName>",actionContext.getSender().getName());
-        //触发者头像
-        if (str.contains("<sf:triggerHead>")){
-            try {
-                String md5 = uploadImage(actionContext.getSource(), NetHandle.imageDownload(actionContext.getSender().getAvatar(), actionContext.getSender().getId() + ""));
-                str = str.replace("<sf:triggerHead>", "<Rain:Image:" + md5 + ".jpg>");
-            } catch (IOException e) {
-                SfLog.getInstance().e(MyYuQ.class, e);
-            }
-        }
+        return text;
+    }
 
-        //回复触发消息
-        Message message = Message.Companion.toMessageByRainCode(str);
-        if (str.startsWith("<sf:reply>")){
-            str = str.replace("<sf:reply>", "");
-            message = Message.Companion.toMessageByRainCode(str);
-            message.setReply(actionContext.getMessage().getSource());
-        }
-
-        return new Message[]{message};
+    /**
+     * 腾讯图片可用性检测
+     * @return
+     */
+    public static boolean imageEnableTX(String md5) throws IOException {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        final Request request = new Request.Builder()
+                .url(getImageUrl(md5))
+                .get()//默认就是GET请求，可以不写
+                .build();
+        Response response = okHttpClient.newCall(request).execute();
+        return response.isSuccessful();
     }
 
     public static String getBotName() {

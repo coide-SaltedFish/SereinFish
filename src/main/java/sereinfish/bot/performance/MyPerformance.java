@@ -198,7 +198,7 @@ public class MyPerformance {
      * @param s
      * @return
      */
-    private static String unitConversion(long s){
+    public static String unitConversion(long s){
         if (s < 1024){
             return s + "B";
         }else if (s < 1024 * 1024){

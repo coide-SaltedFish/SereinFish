@@ -171,15 +171,15 @@ public class PixivController {
                 Illust illust = pixivEntity.getIllust();
                 messageLineQ.textLine("图片[" + uid + "]：");
                 if (page > illust.getPageMax()){
-                    page = 1;
+                    page = illust.getPageMax();
                     messageLineQ.textLine("错误已自动纠正：[" + pageStr + "]->[" + page + "]");
                 }
 
                 //是否R18
                 if (illust.isR18()){
-                    messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是第" + page + "张");
                     messageLineQ.textLine("要找的图片带有R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
                     if (enablePage){
+                        messageLineQ.textLine("共" + illust.getPageMax() + "张，以下是第" + page + "张");
                         String proxyUrl = illust.getProxyUrl(page - 1);
                         File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
                         try {

@@ -16,10 +16,12 @@ import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
+import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.entity.User;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
+import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.entity.bili.live.BiliManager;
@@ -27,6 +29,7 @@ import sereinfish.bot.entity.bili.live.entity.dynamic.DynamicCard;
 import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -91,17 +94,6 @@ public class TestController extends QQController {
             messageLineQ.text("直播间还未开启");
         }
         return messageLineQ.getMessage();
-    }
-
-    @Action("获取UP最新视频 {mid}")
-    @QMsg(mastAtBot = true)
-    public Message clickMe(long mid){
-        try {
-            return BiliManager.getInstance().getVideosUpdateTip(BiliManager.getUserVideos(mid).getData().getList().getVlist()[0]);
-        } catch (IOException e) {
-            SfLog.getInstance().e(this.getClass(), e);
-        }
-        throw new DoNone();
     }
 
     @Action("获取UP最新动态 {mid}")
@@ -266,6 +258,26 @@ public class TestController extends QQController {
 
     }
 
+    @Action("喜报 {text}")
+    @QMsg(mastAtBot = true)
+    public Message xibao(Group group, String text){
+        group.sendMessage("正在加载");
+        try {
+            File file = new File(FileHandle.imageCachePath, "xibao_" + System.currentTimeMillis());
+            BufferedImage bufferedImage = ImageHandle.getXiBao(text, new Font("黑体", Font.BOLD, 168));
+            ImageIO.write(bufferedImage, "jpg", file);
+            Image image = group.uploadImage(file);
+            return new Message().lineQ().plus(image).getMessage();
+        } catch (IOException e) {
+            return new Message().lineQ().text("错误：" + e.getMessage()).getMessage();
+        }
+    }
+
+    @Action("抛个异常 {text}")
+    @QMsg(mastAtBot = true)
+    public void thrEx(String text){
+        throw new NullPointerException(text);
+    }
 
     @Catch(error = IOException.class)
     public String iOException(IOException e){

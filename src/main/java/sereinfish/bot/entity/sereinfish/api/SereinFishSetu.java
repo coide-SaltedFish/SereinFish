@@ -18,6 +18,11 @@ public class SereinFishSetu {
         return MyYuQ.toClass(json, ImageList.class);
     }
 
+    public static Msg getMd5(String md5) throws IOException {
+        String json = OkHttpUtils.getStr("http://sereinfish.cc:19198/api/md5?md5=" + md5);
+        return MyYuQ.toClass(json, Msg.class);
+    }
+
     /**
      * 涩图提交
      * @param pid

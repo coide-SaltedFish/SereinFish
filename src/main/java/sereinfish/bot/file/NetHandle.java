@@ -74,6 +74,9 @@ public class NetHandle {
         InputStream inputStream = conn.getInputStream();
         String res = readInputStream(inputStream);
         GamerInfo gamerInfo = MyYuQ.toClass(res,GamerInfo.class);
+
+        inputStream.close();
+        conn.disconnect();
         return gamerInfo;
     }
 

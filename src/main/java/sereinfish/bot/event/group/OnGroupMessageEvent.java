@@ -3,6 +3,8 @@ package sereinfish.bot.event.group;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.EventBus;
+import com.icecreamqaq.yuq.controller.BotActionContext;
+import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
@@ -21,8 +23,15 @@ import sereinfish.bot.entity.msg.LeavingMessage;
 import sereinfish.bot.entity.msg.MyMessage;
 import sereinfish.bot.entity.qingyunke.QingYunKeApi;
 import sereinfish.bot.entity.qingyunke.Result;
+import sereinfish.bot.entity.sereinfish.api.SereinFishSetu;
+import sereinfish.bot.entity.sereinfish.api.msg.ImageItem;
+import sereinfish.bot.entity.sereinfish.api.msg.re.Msg;
+import sereinfish.bot.entity.sf.msg.SFMessage;
+import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
+import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.event.myEvent.BotNameEvent;
 import sereinfish.bot.event.myEvent.NoActionResponseEvent;
+import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.DataBaseManager;
@@ -38,11 +47,13 @@ import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -99,9 +110,53 @@ public class OnGroupMessageEvent {
 
         //留言
         LeavingMessage.checkRunnable(event.getGroup().getId(), event.getSender().getId());
-        //刷屏检测
-
+        //TODO:刷屏检测
         Message message = event.getMessage();
+        //图片过期检测
+        try {
+            for (MessageItem item:message.getBody()){
+                if (item instanceof Image){
+                    Image image = (Image) item;
+                    String md5 = image.getId().substring(0, image.getId().lastIndexOf(".")).toUpperCase();
+                    if(!MyYuQ.imageEnableTX(md5)){
+                        event.getGroup().sendMessage("检测到图片已过期：" + md5);
+                        //向api查询是否有图片信息
+                        Msg msg = SereinFishSetu.getMd5(md5);
+                        if (msg.getCode() == Msg.SUCCESS){
+                            ImageItem imageItem = (ImageItem) msg.getMessage();
+                            //如果有，进行发送
+                            if (imageItem.isR18()){
+                                //生成二维码
+                                File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+                                BufferedImage bufferedImage = QRCodeImage.backgroundMatrix(
+                                        QRCodeImage.generateQRCodeBitMatrix(imageItem.getUrl(), 800, 800),
+                                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                        0.0f,
+                                        Color.BLACK);
+                                ImageIO.write(bufferedImage, "png", imageFile);
+                                Image image1 = event.getGroup().uploadImage(imageFile);
+                                event.getGroup().sendMessage("原图可能是：");
+
+                                MessageLineQ messageLineQ = new Message().lineQ();
+                                messageLineQ.text("检测到R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
+                                //撤回设置
+                                Message message1 = messageLineQ.getMessage();
+                                message1.setRecallDelay((long) ConfManager.getInstance().get(event.getGroup().getId()).getSetuReCallTime() * 1000);
+                                event.getGroup().sendMessage(message1);
+                            }else {
+                                Image image1 = event.getGroup().uploadImage(NetHandle.imageDownload(imageItem.getUrl(), md5));
+                                event.getGroup().sendMessage("原图可能是：");
+                                event.getGroup().sendMessage(image1);
+                            }
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), e);
+        }
+
+
         //单独@bot或者bot名字
         if (message.getCodeStr().trim().equals("<Rain:At:" + MyYuQ.getYuQ().getBotId() + ">")
                 || message.getCodeStr().trim().equals(MyYuQ.getBotName())){
@@ -333,8 +388,11 @@ public class OnGroupMessageEvent {
             String tip = conf.getJoinGroupTipText();
             if (!tip.trim().equals("")){
                 SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
-                event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
-                return;
+
+                SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
+                    event.getGroup().sendMessage(message);
+                }
             }
         }
 
@@ -365,7 +423,10 @@ public class OnGroupMessageEvent {
             if (conf.isQuitGroupTipEnable()){
                 String tip = conf.getQuitGroupTipText();
                 if (!tip.trim().equals("")){
-                    group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
+                    SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+                    for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
+                        event.getGroup().sendMessage(message);
+                    }
                 }else {
                     group.sendMessage(MyYuQ.getMif().text("刚刚，" + member.getNameCard() + "(" +
                             member.getName() + ")[" + member.getId() + "]离开了我们，他说过的最后一句话是：").toMessage());
@@ -402,7 +463,10 @@ public class OnGroupMessageEvent {
                         if (conf.isAddGroupBlackListTip()){
                             String tip = conf.getAddGroupBlackListTipText();
                             if (!tip.trim().equals("")){
-                                group.sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,member,null,group)));
+                                SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+                                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
+                                    event.getGroup().sendMessage(message);
+                                }
                             }
                         }
                     } catch (SQLException e) {
@@ -437,7 +501,11 @@ public class OnGroupMessageEvent {
         if (conf.isEnable() && conf.isKickGroupTipEnable()){
             String tip = conf.getKickGroupTipText();
             if (!tip.trim().equals("")){
-                event.getGroup().sendMessage(Message.Companion.toMessageByRainCode(MyYuQ.messageVariable(tip,event.getMember(),null,event.getGroup())));
+                SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+                sfMsgCodeContact.save("Operator", event.getOperator());
+                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
+                    event.getGroup().sendMessage(message);
+                }
             }
         }
     }
@@ -454,6 +522,8 @@ public class OnGroupMessageEvent {
             event.setCancel(true);
             return;
         }
+
+        System.out.println("msg:" + event.getMessage());
 
         SfLog.getInstance().d(this.getClass(),"[" + event.getQq() + "]申请加入群聊[" + event.getGroup() + "]");
         //自动同意入群
@@ -472,6 +542,7 @@ public class OnGroupMessageEvent {
                             if (conf.isGlobalBlackListGroupEnable()){
                                 if(blackListDao.exist(event.getQq().getId())){
                                     //拒绝
+                                    event.setRejectMessage("黑名单用户");
                                     event.setAccept(false);
                                     event.setCancel(true);
                                     event.getGroup().sendMessage(MyYuQ.getMif().text("[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
@@ -485,6 +556,7 @@ public class OnGroupMessageEvent {
                             }else {
                                 if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
                                     //拒绝
+                                    event.setRejectMessage("黑名单用户");
                                     event.setAccept(false);
                                     event.setCancel(true);
                                     event.getGroup().sendMessage(MyYuQ.getMif().text("[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
@@ -537,7 +609,8 @@ public class OnGroupMessageEvent {
                 String str = replyDao.queryKey(event.getContact().getId(),Message.Companion.toCodeString(event.getMessage()));
                 if (str != null){
                     try{
-                        for (Message message:MyYuQ.sfCodeToMessage(event.getBotActionContact(), str)){
+                        SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getBotActionContact());
+                        for (Message message: SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, str)){
                             event.getContact().sendMessage(message);
                         }
                         return;

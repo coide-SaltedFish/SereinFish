@@ -8,10 +8,13 @@ import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
+import sereinfish.bot.entity.random.DrawManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
@@ -95,6 +98,17 @@ public class RandomController {
 
         return new Message().lineQ().at(sender).text("\n").textLine("设置值：" + var).textLine("对[" + name + "]进行判定，判定值:" + rdVar).text(result).getMessage();
     }
+
+    @Action("抽签")
+    @QMsg(mastAtBot = true, reply = true)
+    public String draw(GroupConf groupConf, Member sender){
+        //判断是否启用功能
+        if (!groupConf.isDrawEnable()){
+            throw new SkipMe();
+        }
+        return DrawManager.draw(groupConf, sender.getId());
+    }
+
 
     @Action("抽一位幸运群友")
     @Synonym({"抽个幸运群友", "抽一个幸运群友", "抽个幸运群员", "抽一个幸运群员", "抽一位幸运群员"})

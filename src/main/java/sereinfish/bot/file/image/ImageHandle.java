@@ -10,16 +10,19 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sun.font.FontDesignMetrics;
 import sun.misc.BASE64Decoder;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.GlyphVector;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -400,6 +403,67 @@ public class ImageHandle {
             }
         }
 
+        return bufferedImage;
+    }
+
+    /**
+     * 得到一张喜报图片
+     * @return
+     */
+    public static BufferedImage getXiBao(String text, Font font) throws IOException {
+        //获取底图
+        BufferedImage bufferedImage = ImageIO.read(ImageHandle.class.getClassLoader().getResource("image/xibao.jpg"));
+
+        FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
+        //字体位置计算
+        int minX = 260;
+        int minY = 480;
+
+        int maxWidth = bufferedImage.getWidth() - (minX * 2);
+        int maxHeight = bufferedImage.getHeight() - (minY * 2);
+
+        ArrayList<String> strings = new ArrayList<>();
+        //计算文字长度
+        if (metrics.stringWidth(text) > maxWidth){
+            //分段
+            String str = "";
+            for (String c:text.split("")){
+                str += c;
+                if (metrics.stringWidth(str) >= maxWidth){
+                    strings.add(str);
+                    str = "";
+                }
+            }
+            if (!str.equals("")){
+                strings.add(str);
+            }
+        }else {
+            strings.add(text);
+        }
+        //绘制文字
+        int fontHeight = metrics.getHeight();
+        int startY = (maxHeight - fontHeight * strings.size()) / 2 + minY;
+
+        for (String str:strings){
+            GlyphVector glyphVector = font.createGlyphVector(metrics.getFontRenderContext(), str);
+            Shape shape = glyphVector.getOutline();
+
+            Rectangle bounds = shape.getBounds();
+
+            Graphics2D graphics2D = bufferedImage.createGraphics();
+            graphics2D.translate(
+                    (bufferedImage.getWidth() - bounds.width) / 2 - bounds.x,
+                    startY - bounds.y
+            );
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics2D.setColor(Color.RED);
+            graphics2D.fill(shape);
+            graphics2D.setColor(Color.YELLOW);
+            graphics2D.setStroke(new BasicStroke(8));
+            graphics2D.draw(shape);
+
+            startY += fontHeight + 20;
+        }
         return bufferedImage;
     }
 }

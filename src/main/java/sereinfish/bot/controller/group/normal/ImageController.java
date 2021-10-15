@@ -749,7 +749,7 @@ public class ImageController extends QQController {
     private Message getDingGif(long m){
         int bgW = 480;
         int bgH = 400;
-        int delay = 50;//每张图之间的延迟
+        int delay = 120;//每张图之间的延迟
 
         BufferedImage headImage = ImageHandle.imageToBufferedImage(CacheManager.getMemberHeadImage(m));//得到头像
         File imageFile = new File(FileHandle.imageCachePath,"ding_temp_" + new Date().getTime());//文件缓存路径

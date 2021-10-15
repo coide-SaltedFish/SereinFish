@@ -1,10 +1,17 @@
 package sereinfish.bot.job.entity;
 
+import com.icecreamqaq.yuq.controller.BotActionContext;
+import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
+import sereinfish.bot.entity.sf.msg.SFMessage;
+import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.job.ex.MessageJobIllegalException;
+import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+
+import java.util.HashMap;
 
 @AllArgsConstructor
 public class JobMsg{
@@ -16,8 +23,15 @@ public class JobMsg{
      * 得到消息
      * @return
      */
-    public Message getMessage(){
-        return Message.Companion.toMessageByRainCode(msg);
+    public Message[] getMessage(){
+        SFMsgCodeContact sfMsgCodeContact = null;
+        try {
+            sfMsgCodeContact = new SFMsgCodeContact(getRecipient(), getRecipient());
+        } catch (MessageJobIllegalException e) {
+            SfLog.getInstance().e(this.getClass(), e);
+            return new Message[]{new Message().lineQ().text("错误：" + e.getMessage()).getMessage()};
+        }
+        return SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, msg).toArray(new Message[]{});
     }
 
     /**

@@ -40,6 +40,8 @@ public class FileHandle {
 
     public static String JetBrainsMonoFontFile = "fonts/JetBrainsMono.ttc";//mc默认字体
 
+    public static File backupsPath = new File(dataPath, "backups/");//备份文件
+
     static {
         //初始化
         if (dataPath.exists())
@@ -62,6 +64,8 @@ public class FileHandle {
             groupDataPath.mkdirs();
         if (mcResPath.exists())
             mcResPath.mkdirs();
+        if (backupsPath.exists())
+            backupsPath.mkdirs();
     }
     /**
      * 写入文件

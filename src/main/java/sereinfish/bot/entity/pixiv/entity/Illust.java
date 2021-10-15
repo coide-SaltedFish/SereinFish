@@ -75,6 +75,8 @@ public class Illust {
         return x_restrict == 2;
     }
 
+
+
     @Getter
     public class MetaSinglePage{
         private String original_image_url;

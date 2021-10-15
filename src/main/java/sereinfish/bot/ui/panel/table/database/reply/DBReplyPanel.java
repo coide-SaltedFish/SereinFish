@@ -8,7 +8,9 @@ import sereinfish.bot.database.ex.UpdateNoFindThrowable;
 import sereinfish.bot.database.handle.BlackListDao;
 import sereinfish.bot.database.handle.ReplyDao;
 import sereinfish.bot.database.table.Reply;
+import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.dialog.TipDialog;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.frame.database.insert.InsertFrame;
@@ -28,6 +30,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -126,6 +130,25 @@ public class DBReplyPanel extends JPanel {
         panel_bottom.add(panel_tip,BorderLayout.SOUTH);
 
         //操作区域
+        JButton btn_backups = new JButton("备份");
+        btn_backups.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    File backupsFile = new File(FileHandle.backupsPath, "replyBackups_" + conf.getGroup() + "_" + System.currentTimeMillis() + ".txt");
+                    ArrayList<Reply> replies = replyDao.query(conf.getGroup());
+                    FileHandle.write(backupsFile, MyYuQ.toJson(replies, replies.getClass()));
+                    SfLog.getInstance().d(this.getClass(), "备份完成");
+                } catch (SQLException throwables) {
+                    SfLog.getInstance().e(this.getClass(), throwables);
+                } catch (IllegalAccessException illegalAccessException) {
+                    SfLog.getInstance().e(this.getClass(), illegalAccessException);
+                } catch (IOException ioException) {
+                    SfLog.getInstance().e(this.getClass(), ioException);
+                }
+            }
+        });
+
         JButton btn_insert = new JButton("插入");
         btn_insert.addActionListener(new ActionListener() {
             @Override
@@ -212,6 +235,7 @@ public class DBReplyPanel extends JPanel {
         });
 
         JPanel panel_btn = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panel_btn.add(btn_backups);
         panel_btn.add(btn_insert);
         panel_btn.add(btn_delete);
         panel_btn.add(btn_update);

@@ -6,6 +6,8 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
@@ -39,6 +41,23 @@ public class ClassManager {
             throw new NullPointerException("类管理器尚未初始化");
         }
         return manager;
+    }
+
+    /**
+     * 得到包含指定注解的类列表
+     * @param annotationClass
+     * @return
+     */
+    public ArrayList<Class> getClassList(Class<? extends Annotation> annotationClass){
+        ArrayList<Class> classList = new ArrayList<>();
+
+        for (Class c:classArrayList){
+            if (c.isAnnotationPresent(annotationClass)){
+                classList.add(c);
+            }
+        }
+
+        return classList;
     }
 
     /**
@@ -184,6 +203,21 @@ public class ClassManager {
             }
         }
         return myClassName;
+    }
+
+    /**
+     * 判断类是否继承了类
+     * @param c
+     * @param i
+     * @return
+     */
+    public static boolean hasInterfaces(Class c, Class i){
+        for (Class<?> item:c.getInterfaces()){
+            if (item == i){
+                return true;
+            }
+        }
+        return false;
     }
 
     public ArrayList<Class> getControllerClassList() {

@@ -9,6 +9,7 @@ import com.IceCreamQAQ.Yu.job.JobManager;
 import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.icecreamqaq.yuq.RainBot;
+import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
@@ -54,6 +55,8 @@ public class InitEvent{
     private RainBot rainBot;
     @Inject
     private Web web;
+    @Inject
+    RainVersion rainVersion;
 
     @Config("YuQ.bot.name")
     private String name;
@@ -76,6 +79,7 @@ public class InitEvent{
             name = yuQ.getBotInfo().getName();
         }
         MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web, name);
+        MyYuQ.setRainVersion(rainVersion);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");

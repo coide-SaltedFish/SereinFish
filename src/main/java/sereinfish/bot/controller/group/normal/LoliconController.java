@@ -2,6 +2,7 @@ package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.controller.ActionContext;
 import com.IceCreamQAQ.Yu.entity.DoNone;

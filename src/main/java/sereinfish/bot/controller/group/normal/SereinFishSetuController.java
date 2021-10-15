@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
+import com.icecreamqaq.yuq.annotation.PathVar;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
@@ -75,10 +76,11 @@ public class SereinFishSetuController {
         setu(request, group, groupConf);
     }
 
-    @Action("涩图查询 {key} {numStr}")
+    @Action("涩图查询 {key}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message setu(GroupConf groupConf, Group group, String key, String numStr){
+    public Message setu(GroupConf groupConf, Group group, String key, @PathVar(3) String numStr){
         int num = 1;
+
         try{
             num = Integer.decode(numStr);
         }catch (NumberFormatException e){

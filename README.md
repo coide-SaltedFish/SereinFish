@@ -1,6 +1,10 @@
 # SereinFish Bot
 基于YuQ-Mirai实现的QQ机器人
 
+[查看文档](https://github.com/coide-SaltedFish/SereinFish/blob/master/docs/UserManual.md)
+
+[查看SFMsgCode文档](https://github.com/coide-SaltedFish/SereinFish/blob/master/docs/SfMsgCode.md)
+
 [点此跳转到YuQ](https://github.com/YuQWorks)
 
 [点此跳转到kukubot](https://github.com/kukume/kukubot)

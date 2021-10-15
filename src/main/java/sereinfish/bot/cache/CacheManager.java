@@ -71,6 +71,24 @@ public class CacheManager {
     }
 
     /**
+     * 得到群头像
+     * @param group
+     * @return
+     */
+    public static File getGroupHeadImageFile(long group) throws IOException {
+        File file = new File(FileHandle.groupHeadCachePath,group + "");
+        if (!file.getParentFile().exists()){
+            file.getParentFile().mkdirs();
+        }
+        //检测缓存文件里有没有
+        if (existGroupHead(group)){
+            //从缓存文件获取
+            return file;
+        }
+        return getGroupNetHeadImageFile(group);
+    }
+
+    /**
      * 从网络获取群头像
      * @param group
      * @return
@@ -90,6 +108,19 @@ public class CacheManager {
         BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
         bufferedImage.createGraphics().drawString("错误",0,0);
         return bufferedImage;
+    }
+
+    /**
+     * 从网络获取群头像
+     * @param group
+     * @return
+     */
+    public static File getGroupNetHeadImageFile(long group) throws IOException {
+        File file = new File(FileHandle.groupHeadCachePath,group + "");
+        //从网络获取
+        Image image = NetHandle.getImage(new URL("https://p.qlogo.cn/gh/" + group + "/" + group + "/640"));
+        ImageIO.write((BufferedImage) image,"PNG",file);//写入文件
+        return file;
     }
 
     /**
@@ -115,6 +146,24 @@ public class CacheManager {
     }
 
     /**
+     * 得到qq头像
+     * @param qq
+     * @return
+     */
+    public static File getMemberHeadImageFile(long qq) throws IOException {
+        File file = new File(FileHandle.memberHeadCachePath,qq + "");
+        if (!file.getParentFile().exists()){
+            file.getParentFile().mkdirs();
+        }
+
+        if (existMemberHead(qq)){
+            //从缓存文件获取
+            return file;
+        }
+        return getMemberNetHeadImageFile(qq);
+    }
+
+    /**
      * 从网络获取头像文件
      * @param qq
      * @return
@@ -134,6 +183,19 @@ public class CacheManager {
         BufferedImage bufferedImage = new BufferedImage(640, 640, BufferedImage.TYPE_4BYTE_ABGR);
         bufferedImage.createGraphics().drawString("错误",0,0);
         return bufferedImage;
+    }
+
+    /**
+     * 从网络获取头像文件
+     * @param qq
+     * @return
+     */
+    public static File getMemberNetHeadImageFile(long qq) throws IOException {
+        File file = new File(FileHandle.memberHeadCachePath,qq + "");
+        //从网络获取
+        Image image = NetHandle.getImage(new URL("http://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"));
+        ImageIO.write((BufferedImage) image,"PNG",file);//写入文件
+        return file;
     }
 
     /**Lolicon**/

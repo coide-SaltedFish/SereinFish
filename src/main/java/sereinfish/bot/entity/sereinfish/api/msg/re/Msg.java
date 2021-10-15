@@ -10,5 +10,5 @@ public class Msg {
     public static final int FAIL = 404;
 
     int code;
-    String message;
+    Object message;
 }

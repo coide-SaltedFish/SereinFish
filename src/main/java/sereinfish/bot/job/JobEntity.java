@@ -103,12 +103,14 @@ public class JobEntity {
     @AllArgsConstructor
     public static class SendMsgJob implements Runnable{
         private Contact contact;
-        private Message message;
+        private Message[] messages;
 
         @Override
         public void run() {
             SfLog.getInstance().d(this.getClass(), "定时任务执行，消息发送");
-            contact.sendMessage(message);
+            for (Message message:messages){
+                contact.sendMessage(message);
+            }
         }
     }
 }

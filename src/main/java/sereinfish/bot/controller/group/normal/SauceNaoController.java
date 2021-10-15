@@ -25,6 +25,7 @@ import sereinfish.bot.database.table.GroupHistoryMsg;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.pixiv.Pixiv;
+import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.entity.pixiv.entity.PixivEntity;
 import sereinfish.bot.entity.pixivcat.PixivCat;
 import sereinfish.bot.entity.sauceNAO.SauceNao;
@@ -36,6 +37,8 @@ import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.performance.MyPerformance;
+import sereinfish.bot.utils.BotUtils;
 import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
@@ -44,6 +47,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -202,88 +206,221 @@ public class SauceNaoController extends QQController {
                        }else {
                            messageLineQ.textLine("索引名称：" + result.getHeader().getIndex_name());
                        }
-                        messageLineQ.text("链接：");
-                        if (result.getData().getExt_urls().length > 0){
-                            for (String url:result.getData().getExt_urls()){
-                                messageLineQ.textLine(url);
-                            }
-                        }else {
-                            messageLineQ.text("无链接");
-                        }
-                        if (result.getData().getPixiv_id() != 0){
-                            if (result.getData().getMember_id() != 0){
-                                messageLineQ.textLine("作者链接：https://www.pixiv.net/users/" + result.getData().getMember_id());
-                            }
+                        //是pixiv图片再进行
+                        if (result.getHeader().getIndex_id() == 5){
                             messageLineQ.textLine("Pixiv ID：" + result.getData().getPixiv_id());
-                            messageLineQ.textLine("作者ID：" + result.getData().getMember_id());
                             messageLineQ.textLine("作者名称：" + result.getData().getMember_name());
 
-                            Message noImage = MyYuQ.getMif().text("").plus(messageLineQ.getMessage());
-
-                            //是pixiv图片再进行
-                            if (groupConf.getSauceNaoApiDb() == 5){
-                                PixivEntity pixivEntity = Pixiv.getIllust(result.getData().getPixiv_id());//图片信息
-                                if (pixivEntity.isError()){
-                                    messageLineQ.text("图片加载错误：" + pixivEntity.getError().getUser_message());
-                                    group.sendMessage(messageLineQ.getMessage());
-                                }else {
-                                    if (pixivEntity.getIllust().isR18()){
-                                        messageLineQ.textLine("预览图片包含R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
-                                    }
-
-                                    messageLineQ.textLine(String.format("共%d张，当前显示第%d张", pixivEntity.getIllust().getPageMax(), 1));
-                                    if (pixivEntity.getIllust().isR18()) {
-                                        //消息发送
-                                        try {
-                                            //原图
-                                            messageLineQ.textLine("原图链接（也许是?）：");
-                                            //生成二维码
-                                            File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
-                                            try {
-                                                BufferedImage image = QRCodeImage.backgroundMatrix(
-                                                        QRCodeImage.generateQRCodeBitMatrix(pixivEntity.getIllust().getProxyUrl(), 800, 800),
-                                                        ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
-                                                        0.3f,
-                                                        Color.BLACK);
-                                                ImageIO.write(image, "png", imageFile);
-
-                                            } catch (WriterException e) {
-                                                SfLog.getInstance().e(this.getClass(), e);
-                                                messageLineQ.text("唔，二维码图片生成失败了：WriterException");
-                                            } catch (IOException e) {
-                                                SfLog.getInstance().e(this.getClass(), e);
-                                                messageLineQ.text("唔，二维码图片生成失败了：IOException");
-                                            }
-                                            messageLineQ.plus(group.uploadImage(imageFile));
-                                            Message message1 = messageLineQ.getMessage();
-                                            message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
-                                            group.sendMessage(message1);
-                                        } catch (IllegalStateException e) {
-                                            SfLog.getInstance().e(this.getClass(), e);
-                                            group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                            group.sendMessage(noImage);
-                                        }
-                                    }else {
-                                        //原图
-                                        messageLineQ.textLine("原图（也许是?）：");
-                                        try {
-                                            messageLineQ.plus(group.uploadImage(NetHandle.imagePixivDownload(pixivEntity.getIllust(), 0)));
-                                            group.sendMessage(messageLineQ.getMessage());
-                                        } catch (IllegalStateException e) {
-                                            SfLog.getInstance().e(this.getClass(), e);
-                                            group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                            group.sendMessage(noImage);
-                                        }
-                                    }
-                                }
-                            }else {
-                                group.sendMessage(noImage);
+                            PixivEntity pixivEntity = Pixiv.getIllust(result.getData().getPixiv_id());//图片信息
+                            if (pixivEntity.isError()){
+                                messageLineQ.text("图片信息获取失败：" + pixivEntity.getError().getUser_message());
+                                group.sendMessage(messageLineQ.getMessage());
+                                return;
                             }
 
+                            Illust illust = pixivEntity.getIllust();
+                            int page = result.getHeader().getPage() + 1;
+
+                            //标题
+                            messageLineQ.textLine("标题：");
+                            messageLineQ.textLine(MyYuQ.textLengthLimit(illust.getTitle(), 30));
+
+                            //描述
+                            messageLineQ.textLine("描述：");
+                            messageLineQ.textLine(MyYuQ.textLengthLimit(MyYuQ.delHTMLTag(illust.getTitle()), 30));
+
+                            //tag列表
+                            messageLineQ.textLine("Tag：");
+                            for (int i = 0; i < (illust.getTags().length > 4?4:illust.getTags().length); i++){
+                                Illust.Tag tag = illust.getTags()[i];
+                                messageLineQ.textLine(tag.getName() + "[" + tag.getTranslated_name() + "]");
+                            }
+                            if (illust.getTags().length > 4){
+                                messageLineQ.textLine("...");
+                            }else {
+                                messageLineQ.textLine("");
+                            }
+
+                            if (pixivEntity.isError()){
+                                messageLineQ.text("图片加载错误：" + pixivEntity.getError().getUser_message());
+                                group.sendMessage(messageLineQ.getMessage());
+                            }else {
+
+                                if (page > illust.getPageMax()){
+                                    messageLineQ.textLine("图片页数错误，已修改为显示第一张：" + page + "->1");
+                                    page = 1;
+                                }
+
+                                if (illust.isR18()){
+                                    messageLineQ.textLine("预览图片包含R18标签，这里" + MyYuQ.getBotName() + "就不进行展示了哦");
+                                }
+
+                                messageLineQ.textLine(String.format("共%d张，当前显示第%d张", pixivEntity.getIllust().getPageMax(), page));
+
+                                String proxyUrl = pixivEntity.getIllust().getProxyUrl(page - 1);
+
+                                if (pixivEntity.getIllust().isR18()) {
+                                    //消息发送
+                                    try {
+                                        //原图
+                                        messageLineQ.textLine("原图链接（也许是?）：");
+                                        //生成二维码
+                                        File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
+                                        try {
+                                            BufferedImage image = QRCodeImage.backgroundMatrix(
+                                                    QRCodeImage.generateQRCodeBitMatrix(proxyUrl, 800, 800),
+                                                    ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
+                                                    0.3f,
+                                                    Color.BLACK);
+                                            ImageIO.write(image, "png", imageFile);
+
+                                        } catch (WriterException e) {
+                                            SfLog.getInstance().e(this.getClass(), e);
+                                            messageLineQ.text("唔，二维码图片生成失败了：WriterException");
+                                        } catch (IOException e) {
+                                            SfLog.getInstance().e(this.getClass(), e);
+                                            messageLineQ.text("唔，二维码图片生成失败了：IOException");
+                                        }
+                                        messageLineQ.plus(group.uploadImage(imageFile));
+                                        Message message1 = messageLineQ.getMessage();
+                                        message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
+                                        group.sendMessage(message1);
+                                    } catch (IllegalStateException e) {
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                        messageLineQ.text("图片上传失败");
+                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                        group.sendMessage(messageLineQ.getMessage());
+                                    }
+                                }else {
+                                    //原图
+                                    messageLineQ.textLine("原图（也许是?）：");
+                                    try {
+                                        File file = NetHandle.imagePixivDownload(illust, page - 1);
+                                        BufferedImage bufferedImage = ImageIO.read(file);
+                                        messageLineQ.textLine("图片信息："
+                                                + bufferedImage.getWidth() + "x" + bufferedImage.getHeight()
+                                                + "    "
+                                                + MyPerformance.unitConversion(file.length()));
+                                        messageLineQ.plus(group.uploadImage(file));
+                                        group.sendMessage(messageLineQ.getMessage());
+                                    } catch (IllegalStateException e) {
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                        messageLineQ.text("图片上传失败");
+                                        group.sendMessage(messageLineQ.getMessage());
+                                    }
+                                }
+                            }
+                        }else if (result.getHeader().getIndex_id() == 9){//danbooru
+                            messageLineQ.textLine("Danbooru ID：" + result.getData().getDanbooru_id());
+                            messageLineQ.textLine("Gelbooru ID：" + result.getData().getGelbooru_id());
+                            messageLineQ.textLine("创作者：" + result.getData().getCreator());
+                            messageLineQ.textLine("来源：" + result.getData().getSource());
+                            messageLineQ.text("外部链接：");
+                            if (result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
+                        }else if(result.getHeader().getIndex_id() == 38 || result.getHeader().getIndex_id() == 18){//e-hentai
+                            ArrayList<String> creators = (ArrayList<String>) result.getData().getCreator();
+                            messageLineQ.text("创作者：");
+                            for (String s:creators){
+                                messageLineQ.textLine(s);
+                            }
+                            messageLineQ.textLine("英文名：" + result.getData().getEng_name());
+                            messageLineQ.textLine("日文名：" + result.getData().getJp_name());
+
+                            messageLineQ.textLine("来源：" + result.getData().getSource());
+                            //不是p站图片
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
+                        }else if (result.getHeader().getIndex_id() == 34){//deviantArt
+                            messageLineQ.textLine("DeviantArt ID：" + result.getData().getDa_id());
+                            messageLineQ.textLine("标题：" + result.getData().getTitle());
+                            messageLineQ.textLine("作者：" + result.getData().getAuthor_name());
+                            messageLineQ.textLine("Author_url：" + result.getData().getAuthor_url());
+                            //不是p站图片
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
+                        }else if (result.getHeader().getIndex_id() == 37){//MangaDex
+                            messageLineQ.textLine("MangaDex ID：" + result.getData().getMd_id());
+                            messageLineQ.textLine("Mu ID：" + result.getData().getMu_id());
+                            messageLineQ.textLine("Mal ID：" + result.getData().getMal_id());
+
+                            messageLineQ.textLine("作者：" + result.getData().getAuthor());
+                            messageLineQ.textLine("Artist：" + result.getData().getArtist());
+
+                            messageLineQ.textLine("Part：" + result.getData().getPart());
+                            messageLineQ.textLine("来源：" + result.getData().getSource());
+
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
+                        }else if(result.getHeader().getIndex_id() == 40){//FurAffinity
+                            messageLineQ.textLine("FurAffinity ID：" + result.getData().getFa_id());
+                            messageLineQ.textLine("标题：" + result.getData().getTitle());
+                            messageLineQ.textLine("作者：" + result.getData().getAuthor_name());
+                            messageLineQ.textLine("Author_url：" + result.getData().getAuthor_url());
+
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
+                        }else if(result.getHeader().getIndex_id() == 12){// Yande.re
+                            messageLineQ.textLine("Yandere ID：" + result.getData().getYandere_id());
+                            messageLineQ.textLine("作者：" + result.getData().getCreator());
+                            messageLineQ.textLine("来源：" + result.getData().getSource());
+
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
+                            group.sendMessage(messageLineQ.getMessage());
                         }else {
+                            //不是p站图片
+                            messageLineQ.text("链接：");
+                            if (result.getData().getExt_urls() != null && result.getData().getExt_urls().length > 0){
+                                for (String url:result.getData().getExt_urls()){
+                                    messageLineQ.textLine(url);
+                                }
+                            }else {
+                                messageLineQ.text("无链接");
+                            }
                             group.sendMessage(messageLineQ.getMessage());
                         }
-
                     }
                 }else {
                     group.sendMessage(new Message().lineQ().textLine("未找到图片相关结果:" + sauceNAO.getResults().size()).imageByUrl(imageUrl).getMessage());

@@ -72,6 +72,13 @@ public class Permissions {
      * @return
      */
     public void addPermission(long group, long qq, int permission) throws IllegalStateException{
+
+        try {
+            readAuthorityList();//得到权限列表
+        } catch (IOException e) {
+            SfLog.getInstance().w(this.getClass(), "权限列表更新失败，使用缓存中");
+        }
+
         switch (permission){
             case ADMIN:
                 authorityList.addAdmin(qq);
@@ -88,6 +95,36 @@ public class Permissions {
     }
 
     /**
+     * 移除权限组
+     * @param group
+     * @param qq
+     * @param permission
+     * @return
+     */
+    public void deletePermission(long group, long qq, int permission) throws IllegalStateException{
+
+        try {
+            readAuthorityList();//得到权限列表
+        } catch (IOException e) {
+            SfLog.getInstance().w(this.getClass(), "权限列表更新失败，使用缓存中");
+        }
+
+        switch (permission){
+            case ADMIN:
+                authorityList.deleteAdmin(qq);
+                break;
+            case OP:
+                authorityList.deleteOP(group, qq);
+                break;
+            case GROUP_BOT_ADMIN:
+                authorityList.deleteGroupBotAdmin(group, qq);
+                break;
+            default:
+                throw new IllegalStateException("移除失败，可能是权限值错误或该权限并不支持动态修改:" + permission);
+        }
+    }
+
+    /**
      * 通过qq得到用户所在权限组
      * @param member
      * @return
@@ -97,7 +134,7 @@ public class Permissions {
         try {
             readAuthorityList();//得到权限列表
         } catch (IOException e) {
-            SfLog.getInstance().e(this.getClass(), "权限列表更新失败，使用缓存中", e);
+            SfLog.getInstance().w(this.getClass(), "权限列表更新失败，使用缓存中");
         }
         if (authorityList.isOP(group.getId(), member.getId())){
             permissions.add(OP);
@@ -105,17 +142,21 @@ public class Permissions {
 
         if (authorityList.isMaster(member.getId())){
             permissions.add(MASTER);
-        }else if (authorityList.isAdmin(member.getId())){
-            permissions.add(ADMIN);
-        }else if(member.isOwner()){
-            permissions.add(GROUP_MASTER);
-        }else if (member.isAdmin()){
-            permissions.add(GROUP_ADMIN);
-        }else if(authorityList.isGroupBotAdmin(group.getId(), member.getId())){
-            permissions.add(GROUP_BOT_ADMIN);
-        }else{
-            permissions.add(NORMAL);
         }
+        if (authorityList.isAdmin(member.getId())){
+            permissions.add(ADMIN);
+        }
+        if(member.isOwner()){
+            permissions.add(GROUP_MASTER);
+        }
+        if (member.isAdmin()){
+            permissions.add(GROUP_ADMIN);
+        }
+        if(authorityList.isGroupBotAdmin(group.getId(), member.getId())){
+            permissions.add(GROUP_BOT_ADMIN);
+        }
+
+        permissions.add(NORMAL);
 
         return permissions.toArray(new Integer[]{});
     }

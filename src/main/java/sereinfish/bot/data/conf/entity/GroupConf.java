@@ -172,6 +172,12 @@ public class GroupConf{
     @Control(group = "青云客聊天Api", name = "启用", type = ControlType.CheckBox, tip = "启用青云客Api聊天功能")
     boolean qingYunKeApiChat = false;
 
+    @Control(group = "抽签", name = "启用", type = ControlType.CheckBox, tip = "启用抽签功能")
+    boolean drawEnable = false;
+
+    @Control(group = "抽签", name = "数量", type = ControlType.Edit_IntNum, tip = "设置每天每人能抽的次数")
+    int drawNum = 3;
+
     @Control(group = "消息转图片", name = "启用长文本转图片功能", type = ControlType.CheckBox, tip = "bot在发送长文本时将自动把消息转换为图片发送")
     boolean longMsgToImageEnable = false;
 
