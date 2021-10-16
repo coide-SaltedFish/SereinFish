@@ -219,6 +219,7 @@ public class SauceNaoController extends QQController {
                             }
 
                             Illust illust = pixivEntity.getIllust();
+                            illust.setProxy(groupConf.getPixivProxy());
                             int page = result.getHeader().getPage() + 1;
 
                             //标题
@@ -302,13 +303,14 @@ public class SauceNaoController extends QQController {
                                                 + "    "
                                                 + MyPerformance.unitConversion(file.length()));
                                         messageLineQ.plus(group.uploadImage(file));
-                                        group.sendMessage(messageLineQ.getMessage());
                                     } catch (IllegalStateException e) {
                                         SfLog.getInstance().e(this.getClass(), e);
                                         group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
                                         messageLineQ.text("图片上传失败");
-                                        group.sendMessage(messageLineQ.getMessage());
+                                    } catch (IOException e){
+                                        messageLineQ.text("图片下载失败：" + e.getMessage());
                                     }
+                                    group.sendMessage(messageLineQ.getMessage());
                                 }
                             }
                         }else if (result.getHeader().getIndex_id() == 9){//danbooru

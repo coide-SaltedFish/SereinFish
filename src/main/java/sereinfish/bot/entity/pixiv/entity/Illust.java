@@ -6,6 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Illust {
+    public static final int PROXY_PIXIVCAT = 0;
+    public static final int PROXY_PIXIVMOE = 1;
+
+    private int proxy = PROXY_PIXIVCAT;
+
     private long id;
     private String title;
     private String caption;
@@ -28,10 +33,10 @@ public class Illust {
     public String getProxyUrl(){
         if (proxyUrl == null || proxyUrl.equals("")){
             if (meta_single_page != null && meta_single_page.original_image_url != null){
-                proxyUrl = meta_single_page.original_image_url.replace("i.pximg.net", "i.pixiv.cat");
+                proxyUrl = getProxy(meta_single_page.original_image_url);
             }else {
                 if (meta_pages != null && meta_pages.length > 0 && meta_pages[0].image_urls != null){
-                    proxyUrl = meta_pages[0].image_urls.original.replace("i.pximg.net", "i.pixiv.cat");
+                    proxyUrl = getProxy(meta_pages[0].image_urls.original);
                 }
             }
         }
@@ -56,7 +61,7 @@ public class Illust {
      */
     public String getProxyUrl(int num){
         if (meta_pages != null && meta_pages.length > num){
-            proxyUrl = meta_pages[num].image_urls.original.replace("i.pximg.net", "i.pixiv.cat");
+            proxyUrl = getProxy(meta_pages[num].image_urls.original);
         }else {
             return getProxyUrl();
         }
@@ -69,6 +74,27 @@ public class Illust {
         }else {
             return true;
         }
+    }
+
+    public void setProxy(int proxy) {
+        this.proxy = proxy;
+    }
+
+    /**
+     * 得到代理连接
+     * @param url
+     * @return
+     */
+    private String getProxy(String url){
+        if (proxy == PROXY_PIXIVCAT){
+            return url.replace("i.pximg.net", "i.pixiv.cat");
+        }
+
+        if (proxy == PROXY_PIXIVMOE){
+            return url.replace("https://","https://api.pixiv.moe/image/");
+        }
+
+        return url;
     }
 
     public boolean isR18G(){

@@ -55,7 +55,6 @@ public class SFMessage {
     public ArrayList<Message> sfCodeToMessage(SFMsgCodeContact sfMsgCodeContact, String code){
         ArrayList<Message> messages = new ArrayList<>();
         for (String str:sfCodeToRainCode(sfMsgCodeContact, code)){
-            System.out.println(str);
             if (str.startsWith("<SF:Reply>") && sfMsgCodeContact.getBotActionContext() != null){
                 str = str.substring("<SF:Reply>".length());
                 Message message = sfMsgCodeContact.getReMessage().plus(Message.Companion.toMessageByRainCode(str));

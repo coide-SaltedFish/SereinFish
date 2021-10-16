@@ -169,6 +169,8 @@ public class PixivController {
                 return new Message().lineQ().textLine("出现错误了：").text(pixivEntity.getError().getUser_message()).getMessage();
             }else {
                 Illust illust = pixivEntity.getIllust();
+                illust.setProxy(groupConf.getPixivProxy());
+
                 messageLineQ.textLine("图片[" + uid + "]：");
                 if (page > illust.getPageMax()){
                     page = illust.getPageMax();
@@ -351,6 +353,8 @@ public class PixivController {
                 for (int i = 0; i < finalSize; i++){
 
                     Illust illust = rank.getIllusts()[i];
+                    illust.setProxy(groupConf.getPixivProxy());
+
                     messageLineQ.textLine((i + 1) + ".");
                     messageLineQ.textLine("标题：" + illust.getTitle());//标题
                     messageLineQ.textLine("Pid：" + illust.getId());

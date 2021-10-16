@@ -1,6 +1,9 @@
 package sereinfish.bot.file;
 
 import com.IceCreamQAQ.Yu.util.IO;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import sereinfish.bot.entity.mc.GamerInfo;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.image.ImageHandle;
