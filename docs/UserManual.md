@@ -42,7 +42,7 @@ YuQ.Mirai.user.pwd =
 
 ```
 
-####示例：
+#### 示例：
 
 当程序包命名为`sereinfish_bot.jar`时
 
