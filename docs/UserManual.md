@@ -31,13 +31,10 @@ YuQ.Mirai.user.pwd =
 ```
 
 [更多配置项](https://yuqworks.github.io/YuQ-Doc/guide/basic-configuration.html)
-### 4.获取设备标识文件 device.json
-推荐方法：使用[mcl](https://github.com/iTXTech/mcl-installer/releases)按照提示进行登录
+### 4.运行程序并按照提示使用`滑块助手`进行登录，此操作只需进行一次
 
-然后在mcl目录找到：\bots\QQ号\device.json 并复制到本程序包目录
-
-### 5.编写start.bat文件(可选)
-新建start.bat文件，写入以下命令：
+### 5.编写`start.bat`文件(可选)
+新建`start.bat`文件，写入以下命令：
 
 ```text
 
@@ -47,14 +44,51 @@ YuQ.Mirai.user.pwd =
 
 ####示例：
 
-当程序包命名为[sereinfish_bot.jar]时
+当程序包命名为`sereinfish_bot.jar`时
 
 ```text
 java sereinfish_bot.jar
 ```
 
 ## 启动
-双击start.bat文件一键启动Bot
+双击`start.bat`文件一键启动Bot
 
 等待程序初始化完成即可
+
+## 设置权限
+
+Bot运行并初始化完成后
+
+找到并打开`\SereinFish\conf\authority.json`文件，使用你的`QQ号码`替换下面标注部分，即可将自己设置为`MASTER`权限
+
+`MASTER`以下权限可通过Bot指令设置
+
+```json
+{
+  "opList": {},
+  "masterList": {
+    "你的QQ": 你的QQ
+  },
+  "adminList": {
+  },
+  "groupBotAdmin": {
+  }
+}
+```
+
+## 获取bot运行状态
+
+权限设置后，在控制面板中打开群聊`启用`开关，也可在群聊中使用`SereinFish Bot 开`指令
+
+并在在群聊中使用`@Bot 运行状态`命令获取运行状态
+
+如果正常返回信息，说明指令路由模块运行状态正常
+
+再次发送`@Bot`指令，如果Bot正常应答，说明事件模块运行正常
+
+## 其他
+
+使用`@Bot help`指令获取指令菜单列表
+
+
 

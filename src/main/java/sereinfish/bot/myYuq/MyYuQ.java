@@ -44,7 +44,7 @@ public class MyYuQ {
     public static boolean isEnable = false;//功能启用标志
     public static final String appName = "SereinFish Bot";
     public static final int version = 100544;
-    public static final String versionName = "v_0.0.54";
+    public static final String versionName = "v_0.0.55";
 
     private static MyYuQ myYuQ = null;//单例模式
     //
