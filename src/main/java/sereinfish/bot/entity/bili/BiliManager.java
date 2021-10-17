@@ -8,6 +8,7 @@ import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bili.entity.FollowConf;
+import sereinfish.bot.entity.bili.entity.dynamic.DynamicVideo;
 import sereinfish.bot.entity.bili.entity.info.Contribution;
 import sereinfish.bot.entity.bili.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.entity.dynamic.Dynamic;
@@ -108,41 +109,42 @@ public class BiliManager {
             GroupConf groupConf = ConfManager.getInstance().get(group.getId());
             try {
                 FollowConf followConf = FollowConf.get(group.getId());
-                if (groupConf.isBiliFollowEnable()){
-                    //读取配置列表
-                    for (int i = 0; i < followConf.getFollows().size(); i++) {
-                        FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
-                        //获取最新视频
-                        Contribution contribution = getUserVideos(biliUser.getMid());
-                        if (contribution.getCode() == Contribution.SUCCESS){
-                            Contribution.Data.List.VList vList[] = contribution.getData().getList().getVlist();
-                            if (vList != null && vList.length > 0){
-                                //如果得到的时间大于之前查询的时间
-                                if (vList[0].getCreated() > biliUser.getLastVideosTime()){
-                                    if (isConfInit){
-                                        //发送更新消息
-                                        try {
+                //读取配置列表
+                for (int i = 0; i < followConf.getFollows().size(); i++) {
+                    FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
+                    //获取最新视频
+                    Contribution contribution = getUserVideos(biliUser.getMid());
+                    if (contribution.getCode() == Contribution.SUCCESS){
+                        Contribution.Data.List.VList vList[] = contribution.getData().getList().getVlist();
+                        if (vList != null && vList.length > 0){
+                            //如果得到的时间大于之前查询的时间
+                            if (vList[0].getCreated() > biliUser.getLastVideosTime()){
+                                if (isConfInit){
+                                    //发送更新消息
+                                    try {
+                                        //检查功能是否启用
+                                        if (groupConf.isBiliFollowEnable()) {
                                             group.sendMessage(getVideosUpdateTip(vList[0], group));
-                                        }catch (SendMessageFailedByCancel e){
-                                            SfLog.getInstance().e(this.getClass(), e);
                                         }
+                                    }catch (SendMessageFailedByCancel e){
+                                        SfLog.getInstance().e(this.getClass(), e);
                                     }
-                                    //更新配置文件
-                                    biliUser.setLastVideosTime(vList[0].getCreated());
                                 }
-                            }else {
-                                SfLog.getInstance().w(this.getClass(), "视频列表为空："
-                                        + biliUser.getMid()
-                                        + ">>"
-                                        + Arrays.toString(vList));
+                                //更新配置文件
+                                biliUser.setLastVideosTime(vList[0].getCreated());
                             }
                         }else {
-                            SfLog.getInstance().e(this.getClass(), "视频更新列表请求失败:"
-                                    + biliUser.getMid() + ">>"
-                                    + contribution.getCode()
-                                    + ":"
-                                    + contribution.getMessage());
+                            SfLog.getInstance().w(this.getClass(), "视频列表为空："
+                                    + biliUser.getMid()
+                                    + ">>"
+                                    + Arrays.toString(vList));
                         }
+                    }else {
+                        SfLog.getInstance().e(this.getClass(), "视频更新列表请求失败:"
+                                + biliUser.getMid() + ">>"
+                                + contribution.getCode()
+                                + ":"
+                                + contribution.getMessage());
                     }
                 }
                 followConf.save();
@@ -160,49 +162,47 @@ public class BiliManager {
             GroupConf groupConf = ConfManager.getInstance().get(group.getId());
             try {
                 FollowConf followConf = FollowConf.get(group.getId());
+                //读取配置列表
+                for (int i = 0; i < followConf.getFollows().size(); i++){
+                    FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
+                    //获取直播间状态
+                    UserInfo userInfo = getUserInfo(biliUser.getMid());
 
-                //检查功能是否启用
-                if (groupConf.isBiliFollowEnable()){
-
-                    //读取配置列表
-                    for (int i = 0; i < followConf.getFollows().size(); i++){
-                        FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
-                        //获取直播间状态
-                        UserInfo userInfo = getUserInfo(biliUser.getMid());
-
-                        if (isConfInit){//初始化后进行
-                            //判断直播状态是否改变
-                            if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ENABLE){//如果之前在直播
-                                if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_CLOSE){
-                                    //发送下播提醒
-                                    try {
+                    if (isConfInit){//初始化后进行
+                        //判断直播状态是否改变
+                        if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ENABLE){//如果之前在直播
+                            if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_CLOSE){
+                                //发送下播提醒
+                                try {
+                                    //检查功能是否启用
+                                    if (groupConf.isBiliFollowEnable()) {
                                         group.sendMessage(getLiveCloseTip(userInfo, group));
-                                    }catch (SendMessageFailedByCancel e){
-                                        SfLog.getInstance().e(this.getClass(), e);
                                     }
+                                }catch (SendMessageFailedByCancel e){
+                                    SfLog.getInstance().e(this.getClass(), e);
                                 }
-                            }else if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_CLOSE
-                                    || biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ROUND_ENABLE){//如果之前没直播或在轮播
-
-                                if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
-                                    //发送上播提醒
-                                    try {
-                                        group.sendMessage(getLiveOpenTip(userInfo, group));
-                                    }catch (Exception e){
-                                        SfLog.getInstance().e(this.getClass(), e);
-                                    }
-                                }
-
                             }
+                        }else if (biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_CLOSE
+                                || biliUser.getLastLiveState() == FollowConf.BiliUser.LIVE_ROUND_ENABLE){//如果之前没直播或在轮播
+
+                            if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
+                                //发送上播提醒
+                                try {
+                                    group.sendMessage(getLiveOpenTip(userInfo, group));
+                                }catch (Exception e){
+                                    SfLog.getInstance().e(this.getClass(), e);
+                                }
+                            }
+
                         }
-                        //更新配置
-                        if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
-                            biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_ENABLE);
-                        }else if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){
-                            biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_ROUND_ENABLE);
-                        }else {
-                            biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_CLOSE);
-                        }
+                    }
+                    //更新配置
+                    if (userInfo.getData().getLive_room().getLiveStatus() == LiveRoom.LIVE_STATUS_OPEN){
+                        biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_ENABLE);
+                    }else if (userInfo.getData().getLive_room().getRoundStatus() == LiveRoom.ROUND_STATUS_OPEN){
+                        biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_ROUND_ENABLE);
+                    }else {
+                        biliUser.setLastLiveState(FollowConf.BiliUser.LIVE_CLOSE);
                     }
                 }
 
@@ -222,36 +222,39 @@ public class BiliManager {
             try {
                 FollowConf followConf = FollowConf.get(group.getId());
 
-                //检查功能是否启用
-                if (groupConf.isBiliFollowEnable()){
-                    //读取配置列表
-                    for (int i = 0; i < followConf.getFollows().size(); i++){
-                        FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
-                        //获取动态状态
-                        Dynamic dynamic = BiliManager.getUserDynamic(biliUser.getMid());
+                //读取配置列表
+                for (int i = 0; i < followConf.getFollows().size(); i++){
+                    FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
+                    //获取动态状态
+                    Dynamic dynamic = BiliManager.getUserDynamic(biliUser.getMid());
 
-                        Dynamic.Data.Card card = dynamic.getCard(0);
+                    Dynamic.Data.Card card = dynamic.getCard(0);
 
-                        for (int t = 1; card.isSpaceTop() && t < dynamic.getCardLen(); t++){
-                            card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(t);
-                        }
+                    for (int t = 1; card.isSpaceTop() && t < dynamic.getCardLen(); t++){
+                        card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(t);
+                    }
 
-                        if (card.getDynamicCard() != null){
-                            if (isConfInit){//初始化后进行
-                                if (card.getDesc().getTimestamp() > biliUser.getLastDynamicTime()){
-                                    //发送
-                                    try {
+                    if (card.getDynamicCard() != null){
+                        if (isConfInit){//初始化后进行
+                            if (card.getDesc().getTimestamp() > biliUser.getLastDynamicTime()){
+                                //发送
+                                try {
+                                    //检查功能是否启用
+                                    if (groupConf.isBiliFollowEnable()) {
                                         group.sendMessage(getDynamicUpdateTip(card, group));
-                                    }catch (SendMessageFailedByCancel e){
-                                        SfLog.getInstance().e(this.getClass(), e);
                                     }
+                                }catch (SendMessageFailedByCancel e){
+                                    SfLog.getInstance().e(this.getClass(), e);
+                                }catch (Exception e){
+                                    SfLog.getInstance().e(this.getClass(), "提示信息获取失败", e);
+                                    group.sendMessage("[" + biliUser.getMid() + "]更新提示获取失败：" + e.getMessage());
                                 }
                             }
-                            //更新配置
-                            biliUser.setLastDynamicTime(card.getDesc().getTimestamp());
-                        }else {
-                            SfLog.getInstance().w(BiliManager.class, "动态为空:" + biliUser.getMid());
                         }
+                        //更新配置
+                        biliUser.setLastDynamicTime(card.getDesc().getTimestamp());
+                    }else {
+                        SfLog.getInstance().w(BiliManager.class, "动态为空:" + biliUser.getMid());
                     }
                 }
 
@@ -358,17 +361,25 @@ public class BiliManager {
                 messageLineQ.textLine("发布日期：");
                 messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
                 messageLineQ.textLine("内容：");
-                messageLineQ.textLine(card.getDynamicVideo().getDynamic());
+
+                DynamicVideo dynamicVideo = card.getDynamicVideo();
+
+                if (dynamicVideo == null){
+                    messageLineQ.textLine("内容获取失败：" + card.getDesc().getType());
+                    break;
+                }
+
+                messageLineQ.textLine(dynamicVideo.getDynamic());
                 messageLineQ.textLine("视频信息：");
                 try {
-                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(card.getDynamicVideo().getPic(), System.currentTimeMillis() + "_cover")));
+                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(dynamicVideo.getPic(), System.currentTimeMillis() + "_cover")));
                 }catch (Exception e){
                     messageLineQ.textLine("封面获取失败了：" + e.getMessage());
                 }
                 messageLineQ.textLine("标题：");
-                messageLineQ.textLine(card.getDynamicVideo().getTitle());
+                messageLineQ.textLine(dynamicVideo.getTitle());
                 messageLineQ.textLine("描述：");
-                String desc = card.getDynamicVideo().getDesc();
+                String desc = dynamicVideo.getDesc();
                 int maxLen = 40;
                 if (desc.length() > maxLen){
                     desc = desc.substring(0, maxLen) + "...\n";
@@ -381,9 +392,9 @@ public class BiliManager {
                     desc += "\n";
                 }
                 messageLineQ.textLine(desc);
-                messageLineQ.textLine(card.getDynamicVideo().getShare_subtitle());
+                messageLineQ.textLine(dynamicVideo.getShare_subtitle());
                 messageLineQ.textLine("视频链接：");
-                messageLineQ.textLine(card.getDynamicVideo().getShort_link());
+                messageLineQ.textLine(dynamicVideo.getShort_link());
 
                 break;
             default:
