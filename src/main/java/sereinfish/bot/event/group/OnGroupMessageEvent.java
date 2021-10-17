@@ -523,8 +523,6 @@ public class OnGroupMessageEvent {
             return;
         }
 
-        System.out.println("msg:" + event.getMessage());
-
         SfLog.getInstance().d(this.getClass(),"[" + event.getQq() + "]申请加入群聊[" + event.getGroup() + "]");
         //自动同意入群
         if (conf.isEnable() && conf.isAutoAgreeJoinGroupEnable()){

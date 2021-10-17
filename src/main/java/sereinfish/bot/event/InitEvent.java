@@ -191,7 +191,7 @@ public class InitEvent{
             System.exit(-1);
         }
         //初始化消息队列
-        MessageState.init();
+        MessageState.getInstance();
         SfLog.getInstance().d(this.getClass(),"消息队列初始化完成");
         //显示主窗体
         SfLog.getInstance().d(this.getClass(),"主界面初始化中");

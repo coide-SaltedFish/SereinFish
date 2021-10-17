@@ -18,6 +18,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
+import sereinfish.bot.event.MessageState;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.event.GroupReCallMessageManager;
 import sereinfish.bot.file.FileHandle;
@@ -68,7 +69,14 @@ public class MsgController extends QQController {
     @MenuItem(name = "获取Bot运行状态", usage = "@Bot 运行状态", description = "返回当前Bot运行状态", permission = Permissions.GROUP_ADMIN)
     public Message appState(){
 
+        String tip = String.format("当前每分钟收%d，发%d条消息",
+                MessageState.getInstance().getReceiveMsgNum(60 * 1000),
+                MessageState.getInstance().getSendMsgNum(60 * 1000)
+        );
+
         String str = "程序运行时长：" + MyPerformance.getRunTime() +
+                "\n" + tip +
+                "\n" + String.format("总接收%d，发送%d条消息", MessageState.getInstance().getReceiveMsgNum(), MessageState.getInstance().getSendMsgNum()) +
                 "\n进程号：" + MyPerformance.getPid() +
                 "\n处理器核心数：" + MyPerformance.getCoresNum() +
                 //str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
@@ -79,7 +87,8 @@ public class MsgController extends QQController {
                 "\nJVM内存总量：" + MyPerformance.getJvmTotalMemory() +
                 "\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory() +
                 "\nJAVA版本：" + MyPerformance.getJavaVersion() +
-                "\nYuQ版本：" + MyPerformance.getYuQVersion() +
+                "\nYuQ-Mirai版本：" + MyYuQ.getRainVersion().runtimeVersion() +
+                "\nYuQ-Core版本：" + MyYuQ.getRainVersion().apiVersion() +
                 "\nbot版本：" + MyYuQ.getVersion();
         return MyYuQ.getMif().text(str).toMessage();
     }

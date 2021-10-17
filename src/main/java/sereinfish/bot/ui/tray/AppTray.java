@@ -1,6 +1,8 @@
 package sereinfish.bot.ui.tray;
 
+import sereinfish.bot.event.MessageState;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.frame.MainFrame;
 
 import javax.swing.*;
@@ -34,6 +36,15 @@ public class AppTray {
 
     public static AppTray init(Image image){
         appTray = new AppTray(image);
+        //托盘更新任务
+        MyYuQ.getJobManager().registerTimer((Runnable) () -> {
+            String tip = String.format("每分钟：收%d，发%d条消息",
+                    MessageState.getInstance().getReceiveMsgNum(60 * 1000),
+                    MessageState.getInstance().getSendMsgNum(60 * 1000)
+            );
+            AppTray.getInstance().setTip(tip);
+        }, 0l, 30l * 1000);
+
         return appTray;
     }
 

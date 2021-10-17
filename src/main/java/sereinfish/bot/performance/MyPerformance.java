@@ -169,16 +169,6 @@ public class MyPerformance {
     }
 
     /**
-     * 返回yuq版本信息
-     * @return
-     */
-    public static String getYuQVersion(){
-        return "API:" +
-                MyYuQ.getRainVersion().apiVersion() +
-                "\nRuntime:" + MyYuQ.getRainVersion().runtimeVersion();
-    }
-
-    /**
      * 得到程序开始运行时间
      * @return
      */
