@@ -3,7 +3,7 @@ package sereinfish.bot.job;
 import com.IceCreamQAQ.Yu.annotation.Cron;
 import com.IceCreamQAQ.Yu.annotation.JobCenter;
 import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.entity.bili.live.BiliManager;
+import sereinfish.bot.entity.bili.BiliManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 

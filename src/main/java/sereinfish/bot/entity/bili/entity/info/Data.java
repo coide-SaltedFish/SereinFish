@@ -1,8 +1,8 @@
-package sereinfish.bot.entity.bili.live.entity.info;
+package sereinfish.bot.entity.bili.entity.info;
 
 import lombok.Getter;
-import sereinfish.bot.entity.bili.live.entity.info.vip.Vip;
-import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
+import sereinfish.bot.entity.bili.entity.info.vip.Vip;
+import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 
 /**
  * 用户数据

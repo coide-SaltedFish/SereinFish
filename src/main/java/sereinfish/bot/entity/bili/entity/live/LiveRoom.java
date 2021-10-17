@@ -1,4 +1,4 @@
-package sereinfish.bot.entity.bili.live.entity.live;
+package sereinfish.bot.entity.bili.entity.live;
 
 import lombok.Getter;
 import lombok.var;

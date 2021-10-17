@@ -1,4 +1,4 @@
-package sereinfish.bot.entity.bili.live;
+package sereinfish.bot.entity.bili;
 
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
@@ -7,12 +7,12 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.entity.bili.live.entity.FollowConf;
-import sereinfish.bot.entity.bili.live.entity.dynamic.Dynamic;
-import sereinfish.bot.entity.bili.live.entity.dynamic.DynamicCard;
-import sereinfish.bot.entity.bili.live.entity.info.Contribution;
-import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
-import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
+import sereinfish.bot.entity.bili.entity.FollowConf;
+import sereinfish.bot.entity.bili.entity.info.Contribution;
+import sereinfish.bot.entity.bili.entity.info.UserInfo;
+import sereinfish.bot.entity.bili.entity.dynamic.Dynamic;
+import sereinfish.bot.entity.bili.entity.dynamic.DynamicCard;
+import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -20,6 +20,8 @@ import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.utils.OkHttpUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * 哔哩哔哩直播相关功能管理器
@@ -83,8 +85,8 @@ public class BiliManager {
      */
     public static Dynamic getUserDynamic(long mid) throws IOException {
         String api = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?visitor_uid=0&host_uid=" + mid + "&offset_dynamic_id=0&need_top=1";
-
         String json = OkHttpUtils.getStr(api, OkHttpUtils.addReferer("https://space.bilibili.com/$id/dynamic"));
+
         Dynamic dynamic = MyYuQ.toClass(json, Dynamic.class);
         return dynamic;
     }
@@ -132,7 +134,7 @@ public class BiliManager {
                                 SfLog.getInstance().w(this.getClass(), "视频列表为空："
                                         + biliUser.getMid()
                                         + ">>"
-                                        + vList);
+                                        + Arrays.toString(vList));
                             }
                         }else {
                             SfLog.getInstance().e(this.getClass(), "视频更新列表请求失败:"
@@ -227,6 +229,10 @@ public class BiliManager {
                         FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
                         //获取动态状态
                         Dynamic.Data.Card card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(0);
+                        for (int t = 1; card.getDesc().getType() != 4; t++){
+                            card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(t);
+                        }
+
                         if (card.getDynamicCard() != null){
                             if (isConfInit){//初始化后进行
                                 if (card.getDesc().getTimestamp() > biliUser.getLastDynamicTime()){

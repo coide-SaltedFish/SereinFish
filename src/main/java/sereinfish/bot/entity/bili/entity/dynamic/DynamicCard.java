@@ -1,4 +1,4 @@
-package sereinfish.bot.entity.bili.live.entity.dynamic;
+package sereinfish.bot.entity.bili.entity.dynamic;
 
 import lombok.Getter;
 import sereinfish.bot.myYuq.MyYuQ;

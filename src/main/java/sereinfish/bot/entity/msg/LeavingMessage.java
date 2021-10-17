@@ -4,7 +4,6 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import sereinfish.bot.entity.bili.live.entity.FollowConf;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;

@@ -1,11 +1,11 @@
-package sereinfish.bot.entity.bili.live.entity;
+package sereinfish.bot.entity.bili.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import sereinfish.bot.entity.bili.live.BiliManager;
-import sereinfish.bot.entity.bili.live.entity.info.UserInfo;
-import sereinfish.bot.entity.bili.live.entity.live.LiveRoom;
+import sereinfish.bot.entity.bili.entity.info.UserInfo;
+import sereinfish.bot.entity.bili.BiliManager;
+import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;

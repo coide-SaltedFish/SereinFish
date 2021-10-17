@@ -15,7 +15,7 @@ import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
-import sereinfish.bot.entity.bili.live.BiliManager;
+import sereinfish.bot.entity.bili.BiliManager;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.database.DataBaseManager;
