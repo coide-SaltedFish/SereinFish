@@ -228,8 +228,11 @@ public class BiliManager {
                     for (int i = 0; i < followConf.getFollows().size(); i++){
                         FollowConf.BiliUser biliUser = followConf.getFollows().get(i);
                         //获取动态状态
-                        Dynamic.Data.Card card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(0);
-                        for (int t = 1; card.getDesc().getType() != 4; t++){
+                        Dynamic dynamic = BiliManager.getUserDynamic(biliUser.getMid());
+
+                        Dynamic.Data.Card card = dynamic.getCard(0);
+
+                        for (int t = 1; card.isSpaceTop() && t < dynamic.getCardLen(); t++){
                             card = BiliManager.getUserDynamic(biliUser.getMid()).getCard(t);
                         }
 
@@ -267,46 +270,130 @@ public class BiliManager {
     public Message getDynamicUpdateTip(Dynamic.Data.Card card, Contact contact){
         MessageLineQ messageLineQ = new Message().lineQ();
 
-        messageLineQ.textLine("UP主：" + card.getUserName());
-        if (card.getDynamicCard().isExtend()){
-            messageLineQ.textLine("刚刚转发了一条来自[" + card.getDynamicCard().getOrigin().getUserName() + "]的动态：");
-            messageLineQ.textLine("发布日期：");
-            messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
-            messageLineQ.textLine("内容：");
-            messageLineQ.textLine(card.getDynamicCard().getDescription());
-            messageLineQ.textLine("转发内容：");
-            if (card.getDynamicCard().getOrigin().isExtend()){
-                messageLineQ.textLine(card.getDynamicCard().getOrigin().getDescription());
-            }else {
-                if (card.getDynamicCard().getOrigin().getItem() != null && card.getDynamicCard().getOrigin().getItem().getDescription() != null){
-                    messageLineQ.textLine(card.getDynamicCard().getOrigin().getItem().getDescription());
-                }
-            }
-            for (DynamicCard.Item.Picture picture:card.getDynamicCard().getOrigin().getPictures()){
-                try{
-                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
-                }catch (Exception e){
-                    messageLineQ.textLine("图片获取失败：" + e.getMessage());
-                }
-            }
-        }else {
-            messageLineQ.textLine("刚刚发布了一条动态:");
-            messageLineQ.textLine("发布日期：");
-            messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
-            messageLineQ.textLine("内容：");
-            messageLineQ.textLine(card.getDynamicCard().getDescription());
-            for (DynamicCard.Item.Picture picture:card.getDynamicCard().getPictures()){
-                try{
-                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
-                }catch (Exception e){
-                    messageLineQ.textLine("图片获取失败：" + e.getMessage());
-                }
-            }
+        //类型判断
+        switch (card.getDesc().getType()){
+            case Dynamic.Data.Card.TYPE_EXTEND://转发动态
+                messageLineQ.textLine("UP主：" + card.getDesc().getUser_profile().getInfo().getUname());
 
+                messageLineQ.textLine("刚刚转发了一条来自[" + card.getDynamicCard().getOrigin_user().getInfo().getUname() + "]的动态：");
+                messageLineQ.textLine("发布日期：");
+                messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+                messageLineQ.textLine("内容：");
+                messageLineQ.textLine(card.getDynamicCard().getItem().getContent());
+                messageLineQ.textLine("转发内容：");
+                DynamicCard dynamicCardExtend = card.getDynamicCard().getOrigin();
+                //判断转发的消息类型
+                switch (card.getDynamicCard().getItem().getOrig_type()){
+                    case Dynamic.Data.Card.TYPE_IMAGE_TEXT://图文动态
+                        messageLineQ.textLine(card.getDynamicCard().getOrigin().getItem().getDescription());
+                        for (DynamicCard.Item.Picture picture:card.getDynamicCard().getOrigin().getItem().getPictures()){
+                            try{
+                                messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                            }catch (Exception e){
+                                messageLineQ.textLine("图片获取失败：" + e.getMessage());
+                            }
+                        }
+                        break;
+                    case Dynamic.Data.Card.TYPE_TEXT://文字动态
+                        messageLineQ.textLine(card.getDynamicCard().getOrigin().getItem().getContent());
+                        break;
+                    case Dynamic.Data.Card.TYPE_VIDEO://视频动态
+                        messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getDynamic());
+                        messageLineQ.textLine("视频信息：");
+                        try {
+                            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(card.getDynamicCard().getVideoOrigin().getPic(), System.currentTimeMillis() + "_cover")));
+                        }catch (Exception e){
+                            messageLineQ.textLine("封面获取失败了：" + e.getMessage());
+                        }
+                        messageLineQ.textLine("标题：");
+                        messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getTitle());
+                        messageLineQ.textLine("描述：");
+                        String desc = card.getDynamicCard().getVideoOrigin().getDesc();
+                        int maxLen = 40;
+                        if (desc.length() > maxLen){
+                            desc = desc.substring(0, maxLen) + "...\n";
+                        }
+                        while(!desc.equals(desc.replace("\n\n","\n"))){
+                            desc = desc.replace("\n\n","\n");
+                        }
+
+                        if (!desc.endsWith("\n")){
+                            desc += "\n";
+                        }
+                        messageLineQ.textLine(desc);
+                        messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getShare_subtitle());
+                        messageLineQ.textLine("视频链接：");
+                        messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getShort_link());
+                        break;
+                    default:
+                        messageLineQ.textLine("未知消息类型");
+                }
+                break;
+            case Dynamic.Data.Card.TYPE_IMAGE_TEXT://图文动态
+                messageLineQ.textLine("UP主：" + card.getDesc().getUser_profile().getInfo().getUname());
+                messageLineQ.textLine("刚刚发布了一条图文动态:");
+                messageLineQ.textLine("发布日期：");
+                messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+                messageLineQ.textLine("内容：");
+                messageLineQ.textLine(card.getDynamicCard().getItem().getDescription());
+                for (DynamicCard.Item.Picture picture:card.getDynamicCard().getItem().getPictures()){
+                    try{
+                        messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                    }catch (Exception e){
+                        messageLineQ.textLine("图片获取失败：" + e.getMessage());
+                    }
+                }
+                break;
+            case Dynamic.Data.Card.TYPE_TEXT://文字动态
+                messageLineQ.textLine("UP主：" + card.getDesc().getUser_profile().getInfo().getUname());
+                messageLineQ.textLine("刚刚发布了一条文字动态:");
+                messageLineQ.textLine("发布日期：");
+                messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+                messageLineQ.textLine("内容：");
+                messageLineQ.textLine(card.getDynamicCard().getItem().getContent());
+                break;
+            case Dynamic.Data.Card.TYPE_VIDEO://视频动态
+                messageLineQ.textLine("UP主：" + card.getDesc().getUser_profile().getInfo().getUname());
+                messageLineQ.textLine("刚刚发布了一条视频动态:");
+                messageLineQ.textLine("发布日期：");
+                messageLineQ.textLine(Time.dateToString(card.getDesc().getTimestamp() * 1000, "yyyy-MM-dd HH:mm:ss"));
+                messageLineQ.textLine("内容：");
+                messageLineQ.textLine(card.getDynamicVideo().getDynamic());
+                messageLineQ.textLine("视频信息：");
+                try {
+                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(card.getDynamicVideo().getPic(), System.currentTimeMillis() + "_cover")));
+                }catch (Exception e){
+                    messageLineQ.textLine("封面获取失败了：" + e.getMessage());
+                }
+                messageLineQ.textLine("标题：");
+                messageLineQ.textLine(card.getDynamicVideo().getTitle());
+                messageLineQ.textLine("描述：");
+                String desc = card.getDynamicVideo().getDesc();
+                int maxLen = 40;
+                if (desc.length() > maxLen){
+                    desc = desc.substring(0, maxLen) + "...\n";
+                }
+                while(!desc.equals(desc.replace("\n\n","\n"))){
+                    desc = desc.replace("\n\n","\n");
+                }
+
+                if (!desc.endsWith("\n")){
+                    desc += "\n";
+                }
+                messageLineQ.textLine(desc);
+                messageLineQ.textLine(card.getDynamicVideo().getShare_subtitle());
+                messageLineQ.textLine("视频链接：");
+                messageLineQ.textLine(card.getDynamicVideo().getShort_link());
+
+                break;
+            default:
+                messageLineQ.textLine("未知动态类型：" + card.getDesc().getType());
         }
-        messageLineQ.textLine("链接：");
+
+        messageLineQ.textLine("动态链接：");
         messageLineQ.textLine("https://t.bilibili.com/" + card.getDesc().getDynamic_id());
         messageLineQ.text("にゃ～");
+
         return messageLineQ.getMessage();
     }
 
