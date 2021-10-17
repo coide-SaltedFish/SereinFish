@@ -262,36 +262,40 @@ public class LoliconController {
 
                 ArrayList<Message> messages = new ArrayList<>();
                 for (Lolicon.Setu setu:lolicon.getData()){
-                    File file = CacheManager.getLoliconImage(setu.getPid(),setu);
-                    SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
-                    //MD5发送方法
-                    if (conf.isLoliconMD5ImageEnable()){
-                        try {
+                    try{
+                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
+                        SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
+                        //MD5发送方法
+                        if (conf.isLoliconMD5ImageEnable()){
+                            try {
 
-                            Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + DigestUtils.md5Hex(new FileInputStream(file)) + ".jpg>");
-                            if (setu.isR18() || conf.isSetuMastReCallEnable()){
-                                reMsg.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                                Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + DigestUtils.md5Hex(new FileInputStream(file)) + ".jpg>");
+                                if (setu.isR18() || conf.isSetuMastReCallEnable()){
+                                    reMsg.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                                }
+                                messages.add(reMsg);
+                            } catch (IOException e) {
+                                SfLog.getInstance().e(LoliconManager.class,e);
+                                messages.add(new Message().lineQ().text("图片加载失败：MD5 send>>" + setu.getPid()).getMessage());
                             }
-                            messages.add(reMsg);
-                        } catch (IOException e) {
-                            SfLog.getInstance().e(LoliconManager.class,e);
-                            messages.add(new Message().lineQ().text("图片加载失败：MD5 send>>" + setu.getPid()).getMessage());
-                        }
-                    }else {
-                        //普通发送
-                        Message message;
-                        //上传图片
-                        try {
-                            message = new Message().lineQ().plus(group.uploadImage(file)).getMessage();
-                            if (setu.isR18() || conf.isSetuMastReCallEnable()){
-                                message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                        }else {
+                            //普通发送
+                            Message message;
+                            //上传图片
+                            try {
+                                message = new Message().lineQ().plus(group.uploadImage(file)).getMessage();
+                                if (setu.isR18() || conf.isSetuMastReCallEnable()){
+                                    message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                                }
+                            }catch (Exception e){
+                                SfLog.getInstance().e(this.getClass(), e);
+                                message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
                             }
-                        }catch (Exception e){
-                            SfLog.getInstance().e(this.getClass(), e);
-                            message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
-                        }
 
-                        messages.add(message);
+                            messages.add(message);
+                        }
+                    }catch (Exception e){
+                        messages.add(new Message().lineQ().text("图片下载失败：" + e.getMessage()).getMessage());
                     }
                 }
 

@@ -120,6 +120,9 @@ public class GroupConf{
     @Control(group = "Lolicon", name = "权限", type = ControlType.Authority_ComboBox, tip = "设置Lolicon相关命令的执行权限")
     int loliconPermissions = Permissions.NORMAL;
 
+    @Control(group = "Lolicon", name = "代理", type = ControlType.Edit_Small_Plain, tip = "设置Lolicon的在线反代，为空则为默认")
+    String loliconProxy = "";
+
     @Control(group = "Lolicon", name = "强制撤回", type = ControlType.CheckBox, tip = "不论是否R18，都进行撤回")
     boolean setuMastReCallEnable = false;
 

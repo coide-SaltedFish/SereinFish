@@ -166,7 +166,7 @@ public class LoliconManager {
             }
         }
 
-        Lolicon.Request request = new Lolicon.Request(r18, num, uids, keyword, null);
+        Lolicon.Request request = new Lolicon.Request(r18, num, uids, keyword, conf.getLoliconProxy());
 
         return request;
     }
