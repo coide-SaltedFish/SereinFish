@@ -324,7 +324,12 @@ public class BiliManager {
                             desc += "\n";
                         }
                         messageLineQ.textLine(desc);
-                        messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getShare_subtitle());
+                        try {
+                            messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getShare_subtitle());
+                        }catch (Exception e){
+                            SfLog.getInstance().e(this.getClass(), e);
+                        }
+
                         messageLineQ.textLine("视频链接：");
                         messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getShort_link());
                         break;
@@ -392,7 +397,11 @@ public class BiliManager {
                     desc += "\n";
                 }
                 messageLineQ.textLine(desc);
-                messageLineQ.textLine(dynamicVideo.getShare_subtitle());
+                try {
+                    messageLineQ.textLine(dynamicVideo.getShare_subtitle());
+                }catch (Exception e){
+                    SfLog.getInstance().e(this.getClass(), e);
+                }
                 messageLineQ.textLine("视频链接：");
                 messageLineQ.textLine(dynamicVideo.getShort_link());
 
