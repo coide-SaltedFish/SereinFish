@@ -16,9 +16,9 @@
 
 注意：此标签强匹配
 
-## \<SF:Split>
+## \<SF:Split:[可选参数]>
 
-参数：无参数
+参数：下一条消息发送延时，单位毫秒
 
 范围：文本任意部分
 
@@ -28,7 +28,7 @@
 
 ## \<SF:sender:[参数]>
 
-参数：[Name]、[Id]、[NameCard]、[HeadImage]、[At]
+参数：`Name`、`Id`、`NameCard`、`HeadImage`、`At`
 
 范围：文本任意部分
 
@@ -36,7 +36,7 @@
 
 ## \<SF:group:[参数]>
 
-参数：[Name]、[Id]、[HeadImage]
+参数：`Name`、`Id`、`HeadImage`
 
 生效区域：群消息
 
@@ -46,7 +46,7 @@
 
 ## \<SF:time:[参数]>
 
-参数：时间格式，如[yyyy-dd]
+参数：时间格式，如`yyyy-dd`
 
 范围：文本任意部分
 
@@ -54,7 +54,7 @@
 
 ## \<SF:random:[参数]>
 
-参数：可选，默认为[0，100],填写格式参考默认
+参数：可选，默认为`0，100`,填写格式参考默认
 
 范围：文本任意部分
 
@@ -62,9 +62,9 @@
 
 ## 动态拓展标签（开发者使用）
 
-1. 新建类并继承[SFMsgCode]接口
+1. 新建类并继承`SFMsgCode`接口
 
-2. 使用[SFMsgCodeInfo]注解指定类型
+2. 使用`SFMsgCodeInfo`注解指定类型
 
 ### 示例：
 
@@ -87,4 +87,4 @@ public class Sender implements SFMsgCode {
 }
 ```
 
-实现了在消息中包含\<SF:Sender:Name>标签时替换为发送者名称
+实现了在消息中包含`<SF:Sender:Name>`标签时替换为发送者名称

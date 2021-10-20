@@ -25,15 +25,15 @@ public class Group implements SFMsgCode {
             throw new DoNone();
         }
 
-        if (para.equals("Name")){
+        if (para.toLowerCase().equals("name")){
             return group.getName();
         }
 
-        if (para.equals("Id")){
+        if (para.toLowerCase().equals("id")){
             return group.getId() + "";
         }
 
-        if (para.equals("HeadImage")){
+        if (para.toLowerCase().equals("headimage")){
             Image image = codeContact.getSource().uploadImage(CacheManager.getGroupHeadImageFile(codeContact.getSource().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }

@@ -42,26 +42,28 @@ public class SereinFishSetuController {
 
     @Action("涩图")
     @QMsg(mastAtBot = true)
-    public void setu(GroupConf groupConf, Group group){
+    public Message setu(GroupConf groupConf, Group group, @PathVar(1) String numStr){
         SereinFishSetu.Request request = new SereinFishSetu.Request();
 
-        //r18
-        int type = SereinFishSetu.Request.TYPE_NO_R18;
-        if (groupConf.isPlainAndR18Enable()){
-            type = SereinFishSetu.Request.TYPE_ALL;
-        }
-        if (groupConf.isSetuR18Enable()){
-            type = SereinFishSetu.Request.TYPE_R18;
-        }
-        request.setType(type);
+        int num = 1;
 
-        setu(request, group, groupConf);
-    }
+        if (numStr != null){
+            try{
+                num = Integer.decode(numStr);
+            }catch (NumberFormatException e){
+                SfLog.getInstance().e(this.getClass(), e);
+                return Message.Companion.toMessageByRainCode(numStr + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>");
+            }
+        }
 
-    @Action("涩图 {num}")
-    @QMsg(mastAtBot = true)
-    public void setu(GroupConf groupConf, Group group, int num){
-        SereinFishSetu.Request request = new SereinFishSetu.Request();
+        if (num < 1){
+            group.sendMessage(new Message().lineQ().text(MyYuQ.getBotName() + "发现了一个错误，已自动纠正：[" + numStr + "]->[" + num + "]"));
+        }
+
+        if (num > 10){
+            group.sendMessage(Message.Companion.toMessageByRainCode("我只有这些了\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>"));
+        }
+
         request.setNum(num);
         //r18
         int type = SereinFishSetu.Request.TYPE_NO_R18;
@@ -74,18 +76,22 @@ public class SereinFishSetuController {
         request.setType(type);
 
         setu(request, group, groupConf);
+
+        throw new DoNone();
     }
 
     @Action("涩图查询 {key}")
     @QMsg(mastAtBot = true, reply = true)
-    public Message setu(GroupConf groupConf, Group group, String key, @PathVar(3) String numStr){
+    public Message setu(GroupConf groupConf, Group group, String key, @PathVar(2) String numStr){
         int num = 1;
 
-        try{
-            num = Integer.decode(numStr);
-        }catch (NumberFormatException e){
-            SfLog.getInstance().e(this.getClass(), e);
-            return Message.Companion.toMessageByRainCode(numStr + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>");
+        if (numStr != null){
+            try{
+                num = Integer.decode(numStr);
+            }catch (NumberFormatException e){
+                SfLog.getInstance().e(this.getClass(), e);
+                return Message.Companion.toMessageByRainCode(numStr + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>");
+            }
         }
 
         if (num < 1){
@@ -111,7 +117,7 @@ public class SereinFishSetuController {
 
         setu(request, group, groupConf);
 
-        return new Message().lineQ().text("にゃ～").getMessage();
+        throw new DoNone();
     }
 
     @Action("涩图提交 {pid}")

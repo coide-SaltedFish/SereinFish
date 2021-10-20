@@ -147,7 +147,12 @@ public class BiliController {
 
             for (FollowConf.BiliUser biliUser:followConf.getFollows()){
                 UserInfo userInfo = BiliManager.getUserInfo(biliUser.getMid());
-                messageLineQ.imageByUrl(userInfo.getData().getFace());
+                try {
+                    Image image = group.uploadImage(NetHandle.imageDownload(userInfo.getData().getFace(), userInfo.getData().getMid() + "_face"));
+                    messageLineQ.plus(image);
+                }catch (Exception e){
+                    messageLineQ.textLine("图片加载失败：" + e.getMessage());
+                }
                 messageLineQ.textLine("名称：" + userInfo.getData().getName());
                 messageLineQ.textLine("MID:" + userInfo.getData().getMid());
             }

@@ -22,6 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.codec.digest.DigestUtils;
+import sereinfish.bot.entity.sf.msg.SFMessage;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 
@@ -333,7 +334,25 @@ public class MyYuQ {
                 .get()//默认就是GET请求，可以不写
                 .build();
         Response response = okHttpClient.newCall(request).execute();
-        return response.isSuccessful();
+        return response.code() != 404;
+    }
+
+    /**
+     * 多消息发送
+     * @param contact
+     * @param msgList
+     */
+    public static void sendSFMessage(Contact contact, ArrayList<SFMessage.SFMessageEntity> msgList){
+        int time = 0;
+        for (SFMessage.SFMessageEntity messageEntity:msgList){
+            jobManager.registerTimer(new Runnable() {
+                @Override
+                public void run() {
+                    contact.sendMessage(messageEntity.getMessage());
+                }
+            }, time);
+            time += messageEntity.getWaitTime();
+        }
     }
 
     public static String getBotName() {

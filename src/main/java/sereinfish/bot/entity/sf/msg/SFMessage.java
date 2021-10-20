@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import sereinfish.bot.entity.ClassManager;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
@@ -52,16 +53,21 @@ public class SFMessage {
      * sf码转消息
      * @return
      */
-    public ArrayList<Message> sfCodeToMessage(SFMsgCodeContact sfMsgCodeContact, String code){
-        ArrayList<Message> messages = new ArrayList<>();
-        for (String str:sfCodeToRainCode(sfMsgCodeContact, code)){
-            if (str.startsWith("<SF:Reply>") && sfMsgCodeContact.getBotActionContext() != null){
-                str = str.substring("<SF:Reply>".length());
+    public ArrayList<SFMessageEntity> sfCodeToMessage(SFMsgCodeContact sfMsgCodeContact, String code){
+        ArrayList<SFMessageEntity> messages = new ArrayList<>();
+        for (Msg msg:sfCodeToRainCode(sfMsgCodeContact, code)){
+            if (msg.rainCode.startsWith("<SF:Reply>") && sfMsgCodeContact.getBotActionContext() != null){
+                String str = msg.rainCode.substring("<SF:Reply>".length());
                 Message message = sfMsgCodeContact.getReMessage().plus(Message.Companion.toMessageByRainCode(str));
                 message.setReply(sfMsgCodeContact.getBotActionContext().getMessage().getSource());
-                messages.add(message);
+
+                SFMessageEntity messageEntity = new SFMessageEntity(message);
+                messageEntity.setWaitTime(msg.getTime());
+                messages.add(messageEntity);
             }else {
-                messages.add(sfMsgCodeContact.getReMessage().plus(Message.Companion.toMessageByRainCode(str)));
+                SFMessageEntity messageEntity = new SFMessageEntity(sfMsgCodeContact.getReMessage().plus(Message.Companion.toMessageByRainCode(msg.rainCode)));
+                messageEntity.setWaitTime(msg.getTime());
+                messages.add(messageEntity);
             }
 
         }
@@ -72,7 +78,7 @@ public class SFMessage {
      * sf码转Rain码
      * @return
      */
-    public String[] sfCodeToRainCode(SFMsgCodeContact codeContact, String code){
+    public ArrayList<Msg> sfCodeToRainCode(SFMsgCodeContact codeContact, String code){
         StringBuilder stringBuilder = new StringBuilder(code);
 
         Pattern pattern=Pattern.compile("<SF:.+?>",Pattern.CASE_INSENSITIVE);
@@ -125,8 +131,42 @@ public class SFMessage {
             Replace replace = replaces.get(i);
             stringBuilder.replace(replace.start, replace.end, replace.reCode);
         }
+        //处理分割符
+        ArrayList<Msg> msgList = new ArrayList<>();
+        for (String str:stringBuilder.toString().split("<SF:Split>")){
+            pattern = Pattern.compile("<SF:Split:.+?>",Pattern.CASE_INSENSITIVE);
+            matcher = pattern.matcher(str);
 
-        return stringBuilder.toString().split("<SF:Split>");
+            int start = 0;
+            boolean isFind = false;
+            while (matcher.find()){
+                isFind = true;
+                String gr = matcher.group();
+                //去除头尾
+                String c = gr.substring(1, gr.length() - 1);
+                String[] p = c.split(":", 3);
+                if (p.length > 2){
+                    String paraStr = p[2];
+                    long time = 0;
+                    try {
+                        time = Long.decode(paraStr);
+                    }catch (Exception e){
+                        //
+                    }
+                    String rainCode = str.substring(start, matcher.start());
+                    start = matcher.end();
+                    msgList.add(new Msg(rainCode, time));
+                }
+            }
+            if (isFind){
+                String rainCode = str.substring(start);
+                msgList.add(new Msg(rainCode, 0));
+            }else {
+                msgList.add(new Msg(str, 0));
+            }
+        }
+
+        return msgList;
     }
 
     @Getter
@@ -135,5 +175,23 @@ public class SFMessage {
         int start;
         int end;
         String reCode;
+    }
+
+    @Data
+    @AllArgsConstructor
+    class Msg{
+        String rainCode;
+        long time;
+    }
+
+    @Data
+    public static class SFMessageEntity{
+        Message message;
+        long waitTime = 0;
+        long reCallTime = 0;
+
+        public SFMessageEntity(Message message) {
+            this.message = message;
+        }
     }
 }

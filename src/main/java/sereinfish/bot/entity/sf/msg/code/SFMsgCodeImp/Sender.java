@@ -21,27 +21,27 @@ public class Sender implements SFMsgCode {
     public String code(SFMsgCodeContact codeContact) throws Exception {
         String para = codeContact.getParameter();
 
-        if (para.equals("Name")){
+        if (para.toLowerCase().equals("name")){
             return codeContact.getSender().getName();
         }
 
-        if (para.equals("Id")){
+        if (para.toLowerCase().equals("id")){
             return codeContact.getSender().getId() + "";
         }
 
-        if (para.equals("NameCard")){
+        if (para.toLowerCase().equals("namecard")){
             if (codeContact.getSource() instanceof Group){
                 Group group = (Group) codeContact.getSource();
                 return group.get(codeContact.getSender().getId()).nameCardOrName();
             }
             return codeContact.getSender().getName();
         }
-        if (para.equals("HeadImage")){
+        if (para.toLowerCase().equals("headimage")){
             Image image = codeContact.getSource().uploadImage(CacheManager.getMemberHeadImageFile(codeContact.getSender().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
 
-        if (para.equals("At")){
+        if (para.toLowerCase().equals("at")){
             return "<Rain:At:" + codeContact.getSender().getId() + ">";
         }
 

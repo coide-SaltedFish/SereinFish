@@ -390,9 +390,7 @@ public class OnGroupMessageEvent {
                 SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
 
                 SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
-                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
-                    event.getGroup().sendMessage(message);
-                }
+                MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
             }
         }
 
@@ -424,9 +422,7 @@ public class OnGroupMessageEvent {
                 String tip = conf.getQuitGroupTipText();
                 if (!tip.trim().equals("")){
                     SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
-                    for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
-                        event.getGroup().sendMessage(message);
-                    }
+                    MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
                 }else {
                     group.sendMessage(MyYuQ.getMif().text("刚刚，" + member.getNameCard() + "(" +
                             member.getName() + ")[" + member.getId() + "]离开了我们，他说过的最后一句话是：").toMessage());
@@ -464,9 +460,7 @@ public class OnGroupMessageEvent {
                             String tip = conf.getAddGroupBlackListTipText();
                             if (!tip.trim().equals("")){
                                 SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
-                                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
-                                    event.getGroup().sendMessage(message);
-                                }
+                                MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
                             }
                         }
                     } catch (SQLException e) {
@@ -503,9 +497,10 @@ public class OnGroupMessageEvent {
             if (!tip.trim().equals("")){
                 SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
                 sfMsgCodeContact.save("Operator", event.getOperator());
-                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
-                    event.getGroup().sendMessage(message);
-                }
+//                for (Message message:SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip)){
+//                    event.getGroup().sendMessage(message);
+//                }
+                MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
             }
         }
     }
@@ -608,9 +603,7 @@ public class OnGroupMessageEvent {
                 if (str != null){
                     try{
                         SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getBotActionContact());
-                        for (Message message: SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, str)){
-                            event.getContact().sendMessage(message);
-                        }
+                        MyYuQ.sendSFMessage(event.getContact(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, str));
                         return;
                     }catch (SendMessageFailedByCancel e){
                         SfLog.getInstance().e(this.getClass(),"消息发送取消");

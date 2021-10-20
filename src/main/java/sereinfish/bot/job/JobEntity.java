@@ -4,8 +4,10 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.entity.sf.msg.SFMessage;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -103,14 +105,12 @@ public class JobEntity {
     @AllArgsConstructor
     public static class SendMsgJob implements Runnable{
         private Contact contact;
-        private Message[] messages;
+        private ArrayList<SFMessage.SFMessageEntity> messages;
 
         @Override
         public void run() {
             SfLog.getInstance().d(this.getClass(), "定时任务执行，消息发送");
-            for (Message message:messages){
-                contact.sendMessage(message);
-            }
+            MyYuQ.sendSFMessage(contact, messages);
         }
     }
 }

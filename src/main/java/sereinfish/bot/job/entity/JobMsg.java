@@ -1,7 +1,5 @@
 package sereinfish.bot.job.entity;
 
-import com.icecreamqaq.yuq.controller.BotActionContext;
-import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
@@ -11,7 +9,7 @@ import sereinfish.bot.job.ex.MessageJobIllegalException;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 @AllArgsConstructor
 public class JobMsg{
@@ -23,15 +21,19 @@ public class JobMsg{
      * 得到消息
      * @return
      */
-    public Message[] getMessage(){
+    public ArrayList<SFMessage.SFMessageEntity> getMessage(){
         SFMsgCodeContact sfMsgCodeContact = null;
         try {
             sfMsgCodeContact = new SFMsgCodeContact(getRecipient(), getRecipient());
         } catch (MessageJobIllegalException e) {
             SfLog.getInstance().e(this.getClass(), e);
-            return new Message[]{new Message().lineQ().text("错误：" + e.getMessage()).getMessage()};
+            ArrayList<SFMessage.SFMessageEntity> msgList = new ArrayList<>();
+            SFMessage.SFMessageEntity messageEntity = new SFMessage.SFMessageEntity(new Message().lineQ().text("错误：" + e.getMessage()).getMessage());
+            msgList.add(messageEntity);
+
+            return msgList;
         }
-        return SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, msg).toArray(new Message[]{});
+        return SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, msg);
     }
 
     /**
