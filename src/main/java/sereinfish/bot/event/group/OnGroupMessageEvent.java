@@ -390,6 +390,7 @@ public class OnGroupMessageEvent {
                 SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
 
                 SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+
                 MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
             }
         }

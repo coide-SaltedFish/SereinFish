@@ -334,7 +334,9 @@ public class MyYuQ {
                 .get()//默认就是GET请求，可以不写
                 .build();
         Response response = okHttpClient.newCall(request).execute();
-        return response.code() != 404;
+        response.close();
+        int code = response.code();
+        return code != 404;
     }
 
     /**

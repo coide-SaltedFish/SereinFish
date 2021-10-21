@@ -88,7 +88,7 @@ public class MsgController extends QQController {
                 "\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory() +
                 "\nJAVA版本：" + MyPerformance.getJavaVersion() +
                 "\nYuQ-Mirai版本：" + MyYuQ.getRainVersion().runtimeVersion() +
-                "\nYuQ-Core版本：" + MyYuQ.getRainVersion().apiVersion() +
+                "\nYuQ版本：" + MyYuQ.getRainVersion().apiVersion() +
                 "\nbot版本：" + MyYuQ.getVersion();
         return MyYuQ.getMif().text(str).toMessage();
     }

@@ -79,10 +79,67 @@ public class SFMessage {
      * @return
      */
     public ArrayList<Msg> sfCodeToRainCode(SFMsgCodeContact codeContact, String code){
+        code = codeHandle(codeContact, code);//处理标签
+        //处理分割符
+        ArrayList<Msg> msgList = new ArrayList<>();
+        for (String str:code.split("<SF:Split>")){
+            if (str.equals("")){
+                continue;
+            }
+
+            Pattern pattern = Pattern.compile("<SF:Split:.+?>",Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(str);
+
+            int start = 0;
+            boolean isFind = false;
+            while (matcher.find()){
+                isFind = true;
+                String gr = matcher.group();
+                //去除头尾
+                String c = gr.substring(1, gr.length() - 1);
+                String[] p = c.split(":", 3);
+                if (p.length > 2){
+                    String paraStr = p[2];
+                    long time = 0;
+                    try {
+                        time = Long.decode(paraStr);
+                    }catch (Exception e){
+                        //
+                    }
+                    String sfCode = str.substring(start, matcher.start());
+                    start = matcher.end();
+                    String rainCode = codeHandle(codeContact, sfCode);
+                    if (!rainCode.equals("")){
+                        msgList.add(new Msg(rainCode, time));
+                    }
+                }
+            }
+            if (isFind){
+                String rainCode = str.substring(start);
+                if (!rainCode.equals("")){
+                    msgList.add(new Msg(rainCode, 0));
+                }
+            }else {
+                msgList.add(new Msg(str, 0));
+            }
+        }
+
+        return msgList;
+    }
+
+    /**
+     * 标签处理
+     * @param code
+     * @return
+     */
+    public String codeHandle(SFMsgCodeContact codeContact, String code){
         StringBuilder stringBuilder = new StringBuilder(code);
 
-        Pattern pattern=Pattern.compile("<SF:.+?>",Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("<SF:[^<>]+?>",Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(code);
+
+        //如果已经没有匹配
+        boolean isFind = false;
 
         ArrayList<Replace> replaces = new ArrayList<>();
 
@@ -110,6 +167,7 @@ public class SFMessage {
                     String reCode = classMap.get(type).code(codeContact);
                     if (reCode != null){
                         replaces.add(new Replace(matcher.start(), matcher.end(), reCode));
+                        isFind = true;
                     }
                 }catch (DoNone doNone){
                     //doNone
@@ -118,6 +176,7 @@ public class SFMessage {
                         String reCode = classMap.get(type).error(e);
                         if (reCode != null){
                             replaces.add(new Replace(matcher.start(), matcher.end(), reCode));
+                            isFind = true;
                         }
                     }catch (DoNone doNone){
                         //doNone
@@ -126,47 +185,16 @@ public class SFMessage {
             }
         }
 
+        if (!isFind){
+            return code;
+        }
+
         //从后向前替换
         for (int i = replaces.size() - 1; i >= 0; i--){
             Replace replace = replaces.get(i);
             stringBuilder.replace(replace.start, replace.end, replace.reCode);
         }
-        //处理分割符
-        ArrayList<Msg> msgList = new ArrayList<>();
-        for (String str:stringBuilder.toString().split("<SF:Split>")){
-            pattern = Pattern.compile("<SF:Split:.+?>",Pattern.CASE_INSENSITIVE);
-            matcher = pattern.matcher(str);
-
-            int start = 0;
-            boolean isFind = false;
-            while (matcher.find()){
-                isFind = true;
-                String gr = matcher.group();
-                //去除头尾
-                String c = gr.substring(1, gr.length() - 1);
-                String[] p = c.split(":", 3);
-                if (p.length > 2){
-                    String paraStr = p[2];
-                    long time = 0;
-                    try {
-                        time = Long.decode(paraStr);
-                    }catch (Exception e){
-                        //
-                    }
-                    String rainCode = str.substring(start, matcher.start());
-                    start = matcher.end();
-                    msgList.add(new Msg(rainCode, time));
-                }
-            }
-            if (isFind){
-                String rainCode = str.substring(start);
-                msgList.add(new Msg(rainCode, 0));
-            }else {
-                msgList.add(new Msg(str, 0));
-            }
-        }
-
-        return msgList;
+        return codeHandle(codeContact, stringBuilder.toString());
     }
 
     @Getter

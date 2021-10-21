@@ -2,6 +2,7 @@ package sereinfish.bot.entity.sf.msg.code;
 
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Contact;
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.Data;
 import lombok.NonNull;
@@ -42,7 +43,22 @@ public class SFMsgCodeContact {
         map.put(key, o);
     }
 
+    public Object get(String key){
+        return map.get(key);
+    }
+
+    public boolean containsKey(Object key){
+        return map.containsKey(key);
+    }
+
     public Object getOrDefault(String key, Object defaultValue){
         return map.getOrDefault(key, defaultValue);
+    }
+
+    public Group getGroup(){
+        if (source instanceof Group){
+            return (Group) source;
+        }
+        return null;
     }
 }
