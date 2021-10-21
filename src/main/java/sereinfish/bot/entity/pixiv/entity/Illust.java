@@ -6,10 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Illust {
-    public static final int PROXY_PIXIVCAT = 0;
-    public static final int PROXY_PIXIVMOE = 1;
-
-    private int proxy = PROXY_PIXIVCAT;
+    private String proxy = "";
 
     private long id;
     private String title;
@@ -76,7 +73,7 @@ public class Illust {
         }
     }
 
-    public void setProxy(int proxy) {
+    public void setProxy(String proxy) {
         this.proxy = proxy;
     }
 
@@ -86,15 +83,10 @@ public class Illust {
      * @return
      */
     private String getProxy(String url){
-        if (proxy == PROXY_PIXIVCAT){
-            return url.replace("i.pximg.net", "i.pixiv.cat");
+        if (proxy.equals("")){
+            return url;
         }
-
-        if (proxy == PROXY_PIXIVMOE){
-            return url.replace("https://","https://api.pixiv.moe/image/");
-        }
-
-        return url;
+        return url.replace("i.pximg.net", proxy);
     }
 
     public boolean isR18G(){

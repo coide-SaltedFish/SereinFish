@@ -104,8 +104,8 @@ public class GroupConf{
     @Control(group = "Pixiv", name = "启用", type = ControlType.CheckBox, tip = "启用p站相关功能")
     boolean pixivEnable = false;
 
-    @Control(group = "Pixiv", name = "代理", type = ControlType.Edit_IntNum, tip = "选择代理方式")
-    int pixivProxy = Illust.PROXY_PIXIVCAT;
+    @Control(group = "Pixiv", name = "代理", type = ControlType.Edit_Small_Plain, tip = "选择代理方式")
+    String pixivProxy = "";
 
     @Control(group = "Pixiv", name = "最大获取数量", type = ControlType.Edit_IntNum, tip = "设置一次命令最大图片的发送数量")
     int pixivGetMaxNum = 2;
