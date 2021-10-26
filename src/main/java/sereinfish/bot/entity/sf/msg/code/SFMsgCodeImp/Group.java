@@ -17,7 +17,15 @@ public class Group implements SFMsgCode {
 
     @Override
     public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter();
+        String[] paras = codeContact.getParameter().toLowerCase().split(",", 2);
+
+        String type = paras[0];
+        int num = 0;
+        if (paras.length > 1){
+            num = Integer.decode(paras[1]);
+        }
+
+
         com.icecreamqaq.yuq.entity.Group group = null;
         if (codeContact.getSource() instanceof com.icecreamqaq.yuq.entity.Group){
             group = (com.icecreamqaq.yuq.entity.Group) codeContact.getSource();
@@ -25,18 +33,31 @@ public class Group implements SFMsgCode {
             throw new DoNone();
         }
 
-        if (para.toLowerCase().equals("name")){
+        if (type.equals("name")){
             return group.getName();
         }
 
-        if (para.toLowerCase().equals("id")){
+        if (type.equals("id")){
             return group.getId() + "";
         }
 
-        if (para.toLowerCase().equals("headimage")){
+        if (type.equals("headimage")){
             Image image = codeContact.getSource().uploadImage(CacheManager.getGroupHeadImageFile(codeContact.getSource().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
+
+        if (type.equals("owner")){
+            return group.getOwner().getId() + "";
+        }
+
+        if (type.equals("admin")){
+            return group.getAdmins().get(num).getId() + "";
+        }
+
+        if (type.equals("member")){
+            return group.getMembers().get(num).getId() + "";
+        }
+
         return null;
     }
 }

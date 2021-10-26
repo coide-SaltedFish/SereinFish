@@ -26,6 +26,7 @@ public class Value implements SFMsgCode {
 
         if (codeContact.containsKey(name)){
             Object val = codeContact.get(name);
+
             if (val instanceof String){
                 return (String) val;
             }else if(val instanceof Member){

@@ -1,8 +1,5 @@
 package sereinfish.bot.event;
 
-import com.IceCreamQAQ.Yu.job.Job;
-import com.icecreamqaq.yuq.entity.Contact;
-import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

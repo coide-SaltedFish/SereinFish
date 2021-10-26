@@ -19,30 +19,34 @@ public class Sender implements SFMsgCode {
 
     @Override
     public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter();
+        String para = codeContact.getParameter().toLowerCase();
 
-        if (para.toLowerCase().equals("name")){
+        if (para.equals("name")){
             return codeContact.getSender().getName();
         }
 
-        if (para.toLowerCase().equals("id")){
+        if (para.equals("id")){
             return codeContact.getSender().getId() + "";
         }
 
-        if (para.toLowerCase().equals("namecard")){
+        if (para.equals("namecard")){
             if (codeContact.getSource() instanceof Group){
                 Group group = (Group) codeContact.getSource();
                 return group.get(codeContact.getSender().getId()).nameCardOrName();
             }
             return codeContact.getSender().getName();
         }
-        if (para.toLowerCase().equals("headimage")){
+        if (para.equals("headimage")){
             Image image = codeContact.getSource().uploadImage(CacheManager.getMemberHeadImageFile(codeContact.getSender().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
 
-        if (para.toLowerCase().equals("at")){
+        if (para.equals("at")){
             return "<Rain:At:" + codeContact.getSender().getId() + ">";
+        }
+
+        if (para.equals("message")){
+            return codeContact.getBotActionContext().getMessage().getCodeStr();
         }
 
         return "<参数错误>";

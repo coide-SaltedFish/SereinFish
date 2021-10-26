@@ -14,6 +14,8 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.Mirai;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
@@ -74,20 +76,26 @@ public class MsgController extends QQController {
                 MessageState.getInstance().getSendMsgNum(60 * 1000)
         );
 
+        String dayTip = String.format("今日总接收%d，发%d条消息",
+                MessageState.getInstance().getReceiveMsgNum(60 * 1000 * 60 * 24),
+                MessageState.getInstance().getSendMsgNum(60 * 1000 * 60 * 24)
+        );
+
         String str = "程序运行时长：" + MyPerformance.getRunTime() +
                 "\n" + tip +
+                "\n" + dayTip +
                 "\n" + String.format("总接收%d，发送%d条消息", MessageState.getInstance().getReceiveMsgNum(), MessageState.getInstance().getSendMsgNum()) +
                 "\n进程号：" + MyPerformance.getPid() +
                 "\n处理器核心数：" + MyPerformance.getCoresNum() +
                 //str.append("\n系统CPU使用率：" + String.format("%.2f",MyPerformance.getSystemCpuLoad() * 100) + "%");
-                "\n本程序CPU使用率：" + String.format("%.2f", MyPerformance.getProcessCpuLoad() * 100) + "%" +
+                //"\n本程序CPU使用率：" + String.format("%.2f", MyPerformance.getProcessCpuLoad() * 100) + "%" +
                 "\n总内存：" + MyPerformance.getTotalPhysicalMemorySize() +
                 "\n已使用内存：" + MyPerformance.getUsedPhysicalMemorySize() +
                 "\n操作系统：" + MyPerformance.getOSName() +
                 "\nJVM内存总量：" + MyPerformance.getJvmTotalMemory() +
                 "\nJVM已使用内存：" + MyPerformance.getJvmUsedMemory() +
                 "\nJAVA版本：" + MyPerformance.getJavaVersion() +
-                "\nYuQ-Mirai版本：" + MyYuQ.getRainVersion().runtimeVersion() +
+                "\n" + MyYuQ.getRainVersion().runtimeName() + "版本：" + MyYuQ.getRainVersion().runtimeVersion() +
                 "\nYuQ版本：" + MyYuQ.getRainVersion().apiVersion() +
                 "\nbot版本：" + MyYuQ.getVersion();
         return MyYuQ.getMif().text(str).toMessage();

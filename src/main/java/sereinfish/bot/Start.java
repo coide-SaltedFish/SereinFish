@@ -17,6 +17,8 @@ public class Start {
         YuHook.putMatchHookItem("sereinfish.bot.data.conf.entity.GroupConf.set*", "sereinfish.bot.data.conf.entity.ConfHook");
 
         AppClassloader.registerBackList(new ArrayList<String>() {{add("org.yaml.snakeyaml");}});
+        AppClassloader.registerBackList(new ArrayList<String>() {{add("jdk.");}});
+
         YuQMiraiStart.start(args);
     }
 

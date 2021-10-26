@@ -345,6 +345,10 @@ public class MyYuQ {
      * @param msgList
      */
     public static void sendSFMessage(Contact contact, ArrayList<SFMessage.SFMessageEntity> msgList){
+        if (msgList == null){
+            return;
+        }
+
         int time = 0;
         for (SFMessage.SFMessageEntity messageEntity:msgList){
             jobManager.registerTimer(new Runnable() {

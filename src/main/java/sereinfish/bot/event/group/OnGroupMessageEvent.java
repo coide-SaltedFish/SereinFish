@@ -21,6 +21,7 @@ import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.database.ex.MarkIllegalLengthException;
 import sereinfish.bot.entity.msg.LeavingMessage;
 import sereinfish.bot.entity.msg.MyMessage;
+import sereinfish.bot.entity.msg.ReplyManager;
 import sereinfish.bot.entity.qingyunke.QingYunKeApi;
 import sereinfish.bot.entity.qingyunke.Result;
 import sereinfish.bot.entity.sereinfish.api.SereinFishSetu;
@@ -598,30 +599,8 @@ public class OnGroupMessageEvent {
         GroupConf groupConf = event.getGroupConf();
         //自动回复
         if (groupConf.isAutoReplyEnable() && groupConf.isDataBaseEnable()){
-            try {
-                ReplyDao replyDao = new ReplyDao(DataBaseManager.getInstance().getDataBase(groupConf.getDataBaseConfig().getID()));
-                String str = replyDao.queryKey(event.getContact().getId(),Message.Companion.toCodeString(event.getMessage()));
-                if (str != null){
-                    try{
-                        SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getBotActionContact());
-                        MyYuQ.sendSFMessage(event.getContact(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact, str));
-                        return;
-                    }catch (SendMessageFailedByCancel e){
-                        SfLog.getInstance().e(this.getClass(),"消息发送取消");
-                    }
-                    SfLog.getInstance().d(this.getClass(),"自动回复:：" + str);
-                }
-            }catch (SQLServerException e){
-                SfLog.getInstance().e(this.getClass(), e.getMessage());
-            }catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (IllegalModeException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (ClassNotFoundException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            } catch (MarkIllegalLengthException e) {
-                SfLog.getInstance().e(this.getClass(),"自动回复失败：",e);
-            }
+            ArrayList<SFMessage.SFMessageEntity> sfMessages = ReplyManager.reply(groupConf, event.getBotActionContact());
+            MyYuQ.sendSFMessage(event.getContact(), sfMessages);
         }
 
         //判断功能是否启用
