@@ -1,6 +1,7 @@
 package sereinfish.bot.file.image;
 
 import com.icecreamqaq.yuq.entity.Contact;
+import com.icecreamqaq.yuq.message.At;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.Text;
@@ -158,10 +159,15 @@ public class ImageHandle {
 
         //解析消息数据
         for (MessageItem item:message.getBody()){
-
-            if (item instanceof Text){
-                Text text = (Text) item;
-                String str = text.getText();
+            if (item instanceof Text || item instanceof At){
+                String str = "";
+                if (item instanceof Text){
+                    Text text = (Text) item;
+                    str = text.getText();
+                }else if (item instanceof At){
+                    At at = (At) item;
+                    str = "@" + at.getUser();
+                }
                 //计算位置并开始绘制图像
                 int lineWidth = 0;//当前行宽度
                 int line = 0;//当前行数

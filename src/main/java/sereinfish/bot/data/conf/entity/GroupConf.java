@@ -143,6 +143,13 @@ public class GroupConf{
 
     @Control(group = "Lolicon", name = "Lolicon", type = ControlType.WebLink, tip = "跳转到Lolicon")
     String jumpToLoliconButton = "https://api.lolicon.app/#/setu?id=telegram-bot/";
+    //随机超能力
+    @Control(group = "随机超能力", name = "启用", type = ControlType.CheckBox, tip = "启用随机超能力功能")
+    boolean superPowerEnable = false;
+
+    @Control(group = "随机超能力", name = "添加使能", type = ControlType.CheckBox, tip = "启用随机超能力功能的群添加")
+    boolean superPowerAddEnable = false;
+
     //快捷搜索
     @Control(group = "快捷搜索", name = "Mc Wiki", type = ControlType.CheckBox, tip = "启用mc wiki相关快捷搜索")
     boolean mcWikiEnable = false;

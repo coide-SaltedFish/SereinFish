@@ -26,8 +26,12 @@ public class ReplyManager {
             String msgStr = botActionContext.getMessage().getCodeStr();
             //开始匹配
             for (Reply reply:replies){
-
-                String eqStr = reply.getKey().replaceAll("<SF:Value:.+?>", ".+?");//匹配用字段
+                //普通正则
+                if(msgStr.matches(reply.getKey())){
+                    replyList.add(reply);
+                }
+                //变量输入
+                String eqStr = MyYuQ.makeQueryStringAllRegExp(reply.getKey()).replaceAll("<SF:Value:.+?>", ".+?");//匹配用字段
                 if(msgStr.matches(eqStr)){
                     try {
                         MyString.placeholderExtraction(reply.getKey(), msgStr);
@@ -41,6 +45,7 @@ public class ReplyManager {
 
             if (replyList.size() > 0){
                 Reply reply = replyList.get(MyYuQ.getRandom(0, replyList.size() - 1));//回复的消息文本
+
                 SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(botActionContext);
                 //参数注入
                 for (Map.Entry<String, Object> entry:MyString.placeholderExtraction(reply.getKey(), msgStr).entrySet()){

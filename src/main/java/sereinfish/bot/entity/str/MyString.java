@@ -20,6 +20,7 @@ public class MyString {
         Matcher matcher = pattern.matcher(model);
 
         int startStr = 0;
+        int beforeIndex = 0;
 
         while (matcher.find()){
             String gr = matcher.group();
@@ -39,18 +40,31 @@ public class MyString {
                     }
                 }
                 if (!valType.equals("") && !valName.equals("")){
-                    //获取值
-                    String str1 = model.substring(startStr, matcher.start());
-                    String str2 = "";
+                    //TODO:变量名称检查
 
-                    if (matcher.end() + 1 < model.length()){
-                        str2 = model.substring(matcher.end(), matcher.end() + 1);
-                    }else {
-                        str2 = model.substring(matcher.end());
+
+                    String valStr = "";
+
+                    if (matcher.end() == model.length()){//如果是结尾
+
+                        valStr = str.substring(startStr + (matcher.start() - beforeIndex));
+                        startStr += str.length();
+                    }else {//如果是中间
+                        //获取输入值的宽度
+                        char nextStr = model.charAt(matcher.end());
+                        int len = 0;
+                        while (str.charAt(startStr + len) != nextStr){
+                            if (str.charAt(startStr + len) == ' '
+                                    || str.charAt(startStr + len) == '\n'
+                                    || str.charAt(startStr + len) == '\t'){
+                                break;
+                            }
+                            len++;
+                        }
+                        valStr = str.substring(startStr, startStr + len);
+                        startStr += len;
+                        beforeIndex = matcher.end();
                     }
-                    String valStr = intermediateValueAcquisition(str, str1, str2);
-
-                    startStr = matcher.end();
 
                     if (valType.toLowerCase().equals("string")){
                         reMap.put(valName, valStr);

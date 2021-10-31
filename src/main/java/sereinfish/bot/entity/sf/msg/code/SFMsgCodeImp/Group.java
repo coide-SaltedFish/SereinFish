@@ -54,8 +54,12 @@ public class Group implements SFMsgCode {
             return group.getAdmins().get(num).getId() + "";
         }
 
-        if (type.equals("member")){
-            return group.getMembers().get(num).getId() + "";
+        if (type.equals("adminnum")){
+            return group.getAdmins().size() + "";
+        }
+
+        if (type.equals("membernum")){
+            return group.getMembers().size() + "";
         }
 
         return null;

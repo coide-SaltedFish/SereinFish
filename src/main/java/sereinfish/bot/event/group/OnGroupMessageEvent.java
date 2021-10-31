@@ -299,14 +299,10 @@ public class OnGroupMessageEvent {
                         File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
 
                         ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
-
-                        event.getSendTo().sendMessage(MyYuQ.getMif().imageByFile(imageFile).toMessage());
-                    }catch (UninitializedPropertyAccessException e){
+                        Image image = event.getSendTo().uploadImage(imageFile);
+                        event.getSendTo().sendMessage(image);
+                    }catch (Exception e){
                         SfLog.getInstance().e(this.getClass(), e);
-                        event.getSendTo().sendMessage(MyYuQ.getMif().text("消息转图片失败，原消息发送中..").toMessage());
-                        event.setCancel(false);
-                    }catch (IOException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
                         event.getSendTo().sendMessage(MyYuQ.getMif().text("消息转图片失败，原消息发送中..").toMessage());
                         event.setCancel(false);
                     }
