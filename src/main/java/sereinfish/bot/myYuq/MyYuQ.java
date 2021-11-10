@@ -22,6 +22,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.codec.digest.DigestUtils;
+import sereinfish.bot.database.service.BlackListService;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
+import sereinfish.bot.database.service.ReplyService;
+import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.sf.msg.SFMessage;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
@@ -58,6 +62,11 @@ public class MyYuQ {
     private static Web web;
     private static String botName;
     private static RainVersion rainVersion;
+
+    private static GroupHistoryMsgService groupHistoryMsgService;
+    private static ReplyService replyService;
+    private static BlackListService blackListService;
+    private static WhiteListService whiteListService;
 
     public static final String BASE_PACK = "sereinfish.bot";//包名
 
@@ -118,6 +127,38 @@ public class MyYuQ {
 
     public static Web getWeb() {
         return web;
+    }
+
+    public static GroupHistoryMsgService getGroupHistoryMsgService() {
+        return groupHistoryMsgService;
+    }
+
+    public static void setGroupHistoryMsgService(GroupHistoryMsgService groupHistoryMsgService) {
+        MyYuQ.groupHistoryMsgService = groupHistoryMsgService;
+    }
+
+    public static ReplyService getReplyService() {
+        return replyService;
+    }
+
+    public static void setReplyService(ReplyService replyService) {
+        MyYuQ.replyService = replyService;
+    }
+
+    public static BlackListService getBlackListService() {
+        return blackListService;
+    }
+
+    public static void setBlackListService(BlackListService blackListService) {
+        MyYuQ.blackListService = blackListService;
+    }
+
+    public static WhiteListService getWhiteListService() {
+        return whiteListService;
+    }
+
+    public static void setWhiteListService(WhiteListService whiteListService) {
+        MyYuQ.whiteListService = whiteListService;
     }
 
     /**

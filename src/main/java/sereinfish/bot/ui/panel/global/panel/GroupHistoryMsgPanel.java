@@ -1,8 +1,9 @@
 package sereinfish.bot.ui.panel.global.panel;
 
-import sereinfish.bot.database.table.GroupHistoryMsg;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.context.edit.TextAndImageEdit;
 import sereinfish.bot.ui.list.CellManager;
 import sereinfish.bot.ui.panel.table.GroupCellRenderer;
@@ -10,6 +11,7 @@ import sereinfish.bot.ui.panel.table.QQCellRenderer;
 import sereinfish.bot.ui.panel.table.TimeCellRenderer;
 import sereinfish.bot.ui.panel.table.database.DBTableModel;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -17,13 +19,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 历史消息面板
  */
 public class GroupHistoryMsgPanel extends JPanel {
+    private GroupHistoryMsgService groupHistoryMsgService = MyYuQ.getGroupHistoryMsgService();
+
     private JLabel label_num = new JLabel("共有记录：0条");
     private JTable table;
     private TextAndImageEdit textPane;
@@ -93,19 +96,7 @@ public class GroupHistoryMsgPanel extends JPanel {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayList<GroupHistoryMsg> msgs = null;
-                try {
-                    msgs = GroupHistoryMsgDBManager.getInstance().query();
-                } catch (SQLException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                } catch (IllegalAccessException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                } catch (InstantiationException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                }
-                if (msgs == null){
-                    return;
-                }
+                List<GroupHistoryMsg> msgs = groupHistoryMsgService.findAll();
 
                 label_num.setText("共有记录：" + msgs.size() + "条");
                 if (msgDBTableModel == null){

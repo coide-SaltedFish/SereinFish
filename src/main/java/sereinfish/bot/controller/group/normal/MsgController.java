@@ -1,7 +1,6 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
-import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
@@ -13,23 +12,19 @@ import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
-import com.icecreamqaq.yuq.message.MessageLineQ;
-import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.msg.LeavingMessage;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
-import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 /**
  * 一些消息功能
@@ -37,6 +32,9 @@ import java.util.regex.Pattern;
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "消息")
 public class MsgController extends QQController {
+    @Inject
+    private GroupHistoryMsgService groupHistoryMsgService;
+
     private int maxTime = 25 * 1000;
     private int rd = 60;
 
@@ -117,22 +115,16 @@ public class MsgController extends QQController {
             }
         }else {
             //检查是否回复
-            GroupHistoryMsg groupHistoryMsg = null;
-            try {
-                groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
-                if (groupHistoryMsg == null){
-                    return "找不到该消息，可能是消息未被记录:" + message.getReply().getId();
+            GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findByGroupAndMid(group.getId(), message.getReply().getId());
+            if (groupHistoryMsg == null){
+                return "找不到该消息，可能是消息未被记录:" + message.getReply().getId();
+            }
+            Message replayMsg = groupHistoryMsg.getMessage();
+            for (MessageItem messageItem:replayMsg.getBody()){
+                if (messageItem instanceof Image){
+                    image = (Image) messageItem;
+                    break;
                 }
-                Message replayMsg = groupHistoryMsg.getMessage();
-                for (MessageItem messageItem:replayMsg.getBody()){
-                    if (messageItem instanceof Image){
-                        image = (Image) messageItem;
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),e);
-                group.sendMessage("发生错误了：" + e.getMessage());
             }
         }
 

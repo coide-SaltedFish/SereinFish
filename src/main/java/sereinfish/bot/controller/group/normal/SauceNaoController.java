@@ -16,32 +16,27 @@ import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageLineQ;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.pixiv.Pixiv;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.entity.pixiv.entity.PixivEntity;
-import sereinfish.bot.entity.pixivcat.PixivCat;
 import sereinfish.bot.entity.sauceNAO.SauceNao;
 import sereinfish.bot.entity.sauceNAO.SauceNaoAPI;
 import sereinfish.bot.entity.sauceNAO.sauce.Result;
 import sereinfish.bot.entity.sauceNAO.sauce.SauceNAO;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.performance.MyPerformance;
-import sereinfish.bot.utils.BotUtils;
 import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -50,14 +45,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "SauceNao搜图")
 public class SauceNaoController extends QQController {
+    @Inject
+    private GroupHistoryMsgService groupHistoryMsgService;
 
-    private int maxTime = 15000;
+    private int maxTime = 25000;
 
     @Before
     public void before(Group group, GroupConf groupConf){
@@ -90,25 +85,19 @@ public class SauceNaoController extends QQController {
             }
             sNSearch(sender, message, groupConf, group, image.getUrl());
         }else {
-            GroupHistoryMsg groupHistoryMsg = null;
-            try {
-                groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
-                if (groupHistoryMsg == null){
-                    group.sendMessage("找不到该消息，可能是消息未被记录:" + message.getReply().getId());
-                    return;
+            GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findByGroupAndMid(group.getId(), message.getReply().getId());
+            if (groupHistoryMsg == null){
+                group.sendMessage("找不到该消息，可能是消息未被记录:" + message.getReply().getId());
+                return;
+            }
+            Message replayMsg = groupHistoryMsg.getMessage();
+            for (MessageItem messageItem:replayMsg.getBody()){
+                if (messageItem instanceof Image){
+                    Image image = (Image) messageItem;
+                    sNSearch(sender, message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-"
+                            + image.getId().substring(0, image.getId().lastIndexOf(".")).toUpperCase() + "/0");
+                    break;
                 }
-                Message replayMsg = groupHistoryMsg.getMessage();
-                for (MessageItem messageItem:replayMsg.getBody()){
-                    if (messageItem instanceof Image){
-                        Image image = (Image) messageItem;
-                        sNSearch(sender, message, groupConf, group, "http://gchat.qpic.cn/gchatpic_new/0/-0-"
-                                + image.getId().substring(0, image.getId().lastIndexOf(".")).toUpperCase() + "/0");
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),e);
-                group.sendMessage("发生错误了：" + e.getMessage());
             }
         }
     }

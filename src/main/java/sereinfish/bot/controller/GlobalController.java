@@ -14,9 +14,6 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.entity.DataBase;
-import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
@@ -38,18 +35,6 @@ public class GlobalController {
             actionContext.set("group", group);
             GroupConf groupConf = ConfManager.getInstance().get(group.getId());
             actionContext.set("groupConf", groupConf);
-
-            if (groupConf.getDataBaseConfig() != null){
-                DataBase dataBase = null;
-                try {
-                    dataBase = DataBaseManager.getInstance().getDataBase(groupConf.getDataBaseConfig().getID());
-                    actionContext.set("dataBase", dataBase);
-                } catch (Exception e) {
-                    SfLog.getInstance().e(this.getClass(), e);
-                } catch (IllegalModeException e) {
-                    SfLog.getInstance().e(this.getClass(), e);
-                }
-            }
         }
     }
 

@@ -3,22 +3,18 @@ package sereinfish.bot.event.group;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.EventBus;
-import com.icecreamqaq.yuq.controller.BotActionContext;
-import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.entity.MessageAt;
-import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.*;
 import com.icecreamqaq.yuq.message.Image;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-import kotlin.UninitializedPropertyAccessException;
-import net.mamoe.mirai.event.EventHandler;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.database.service.BlackListService;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
+import sereinfish.bot.database.service.ReplyService;
+import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.msg.LeavingMessage;
 import sereinfish.bot.entity.msg.MyMessage;
 import sereinfish.bot.entity.msg.ReplyManager;
@@ -28,31 +24,23 @@ import sereinfish.bot.entity.sereinfish.api.SereinFishSetu;
 import sereinfish.bot.entity.sereinfish.api.msg.ImageItem;
 import sereinfish.bot.entity.sereinfish.api.msg.re.Msg;
 import sereinfish.bot.entity.sf.msg.SFMessage;
-import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.event.myEvent.BotNameEvent;
 import sereinfish.bot.event.myEvent.NoActionResponseEvent;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.ex.IllegalModeException;
-import sereinfish.bot.database.handle.BlackListDao;
-import sereinfish.bot.database.handle.ReplyDao;
-import sereinfish.bot.database.table.BlackList;
-import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.database.entity.BlackList;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
 import sereinfish.bot.event.GroupReCallMessageManager;
-import sereinfish.bot.event.group.repeater.RepeaterManager;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -60,13 +48,24 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 群事件监听
  */
 @EventListener
 public class OnGroupMessageEvent {
+
+    @Inject
+    private BlackListService blackListService;
+
+    @Inject
+    private GroupHistoryMsgService groupHistoryMsgService;
+
+    @Inject
+    private ReplyService replyService;
+
+    @Inject
+    private WhiteListService whiteListService;
 
     @Inject
     private EventBus eventBus;
@@ -84,10 +83,12 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMessageEvent(GroupMessageEvent event){
+        Message message = event.getMessage();
         //消息记录
-        if(!GroupHistoryMsgDBManager.getInstance().add(event.getGroup(), event.getSender().getId(), event.getMessage())){
-            SfLog.getInstance().e(this.getClass(),"消息记录失败");
-            //event.getGroup().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+        try {
+            groupHistoryMsgService.save(new GroupHistoryMsg(event.getGroup().getId(), event.getSender().getId(), message.getId(), message.getCodeStr()));
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), "错误：消息记录失败，请进入bot管理界面进行查看", e);
         }
         //群功能启用判断
         GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
@@ -112,7 +113,7 @@ public class OnGroupMessageEvent {
         //留言
         LeavingMessage.checkRunnable(event.getGroup().getId(), event.getSender().getId());
         //TODO:刷屏检测
-        Message message = event.getMessage();
+
         //图片过期检测
         try {
             for (MessageItem item:message.getBody()){
@@ -254,9 +255,13 @@ public class OnGroupMessageEvent {
     @Event
     public void privateMessageEvent(PrivateMessageEvent event){
         //消息记录
-        if(!GroupHistoryMsgDBManager.getInstance().add(-1, event.getSender().getId(), event.getMessage())){
-            event.getSender().sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
+        Message message = event.getMessage();
+        try {
+            groupHistoryMsgService.save(new GroupHistoryMsg(-1, event.getSender().getId(), message.getId(), message.getCodeStr()));
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass(), "错误：消息记录失败，请进入bot管理界面进行查看", e);
         }
+
     }
 
     /**
@@ -327,6 +332,12 @@ public class OnGroupMessageEvent {
         try {
             int id = messageSource.getId();
             SfLog.getInstance().d(this.getClass(), "消息Id：" + id);
+
+            //消息记录
+            if (message.getId() != null){
+                groupHistoryMsgService.save(new GroupHistoryMsg(contact.getId(), MyYuQ.getYuQ().getBotId(), message.getId(), message.getCodeStr()));
+            }
+
         }catch (ArrayIndexOutOfBoundsException e){
             if (event.getMessage() instanceof MyMessage) {
                 MyMessage myMessage = (MyMessage) event.getMessage();
@@ -354,12 +365,6 @@ public class OnGroupMessageEvent {
                 return;
             }
         }
-
-        //消息记录
-        if(!GroupHistoryMsgDBManager.getInstance().add(contact.getId(), MyYuQ.getYuQ().getBotId(), message)){
-            contact.sendMessage(MyYuQ.getMif().text("错误：消息记录失败，请进入bot管理界面进行查看").toMessage());
-        }
-        //RepeaterManager.getInstance().add(event.getSendTo(), event.getMessage());//复读
 
         //撤回管理
         if (contact instanceof Group){
@@ -425,13 +430,13 @@ public class OnGroupMessageEvent {
                     group.sendMessage(MyYuQ.getMif().text("刚刚，" + member.getNameCard() + "(" +
                             member.getName() + ")[" + member.getId() + "]离开了我们，他说过的最后一句话是：").toMessage());
                     try {
-                        GroupHistoryMsg groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().queryLast(group.getId(),member.getId());
+                        GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findLastByGroupAndQQ(group.getId(),member.getId());
 
                         if (groupHistoryMsg == null){
                             group.sendMessage(MyYuQ.getMif().text("他好像还没说过话").toMessage());
                             return;
                         }else {
-                            group.sendMessage(Message.Companion.toMessageByRainCode(groupHistoryMsg.getMsg()));
+                            group.sendMessage(Message.Companion.toMessageByRainCode(groupHistoryMsg.getRainCodeMsg()));
                         }
                     }catch (Exception e){
                         group.sendMessage(MyYuQ.getMif().text("出现了一点错误喵：" + e.getMessage()).toMessage());
@@ -440,36 +445,13 @@ public class OnGroupMessageEvent {
             }
             //退群拉黑
             if (conf.isQuitJoinBlackListEnable()){
-                if (conf.isDataBaseEnable()){
-                    try {
-                        BlackListDao blackListDao;
-                        try {
-                            blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                        } catch (Exception e) {
-                            SfLog.getInstance().e(this.getClass(),e);
-                            return;
-                        } catch (IllegalModeException e) {
-                            SfLog.getInstance().e(this.getClass(),e);
-                            return;
-                        }
-
-                        blackListDao.insert(new BlackList(new Date(),member.getId(),group.getId(),"退群自动拉黑"));
-                        if (conf.isAddGroupBlackListTip()){
-                            String tip = conf.getAddGroupBlackListTipText();
-                            if (!tip.trim().equals("")){
-                                SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
-                                MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
-                            }
-                        }
-                    } catch (SQLException e) {
-                        group.sendMessage(MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
-                        SfLog.getInstance().e(this.getClass(),e);
-                    } catch (IllegalAccessException e) {
-                        group.sendMessage(MyYuQ.getMif().text("退群拉黑失败:" + e.getMessage()).toMessage());
-                        SfLog.getInstance().e(this.getClass(),e);
+                blackListService.save(new BlackList(member.getId(),group.getId(),"退群自动拉黑"));
+                if (conf.isAddGroupBlackListTip()){
+                    String tip = conf.getAddGroupBlackListTipText();
+                    if (!tip.trim().equals("")){
+                        SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+                        MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
                     }
-                }else {
-                    group.sendMessage(MyYuQ.getMif().text("退群拉黑失败，数据库未启用").toMessage());
                 }
             }
         }
@@ -522,58 +504,37 @@ public class OnGroupMessageEvent {
             //是否验证黑名单
             if (conf.isBlackListGroupEnable()){
                 //黑名单验证
-                if (!conf.isDataBaseEnable()){
-                    event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库未启用，自动同意入群已停止").toMessage());
-                    return;
-                }else {
-                    try {
-                        BlackListDao blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-                        if (conf.isBlackListGroupEnable()){
-                            //全局黑名单
-                            if (conf.isGlobalBlackListGroupEnable()){
-                                if(blackListDao.exist(event.getQq().getId())){
-                                    //拒绝
-                                    event.setRejectMessage("黑名单用户");
-                                    event.setAccept(false);
-                                    event.setCancel(true);
-                                    event.getGroup().sendMessage(MyYuQ.getMif().text("[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                            ")，尝试加入本群，已自动拒绝").toMessage());
-                                }else {
-                                    //同意
-                                    event.setAccept(true);
-                                    event.setCancel(true);
-                                    SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
-                                }
-                            }else {
-                                if(blackListDao.exist(event.getGroup().getId(), event.getQq().getId())){
-                                    //拒绝
-                                    event.setRejectMessage("黑名单用户");
-                                    event.setAccept(false);
-                                    event.setCancel(true);
-                                    event.getGroup().sendMessage(MyYuQ.getMif().text("[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
-                                            ")，尝试加入本群，已自动拒绝").toMessage());
-                                }else {
-                                    //同意
-                                    event.setAccept(true);
-                                    event.setCancel(true);
-                                    SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
-                                }
-                            }
+                if (conf.isBlackListGroupEnable()){
+                    //全局黑名单
+                    if (conf.isGlobalBlackListGroupEnable()){
+                        if(blackListService.exist(event.getQq().getId())){
+                            //拒绝
+                            event.setRejectMessage("黑名单用户");
+                            event.setAccept(false);
+                            event.setCancel(true);
+                            event.getGroup().sendMessage(MyYuQ.getMif().text("[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                    ")，尝试加入本群，已自动拒绝").toMessage());
+                        }else {
+                            //同意
+                            event.setAccept(true);
+                            event.setCancel(true);
+                            SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
                         }
-                    } catch (SQLException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
-                    } catch (IllegalModeException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
-                    } catch (ClassNotFoundException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
-                    } catch (MarkIllegalLengthException e) {
-                        SfLog.getInstance().e(this.getClass(),e);
-                        event.getGroup().sendMessage(MyYuQ.getMif().text("黑名单数据库错误：" + e.getMessage()).toMessage());
+                    }else {
+                        if(blackListService.existGroup(event.getGroup().getId(), event.getQq().getId())){
+                            //拒绝
+                            event.setRejectMessage("黑名单用户");
+                            event.setAccept(false);
+                            event.setCancel(true);
+                            event.getGroup().sendMessage(MyYuQ.getMif().text("[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
+                                    ")，尝试加入本群，已自动拒绝").toMessage());
+                        }else {
+                            //同意
+                            event.setAccept(true);
+                            event.setCancel(true);
+                            SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                        }
                     }
-
                 }
             }else {
                 //同意
@@ -594,8 +555,8 @@ public class OnGroupMessageEvent {
     public void noActionResponseEvent(NoActionResponseEvent event){
         GroupConf groupConf = event.getGroupConf();
         //自动回复
-        if (groupConf.isAutoReplyEnable() && groupConf.isDataBaseEnable()){
-            ArrayList<SFMessage.SFMessageEntity> sfMessages = ReplyManager.reply(groupConf, event.getBotActionContact());
+        if (groupConf.isAutoReplyEnable()){
+            ArrayList<SFMessage.SFMessageEntity> sfMessages = ReplyManager.reply(event.getBotActionContact());
             MyYuQ.sendSFMessage(event.getContact(), sfMessages);
         }
 

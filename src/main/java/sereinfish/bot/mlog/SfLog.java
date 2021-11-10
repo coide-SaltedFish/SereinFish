@@ -58,6 +58,7 @@ public class SfLog {
      */
     public void e(Class clazz,Exception e){
         logger.error(clazz.getSimpleName() + "::" + e.getLocalizedMessage(),e);
+        e.printStackTrace();
     }
 
     /**

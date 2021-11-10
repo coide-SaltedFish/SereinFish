@@ -4,10 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import sereinfish.bot.database.DataBaseConfig;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.ex.IllegalModeException;
-import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -15,7 +11,6 @@ import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.data.conf.annotation.Control;
 import sereinfish.bot.data.conf.ControlType;
-import sereinfish.bot.ui.context.ControlManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +32,6 @@ public class GroupConf{
 
     @Control(group = "启用", name = "启用", type = ControlType.CheckBox, tip = "选择是否启用此群")
     boolean enable = false;
-    //数据库
-    @Control(group = "数据库", name = "数据库选择", type = ControlType.DataBaseSelect, tip = "选择是否启用此群")
-    DataBaseConfig dataBaseConfig = null;
     //群提示开关
     @Control(group = "群提示开关", name = "启用进群提示", type = ControlType.CheckBox, tip = "启用新人进群提示")
     boolean joinGroupTipEnable = false;
@@ -215,24 +207,6 @@ public class GroupConf{
 
     @Control(group = "消息转图片", name = "字体大小", type = ControlType.Edit_IntNum, tip = "生成字体的大小")
     int longMsgToImageFontSize = 36;
-
-    public boolean isDataBaseEnable(){
-        if(dataBaseConfig == null){
-            return false;
-        }
-
-        try {
-            if(DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID()) == null){
-                return false;
-            }
-        } catch (Exception e) {
-            return false;
-        } catch (IllegalModeException e) {
-            return false;
-        }
-
-        return true;
-    }
 
     /**
      * 保存

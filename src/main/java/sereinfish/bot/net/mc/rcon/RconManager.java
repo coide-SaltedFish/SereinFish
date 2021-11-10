@@ -1,9 +1,6 @@
 package sereinfish.bot.net.mc.rcon;
 
 import lombok.Getter;
-import sereinfish.bot.database.DataBaseConfig;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.entity.DataBase;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;

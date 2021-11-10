@@ -26,7 +26,7 @@ import java.io.IOException;
 @Menu(type = Menu.Type.GROUP, name = "Rcon相关指令", permissions = Permissions.OP)
 public class McRconCmd extends QQController {
 
-    private int maxTime = 15000;
+    private int maxTime = 25000;
 
     @Before
     public void before(Message message, Member sender, Group group){
@@ -86,7 +86,7 @@ public class McRconCmd extends QQController {
         }else {
             throw new DoNone();
         }
-        reply(MyYuQ.getMif().at(sender).plus(MyYuQ.getMif().text("请输入命令")));
+        reply(MyYuQ.getMif().at(sender).plus(MyYuQ.getMif().text(String.format("请输入命令(%d)", maxTime / 1000))));
 
         try{
             String reMsg = Message.Companion.toCodeString(session.waitNextMessage(maxTime));

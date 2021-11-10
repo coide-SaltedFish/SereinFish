@@ -1,9 +1,6 @@
 package sereinfish.bot.ui.panel.global.table;
 
-import sereinfish.bot.mlog.SfLog;
-
 import javax.swing.table.AbstractTableModel;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class DBTableModel extends AbstractTableModel {

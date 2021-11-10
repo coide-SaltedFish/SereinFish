@@ -1,20 +1,12 @@
 package sereinfish.bot.ui.context;
 
-import sereinfish.bot.data.conf.ConfManager;
-import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.DataBaseConfig;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.entity.DataBase;
-import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.data.conf.ControlType;
 import sereinfish.bot.mlog.SfLog;
-import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.ui.context.entity.ConfControls;
 import sereinfish.bot.ui.dialog.FileChooseDialog;
 import sereinfish.bot.ui.frame.EditFrame;
-import sereinfish.bot.ui.frame.database.select.SelectDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.SelectRconFrame;
 import sereinfish.bot.ui.textfield.plainDocument.NumberTextField;
 
@@ -59,77 +51,9 @@ public class ConfContext {
             component = ConfContext.getRconSelect(control);
         }else if (control.getType() == ControlType.Authority_ComboBox){
             component = ConfContext.getAuthorityComboBox(control);
-        }else if(control.getType() == ControlType.DataBaseSelect){
-            component = getDataBaseComboBox(control);
         }
 
         return component;
-    }
-
-    /**
-     * 数据库选择
-     * @return
-     */
-    public static JPanel getDataBaseComboBox(ConfControls.Control control){
-        JPanel comboBox_panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-        final DataBaseConfig[] dataBaseConfig = {control.getValue()};
-
-        final JButton btn_dataBase = new JButton("选择数据库");
-        if (dataBaseConfig[0] != null){
-            btn_dataBase.setText("数据库：" + dataBaseConfig[0].getBaseName());
-        }
-
-        control.setListener(control1 -> {
-            dataBaseConfig[0] = control1.getValue();
-            if (dataBaseConfig[0] != null){
-                btn_dataBase.setText("数据库：" + dataBaseConfig[0].getBaseName());
-            }else {
-                btn_dataBase.setText("选择数据库");
-            }
-        });
-
-        comboBox_panel.add(btn_dataBase);
-        btn_dataBase.setToolTipText("点击选择此群数据库");
-
-        btn_dataBase.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new SelectDataBaseFrame(new SelectDataBaseFrame.SelectDataBaseListener() {
-                    @Override
-                    public void select(SelectDataBaseFrame frame, DataBase dataBase) {
-                        control.setValue(dataBase.getDataBaseConfig());
-                        DataBaseConfig dataBaseConfig = control.getValue();
-                        try {
-                            if (DataBaseManager.getInstance().getDataBase(dataBaseConfig.getID()) != null){
-                                btn_dataBase.setText("数据库：" + dataBaseConfig.getBaseName());
-                            }else {
-                                btn_dataBase.setText("选择数据库");
-                            }
-                        } catch (Exception throwables) {
-                            SfLog.getInstance().e(this.getClass(), throwables);
-                        } catch (IllegalModeException illegalModeException) {
-                            SfLog.getInstance().e(this.getClass(), illegalModeException);
-                        }
-                        frame.close();
-                    }
-
-                    @Override
-                    public void cancel(SelectDataBaseFrame frame) {
-                        frame.close();
-                    }
-
-                    @Override
-                    public void close(SelectDataBaseFrame frame){
-                        control.setValue(null);
-                        btn_dataBase.setText("选择数据库");
-                        frame.close();
-                    }
-                });
-            }
-        });
-
-        return comboBox_panel;
     }
 
     /**

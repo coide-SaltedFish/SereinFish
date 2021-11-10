@@ -11,18 +11,18 @@ import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageLineQ;
-import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.file.image.ImageHandle;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.QRCodeImage;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,6 +34,9 @@ import java.util.Date;
 @GroupController
 @Menu(type = Menu.Type.GROUP, name = "二维码", permissions = Permissions.NORMAL)
 public class QrController {
+
+    @Inject
+    private GroupHistoryMsgService groupHistoryMsgService;
 
     @Action("二维码 {text}")
     @QMsg(mastAtBot = true)
@@ -95,23 +98,17 @@ public class QrController {
         //检查是不是回复
         if (message.getReply() != null){
             //检查回复的图片
-            GroupHistoryMsg groupHistoryMsg = null;
-            try {
-                groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
-                if (groupHistoryMsg == null){
-                    return new Message().lineQ().text("找不到该消息，可能是消息未被记录:" + message.getReply().getId()).getMessage();
+            GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findByGroupAndMid(group.getId(), message.getReply().getId());
+            if (groupHistoryMsg == null){
+                return new Message().lineQ().text("找不到该消息，可能是消息未被记录:" + message.getReply().getId()).getMessage();
+            }
+            Message replayMsg = groupHistoryMsg.getMessage();
+            for (MessageItem messageItem:replayMsg.getBody()){
+                if (messageItem instanceof Image){
+                    Image image = (Image) messageItem;
+                    imageUrl = "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0";
+                    break;
                 }
-                Message replayMsg = groupHistoryMsg.getMessage();
-                for (MessageItem messageItem:replayMsg.getBody()){
-                    if (messageItem instanceof Image){
-                        Image image = (Image) messageItem;
-                        imageUrl = "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0";
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),e);
-                return new Message().lineQ().at(sender).textLine("").text("发生错误了：" + e.getMessage()).getMessage();
             }
         }else {
             //是本消息
@@ -151,23 +148,17 @@ public class QrController {
         //是回复
         if (message.getReply() != null){
             //检查回复的图片
-            GroupHistoryMsg groupHistoryMsg = null;
-            try {
-                groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
-                if (groupHistoryMsg == null){
-                    return new Message().lineQ().text("找不到该消息，可能是消息未被记录:" + message.getReply().getId()).getMessage();
+            GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findByGroupAndMid(group.getId(), message.getReply().getId());
+            if (groupHistoryMsg == null){
+                return new Message().lineQ().text("找不到该消息，可能是消息未被记录:" + message.getReply().getId()).getMessage();
+            }
+            Message replayMsg = groupHistoryMsg.getMessage();
+            for (MessageItem messageItem:replayMsg.getBody()){
+                if (messageItem instanceof Image){
+                    Image image = (Image) messageItem;
+                    imageUrl = "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0";
+                    break;
                 }
-                Message replayMsg = groupHistoryMsg.getMessage();
-                for (MessageItem messageItem:replayMsg.getBody()){
-                    if (messageItem instanceof Image){
-                        Image image = (Image) messageItem;
-                        imageUrl = "http://gchat.qpic.cn/gchatpic_new/0/-0-" + image.getId().substring(0, image.getId().lastIndexOf(".")) + "/0";
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                SfLog.getInstance().e(this.getClass(),e);
-                return new Message().lineQ().text("发生错误了：" + e.getMessage()).getMessage();
             }
         }else {
             for (MessageItem messageItem:message.getBody()){

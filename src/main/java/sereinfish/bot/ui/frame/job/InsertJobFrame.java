@@ -6,8 +6,6 @@ import sereinfish.bot.job.entity.JobType;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.dialog.TipDialog;
 import sereinfish.bot.ui.frame.EditFrame;
-import sereinfish.bot.ui.frame.MainFrame;
-import sereinfish.bot.ui.frame.database.insert.InsertFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
 import sereinfish.bot.ui.textfield.plainDocument.NumberTextField;
 

@@ -5,6 +5,7 @@ import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.ui.frame.EditFrame;
 import sereinfish.bot.ui.layout.VFlowLayout;
 
+import javax.persistence.Column;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -53,8 +54,8 @@ public class InsertFrame<E> extends JFrame {
         contentPane.add(new JScrollPane(panel_edit),BorderLayout.CENTER);
 
         for (Field field:t.getDeclaredFields()){
-            if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
-                sereinfish.bot.database.dao.annotation.Field dField = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
+            if (field.isAnnotationPresent(Column.class)){
+                Column column = field.getAnnotation(Column.class);
                 JPanel panel = new JPanel(new BorderLayout());
                 JPanel panel_e = new JPanel(new VFlowLayout());
                 JTextPane textPane = new JTextPane();
@@ -64,7 +65,7 @@ public class InsertFrame<E> extends JFrame {
                 btn_edit.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        EditFrame editFrame = new EditFrame(dField.name(), new EditFrame.EditListener() {
+                        EditFrame editFrame = new EditFrame(field.getName(), new EditFrame.EditListener() {
                             @Override
                             public void save(EditFrame editFrame, String text) {
                                 textPane.setText(text);
@@ -81,7 +82,7 @@ public class InsertFrame<E> extends JFrame {
                     }
                 });
 
-                JLabel label = new JLabel(dField.name());
+                JLabel label = new JLabel(field.getName());
                 textPanes.add(textPane);
                 panel.add(label,BorderLayout.WEST);
                 panel.add(panel_e,BorderLayout.CENTER);
@@ -94,7 +95,7 @@ public class InsertFrame<E> extends JFrame {
         if (value != null){
             int i = 0;
             for (Field field:value.getClass().getDeclaredFields()){
-                if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                if (field.isAnnotationPresent(Column.class)){
                     try {
                         textPanes.get(i).setText(field.get(value) + "");
                     } catch (IllegalAccessException e) {
@@ -124,15 +125,15 @@ public class InsertFrame<E> extends JFrame {
                     //赋值
                     int i = 0;
                     for (Field field:value.getClass().getDeclaredFields()){
-                        if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+                        if (field.isAnnotationPresent(Column.class)){
                             String str = textPanes.get(i).getText();
 
                             try {
-                               if (field.getType().isAssignableFrom(String.class)){
-                                   field.set(value,str);
-                               }else {
-                                   field.set(value, MyYuQ.toClass(str,field.getType()));
-                               }
+                                if (field.getType().isAssignableFrom(String.class)){
+                                    field.set(value,str);
+                                }else {
+                                    field.set(value, MyYuQ.toClass(str,field.getType()));
+                                }
                             } catch (IllegalAccessException e) {
                                 field.setAccessible(true);
                                 if (field.getType().isAssignableFrom(String.class)){

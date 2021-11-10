@@ -14,17 +14,16 @@ import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import sereinfish.bot.data.conf.ConfManager;
-import sereinfish.bot.database.ex.MarkIllegalLengthException;
+import sereinfish.bot.database.service.BlackListService;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
+import sereinfish.bot.database.service.ReplyService;
+import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.bili.BiliManager;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.ex.IllegalModeException;
 import sereinfish.bot.entity.ClassManager;
 import sereinfish.bot.entity.mc.JsonColor;
 import sereinfish.bot.event.group.repeater.RepeaterManager;
-import sereinfish.bot.file.account.AccountManager;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.job.JobSFManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -36,13 +35,24 @@ import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.sql.SQLException;
 
 /**
  * 初始化类
  */
 @EventListener
 public class InitEvent{
+    @Inject
+    private BlackListService blackListService;
+
+    @Inject
+    private GroupHistoryMsgService groupHistoryMsgService;
+
+    @Inject
+    private ReplyService replyService;
+
+    @Inject
+    private WhiteListService whiteListService;
+
     @Inject
     private JobManager jobManager;
     @Inject
@@ -80,6 +90,10 @@ public class InitEvent{
         }
         MyYuQ.init(yuQ,mif,jobManager,dateUtil,rainBot,web, name);
         MyYuQ.setRainVersion(rainVersion);
+        MyYuQ.setGroupHistoryMsgService(groupHistoryMsgService);
+        MyYuQ.setReplyService(replyService);
+        MyYuQ.setBlackListService(blackListService);
+        MyYuQ.setWhiteListService(whiteListService);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
@@ -111,9 +125,9 @@ public class InitEvent{
         //初始化缓存管理器
         CacheManager.init();
         SfLog.getInstance().d(this.getClass(),"缓存管理器初始化完成");
-        //初始化数据库连接池
-        DataBaseManager.init();
-        SfLog.getInstance().d(this.getClass(),"数据库连接池管理器初始化完成");
+//        //初始化数据库连接池
+//        DataBaseManager.init();
+//        SfLog.getInstance().d(this.getClass(),"数据库连接池管理器初始化完成");
         //初始化RCON
         RconManager.init();
         SfLog.getInstance().d(this.getClass(),"RCON管理器初始化完成");
@@ -121,41 +135,6 @@ public class InitEvent{
         ConfManager.init();
         SfLog.getInstance().d(this.getClass(),"群配置管理器初始化完成");
 
-        //初始化账号管理器
-        try {
-            AccountManager.init();
-            SfLog.getInstance().d(this.getClass(),"账号管理器初始化完成");
-        } catch (IllegalModeException e) {
-            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (ClassNotFoundException e) {
-            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (MarkIllegalLengthException e) {
-            SfLog.getInstance().e(this.getClass(),"账号管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        }
-
-        //初始化群消息记录管理器
-        try {
-            GroupHistoryMsgDBManager.init();
-            SfLog.getInstance().d(this.getClass(),"群消息记录管理器初始化完成");
-        } catch (IllegalModeException e) {
-            SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (ClassNotFoundException e) {
-            SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        } catch (MarkIllegalLengthException e) {
-            SfLog.getInstance().e(this.getClass(),"群消息记录管理器初始化失败,应用退出",e);
-            System.exit(-1);
-        }
         //初始化MC颜色映射表
         JsonColor.initColorMap();
         SfLog.getInstance().d(this.getClass(),"MC颜色映射表初始化完成");

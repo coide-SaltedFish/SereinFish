@@ -2,20 +2,22 @@ package sereinfish.bot.ui.panel.table.database;
 
 import sereinfish.bot.mlog.SfLog;
 
+import javax.persistence.Column;
 import javax.swing.table.AbstractTableModel;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DBTableModel<E> extends AbstractTableModel{
 
     String[] title;
-    ArrayList<E> datas;
+    List<E> datas;
     Class t;
 
     /**
      * 初始化数据
      */
-    public DBTableModel(Class t, ArrayList<E> datas) {
+    public DBTableModel(Class t, List<E> datas) {
         this.t = t;
         this.datas = datas;
         title = getTitle();
@@ -41,7 +43,7 @@ public class DBTableModel<E> extends AbstractTableModel{
      *
      * @param datas
      */
-    public void setData(ArrayList<E> datas) {
+    public void setData(List<E> datas) {
         this.datas = datas;
     }
 
@@ -57,10 +59,17 @@ public class DBTableModel<E> extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (!(rowIndex < datas.size())){
+            return null;
+        }
+
+        if (datas.size() <= 0){
+            return null;
+        }
         E reply = datas.get(rowIndex);
         int i = 0;
         for (Field field:reply.getClass().getDeclaredFields()){
-            if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
+            if (field.isAnnotationPresent(Column.class)){
                 if (i == columnIndex){
                     try {
                         return field.get(reply);
@@ -92,9 +101,8 @@ public class DBTableModel<E> extends AbstractTableModel{
     private String[] getTitle(){
         ArrayList<String> list = new ArrayList<>();
         for (Field field:t.getDeclaredFields()){
-            if (field.isAnnotationPresent(sereinfish.bot.database.dao.annotation.Field.class)){
-                sereinfish.bot.database.dao.annotation.Field S_field = field.getAnnotation(sereinfish.bot.database.dao.annotation.Field.class);
-                list.add(S_field.name());
+            if (field.isAnnotationPresent(Column.class)){
+                list.add(field.getName());
             }
         }
         return list.toArray(new String[0]);

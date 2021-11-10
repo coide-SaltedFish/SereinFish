@@ -1,21 +1,20 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
-import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.message.Message;
 import okhttp3.*;
-import sereinfish.bot.database.table.GroupHistoryMsg;
+import sereinfish.bot.database.entity.GroupHistoryMsg;
+import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.entity.aSoul.ASoulCnKi;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
-import sereinfish.bot.file.msg.GroupHistoryMsgDBManager;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
+import javax.inject.Inject;
 import java.io.IOException;
-import java.sql.SQLException;
 
 import static sereinfish.bot.utils.OkHttpUtil.JSON;
 
@@ -26,6 +25,9 @@ import static sereinfish.bot.utils.OkHttpUtil.JSON;
 @Menu(type = Menu.Type.GROUP, name = "枝网")
 public class ASoulCnKiController {
 
+    @Inject
+    GroupHistoryMsgService groupHistoryMsgService;
+
     @Action("\\^[.!！]枝网查重$\\")
     @MenuItem(name = "枝网查重", usage = "[ReplyMsg][.!！]枝网查重", description = "查询小作文重复率捏")
     public String check(Group group, Message message){
@@ -33,17 +35,12 @@ public class ASoulCnKiController {
             return "请以回复小作文的形式调用此命令捏";
         }
 
-        GroupHistoryMsg groupHistoryMsg = null;
-        try {
-            groupHistoryMsg = GroupHistoryMsgDBManager.getInstance().query(group.getId(), message.getReply().getId());
-            if (groupHistoryMsg == null){
-                return "找不到该消息捏，请以回复小作文的形式调用此命令捏";
-            }
-        } catch (SQLException e) {
-            SfLog.getInstance().e(this.getClass(),e);
-            return "发生错误了捏：" + e.getMessage();
+        GroupHistoryMsg groupHistoryMsg = groupHistoryMsgService.findByGroupAndMid(group.getId(), message.getReply().getId());
+        if (groupHistoryMsg == null){
+            return "找不到该消息捏，请以回复小作文的形式调用此命令捏";
         }
-        String text = groupHistoryMsg.getMsg();
+
+        String text = groupHistoryMsg.getRainCodeMsg();
 
         if (text.length() < 11){
             return "这篇小作文太短了捏";

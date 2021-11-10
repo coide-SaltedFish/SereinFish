@@ -1,7 +1,6 @@
 package sereinfish.bot.ui.menu;
 
 import sereinfish.bot.ui.frame.permission.AuthorityManagerFrame;
-import sereinfish.bot.ui.frame.database.SignInDataBaseFrame;
 import sereinfish.bot.ui.frame.rcon.LinkRconFrame;
 import sereinfish.bot.ui.frame.rcon.RconListFrame;
 
@@ -23,7 +22,6 @@ public class MainMenu extends JMenuBar {
      */
     public MainMenu build(){
         add(getFileMenu());//文件
-        add(getDataBaseMenu());//数据库
         add(getAuthorityMenu());//权限
         add(getRconMenu());//Rcon
         return this;
@@ -47,26 +45,6 @@ public class MainMenu extends JMenuBar {
             }
         });
         menu.add(menuItem_exit);
-
-        return menu;
-    }
-
-    /**
-     * 数据库菜单栏
-     * @return
-     */
-    public JMenu getDataBaseMenu(){
-        JMenu menu = new JMenu("数据库");
-
-        /*******连接************/
-        JMenuItem menuItem_link = new JMenuItem("连接到数据库");
-        menu.add(menuItem_link);
-        menuItem_link.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new SignInDataBaseFrame("连接到新的数据库").build().setVisible(true);
-            }
-        });
 
         return menu;
     }

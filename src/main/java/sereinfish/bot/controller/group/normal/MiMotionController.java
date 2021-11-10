@@ -5,13 +5,13 @@ import com.IceCreamQAQ.Yu.annotation.Before;
 import com.icecreamqaq.yuq.FunKt;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
-import sereinfish.bot.database.table.Account;
-import sereinfish.bot.entity.bot.menu.annotation.Menu;
+import sereinfish.bot.database.entity.Account;
+import sereinfish.bot.database.service.AccountService;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.motion.xiaomi.XiaoMiMotion;
-import sereinfish.bot.file.account.AccountManager;
 import sereinfish.bot.utils.Result;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -19,9 +19,12 @@ import java.sql.SQLException;
 //@Menu(type = Menu.Type.GROUP, name = "小米运动")
 public class MiMotionController {
 
+    @Inject
+    AccountService accountService;
+
     @Before
     public Account before(long qq) throws SQLException, IllegalAccessException {
-        Account account = AccountManager.getInstance().query(Account.Type.XIAOMI_MOTION, qq);
+        Account account = accountService.findByTypeAndQq(Account.Type.XIAOMI_MOTION, qq);
         if (account == null)
             throw FunKt.getMif().at(qq).plus("您还没有绑定账号，无法操作步数！！").toThrowable();
         else return account;
@@ -41,7 +44,8 @@ public class MiMotionController {
             if (loginToken == null) {
                 return loginResult.getMessage();
             }
-            AccountManager.getInstance().changerTaken(loginToken, account.getQq());
+            account.setToken(loginToken);
+            accountService.saveOrUpdate(account);
             result = XiaoMiMotion.changeStep(loginToken, step);
         }
         return result;

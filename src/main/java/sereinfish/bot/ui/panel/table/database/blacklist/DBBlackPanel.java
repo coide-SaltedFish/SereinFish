@@ -1,16 +1,15 @@
 package sereinfish.bot.ui.panel.table.database.blacklist;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.DataBaseManager;
-import sereinfish.bot.database.ex.IllegalModeException;
-import sereinfish.bot.database.ex.MarkIllegalLengthException;
-import sereinfish.bot.database.ex.UpdateNoFindThrowable;
-import sereinfish.bot.database.handle.BlackListDao;
-import sereinfish.bot.database.table.BlackList;
-import sereinfish.bot.database.table.Reply;
+import sereinfish.bot.database.entity.BlackList;
+import sereinfish.bot.database.entity.Reply;
+import sereinfish.bot.database.service.BlackListService;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.ui.dialog.FileChooseDialog;
 import sereinfish.bot.ui.dialog.TipDialog;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.frame.database.insert.InsertFrame;
@@ -19,8 +18,9 @@ import sereinfish.bot.ui.panel.table.GroupCellRenderer;
 import sereinfish.bot.ui.panel.table.QQCellRenderer;
 import sereinfish.bot.ui.panel.table.TimeCellRenderer;
 import sereinfish.bot.ui.panel.table.database.DBTableModel;
-import sereinfish.bot.ui.panel.table.database.reply.DBReplyPanel;
 
+import javax.inject.Inject;
+import javax.persistence.Column;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -33,14 +33,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 public class DBBlackPanel extends JPanel {
+    private BlackListService blackListService = MyYuQ.getBlackListService();
+
     private JPanel contentPane;
 
-    private BlackListDao blackListDao;
     private GroupConf conf;
     private JTable table;
     private DBTableModel<BlackList> model;
@@ -48,7 +49,7 @@ public class DBBlackPanel extends JPanel {
     private JTextArea textArea_value;
     private JLabel label_select_tip;//选中提示
 
-    private ArrayList<BlackList> records;
+    private List<BlackList> records;
     private int[] tableSelection = new int[]{};//表格选中信息
 
     public DBBlackPanel(GroupConf conf){
@@ -64,44 +65,8 @@ public class DBBlackPanel extends JPanel {
     }
 
     private void loadPanel(){
-        contentPane.removeAll();
-
-        if (conf.isDataBaseEnable()){
-            try {
-                blackListDao = new BlackListDao(DataBaseManager.getInstance().getDataBase(conf.getDataBaseConfig().getID()));
-            } catch (SQLException e) {
-                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
-                SfLog.getInstance().e(this.getClass(),e);
-                return;
-            } catch (IllegalModeException e) {
-                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
-                SfLog.getInstance().e(this.getClass(),e);
-                return;
-            } catch (ClassNotFoundException e) {
-                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
-                SfLog.getInstance().e(this.getClass(),e);
-                return;
-            } catch (MarkIllegalLengthException e) {
-                contentPane.add(new JLabel("错误：" + e.getMessage()), BorderLayout.CENTER);
-                SfLog.getInstance().e(this.getClass(),e);
-                return;
-            }
-            build();
-            loadTable();
-        }else {
-            contentPane.add(new JLabel("未连接数据库",JLabel.CENTER), BorderLayout.CENTER);
-
-            JButton btn_reLoad = new JButton("重载");
-            btn_reLoad.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (conf.isDataBaseEnable()) {
-                        loadPanel();
-                    }
-                }
-            });
-            contentPane.add(btn_reLoad,BorderLayout.SOUTH);
-        }
+        build();
+        loadTable();
     }
 
     private void build(){
@@ -129,7 +94,7 @@ public class DBBlackPanel extends JPanel {
         JPanel panel_tip = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel_tip.setBorder(BorderFactory.createTitledBorder(""));
         panel_tip.add(label_select_tip);
-        panel_bottom.add(panel_tip,BorderLayout.SOUTH);
+        panel_bottom.add(panel_tip, BorderLayout.SOUTH);
 
         //操作区域
         JButton btn_backups = new JButton("备份");
@@ -137,17 +102,76 @@ public class DBBlackPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    File backupsFile = new File(FileHandle.backupsPath, "blackListBackups" + conf.getGroup() + "_" + System.currentTimeMillis() + ".txt");
-                    ArrayList<BlackList> blackLists = blackListDao.query(conf.getGroup());
-                    FileHandle.write(backupsFile, MyYuQ.toJson(blackLists, blackLists.getClass()));
+                    File backupsFile = new File(FileHandle.backupsPath, "replyBackups_" + conf.getGroup() + "_" + System.currentTimeMillis() + ".txt");
+
+                    List<BlackList> list = MyYuQ.getBlackListService().findByGroup(conf.getGroup());
+
+                    JSONArray jsonArray = new JSONArray();
+
+                    for (BlackList blackList:list){
+                        SfLog.getInstance().w(this.getClass(), "备份黑名单：" + blackList.getId());
+
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("qq", blackList.getQq());
+                        jsonObject.put("remarks", blackList.getRemarks());
+
+                        jsonArray.add(jsonObject);
+                    }
+
+                    FileHandle.write(backupsFile, jsonArray.toJSONString());
                     SfLog.getInstance().d(this.getClass(), "备份完成");
-                } catch (SQLException throwables) {
-                    SfLog.getInstance().e(this.getClass(), throwables);
-                } catch (IllegalAccessException illegalAccessException) {
-                    SfLog.getInstance().e(this.getClass(), illegalAccessException);
                 } catch (IOException ioException) {
                     SfLog.getInstance().e(this.getClass(), ioException);
+                    new TipDialog(MainFrame.getMainFrame(), "错误", ioException.getMessage(), false);
                 }
+            }
+        });
+
+        JButton btn_import = new JButton("导入");
+        btn_import.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //弹出文件选择框
+                new FileChooseDialog("选择备份", "txt文件", new FileChooseDialog.FileChooseListener() {
+                    @Override
+                    public void cancel() {
+
+                    }
+
+                    @Override
+                    public void option(File f) {
+                        int reCode = JOptionPane.showOptionDialog(MainFrame.getMainFrame(),"是否导入文件“" + f.getName() + "”","提示",JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE, null,new String[]{"确定","取消"},null);
+                        if (reCode == 0){
+                            try {
+                                List<BlackList> list = new ArrayList<>();
+                                JSONArray jsonArray = JSONArray.parseArray(FileHandle.read(f));
+                                for (JSONObject jsonObject:jsonArray.toArray(new JSONObject[]{})){
+                                    list.add(new BlackList(
+                                            jsonObject.getLong("qq"),
+                                            conf.getGroup(),
+                                            jsonObject.getString("remarks")));
+                                }
+
+                                for (BlackList blackList:list){
+                                    SfLog.getInstance().w(this.getClass(), "导入黑名单：" + blackList.getQq());
+                                    blackListService.save(blackList);
+                                }
+                                new TipDialog(MainFrame.getMainFrame(), "提示", String.format("导入完成，共导入 %d 条记录", list.size()), false);
+                                update();
+                            } catch (Exception exception) {
+                                SfLog.getInstance().e(this.getClass(), exception);
+                                new TipDialog(MainFrame.getMainFrame(), "错误", exception.getMessage(), false);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void error() {
+                        new TipDialog(MainFrame.getMainFrame(), "错误", "发生错误", false);
+                    }
+                }, "txt", "*");
             }
         });
 
@@ -155,16 +179,10 @@ public class DBBlackPanel extends JPanel {
         btn_insert.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new InsertFrame<BlackList>("黑名单", BlackList.class,new BlackList(new Date(),0,conf.getGroup(),"") , new InsertFrame.InsertListener<BlackList>() {
+                new InsertFrame<BlackList>("黑名单", BlackList.class,new BlackList(0,conf.getGroup(),"") , new InsertFrame.InsertListener<BlackList>() {
                     @Override
                     public void save(InsertFrame frame, BlackList value) {
-                        try {
-                            blackListDao.insert(value);
-                        } catch (IllegalAccessException e) {
-                            SfLog.getInstance().e(this.getClass(),e);
-                        } catch (SQLException e) {
-                            SfLog.getInstance().e(this.getClass(),e);
-                        }
+                        blackListService.save(value);
                         update();
                         frame.close();
                     }
@@ -185,11 +203,8 @@ public class DBBlackPanel extends JPanel {
                         JOptionPane.WARNING_MESSAGE, null,new String[]{"确定","取消"},null);
                 if (reCode == 0){
                     for (int i:tableSelection){
-                        try {
-                            blackListDao.delete(records.get(i).getGroup(),records.get(i).getQq());
-                        } catch (SQLException e) {
-                            SfLog.getInstance().e(this.getClass(),e);
-                        }
+                        SfLog.getInstance().w(this.getClass(), "删除黑名单：" + records.get(i).getId());
+                        blackListService.delete(records.get(i).getId());
                     }
                     update();
                 }
@@ -210,18 +225,30 @@ public class DBBlackPanel extends JPanel {
         textArea_value.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
+                if (table == null || table.getModel() == null || table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()) == null){
+                    return;
+                }
+
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
                 btn_update.setEnabled(!textArea_value.getText().equals(value));
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
+                if (table == null || table.getModel() == null || table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()) == null){
+                    return;
+                }
+
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
                 btn_update.setEnabled(!textArea_value.getText().equals(value));
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
+                if (table == null || table.getModel() == null || table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()) == null){
+                    return;
+                }
+
                 String value = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
                 btn_update.setEnabled(!textArea_value.getText().equals(value));
             }
@@ -237,6 +264,7 @@ public class DBBlackPanel extends JPanel {
 
         JPanel panel_btn = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel_btn.add(btn_backups);
+        panel_btn.add(btn_import);
         panel_btn.add(btn_insert);
         panel_btn.add(btn_delete);
         panel_btn.add(btn_update);
@@ -274,33 +302,35 @@ public class DBBlackPanel extends JPanel {
      */
     private void valueUpdate(){
         DBTableModel model = (DBTableModel) table.getModel();
-        String tableValue = table.getModel().getValueAt(table.getSelectedRow(),table.getSelectedColumn()).toString();
-        String value = textArea_value.getText();
-        String fieldName = "";
-        try {
-            fieldName = blackListDao.getFieldNames().get(table.getSelectedColumn());
-        } catch (SQLException e) {
-            SfLog.getInstance().e(DBReplyPanel.class, e);
-            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
-            return;
-        }
 
         BlackList blackList = (BlackList) model.getRows(table.getSelectedRow());
 
-        try {
-            blackListDao.update(blackList, new String[]{fieldName}, new String[]{value});
-            new TipDialog(MainFrame.getMainFrame(), "完成", fieldName + "[" + tableValue + "->" + value + "]", true);
-            update();
-        } catch (UpdateNoFindThrowable updateNoFindThrowable) {
-            SfLog.getInstance().e(DBReplyPanel.class, updateNoFindThrowable);
-            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + updateNoFindThrowable.getMessage(), true);
-        } catch (IllegalAccessException e) {
-            SfLog.getInstance().e(DBReplyPanel.class, e);
-            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
-        } catch (SQLException e) {
-            SfLog.getInstance().e(DBReplyPanel.class, e);
-            new TipDialog(MainFrame.getMainFrame(), "错误", "修改失败:" + e.getMessage(), true);
+        String value = textArea_value.getText();
+
+        int i = 0;
+        for(Field field:blackList.getClass().getDeclaredFields()){
+            if (field.isAnnotationPresent(Column.class)){
+                if (i == table.getSelectedColumn()){
+                    try {
+                        field.set(blackList, value);
+                    } catch (IllegalAccessException e) {
+                        field.setAccessible(true);
+
+                        try {
+                            field.set(blackList, value);
+                        } catch (IllegalAccessException illegalAccessException) {
+                            SfLog.getInstance().e(this.getClass(), e);
+                        }
+                    }
+                    break;
+                }
+                i++;
+            }
         }
+
+        blackListService.saveOrUpdate(blackList);
+        new TipDialog(MainFrame.getMainFrame(), "提示", "完成", true);
+        update();
     }
 
     /**
@@ -329,13 +359,7 @@ public class DBBlackPanel extends JPanel {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    records = blackListDao.query(conf.getGroup());
-                } catch (SQLException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                } catch (IllegalAccessException e) {
-                    SfLog.getInstance().e(this.getClass(),e);
-                }
+                records = blackListService.findByGroup(conf.getGroup());
                 if (model == null) {
                     //如果表格数据模型为null，就新建模型并应用
 

@@ -25,6 +25,7 @@ import java.util.List;
 public class SauceNaoAPI {
     public static SauceNAO search(SauceNao sauceNao) throws IOException {
         SfLog.getInstance().d(SauceNaoAPI.class, "SauceNaoAPI>>开始搜索>>" + sauceNao.getImageUrl());
+        System.out.println(sauceNao.getUrl());
         String json = OkHttpUtils.getStr(sauceNao.getUrl());
         SauceNAO sauceNAO = MyYuQ.toClass(json, SauceNAO.class);
 
