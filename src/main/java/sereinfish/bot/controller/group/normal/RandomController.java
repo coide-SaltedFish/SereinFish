@@ -3,7 +3,6 @@ package sereinfish.bot.controller.group.normal;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
-import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
@@ -16,7 +15,6 @@ import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.entity.random.DrawManager;
 import sereinfish.bot.file.FileHandle;
-import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
@@ -24,12 +22,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.jar.JarFile;
 
 @GroupController
 @Menu(name = "骰子")
@@ -181,8 +177,7 @@ public class RandomController {
 
         group.sendMessage(messageLineQ.getMessage());
 
-        if ((group.getBot().isAdmin() || group.getBot().isOwner())
-                && (!sender.isOwner() && !sender.isOwner())){
+        if (group.getBot().getPermission() > sender.getPermission()){
             sender.ban(banTime);
             SfLog.getInstance().w(this.getClass(), "禁言：" + sender);
 
