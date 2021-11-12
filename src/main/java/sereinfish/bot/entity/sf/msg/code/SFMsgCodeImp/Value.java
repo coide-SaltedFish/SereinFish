@@ -29,12 +29,17 @@ public class Value implements SFMsgCode {
 
             if (val instanceof String){
                 return (String) val;
+            }else if(val instanceof Integer){
+                return val + "";
             }else if(val instanceof Member){
                 String type = "at";
                 if (paras.length > 1){
                     type = paras[1];
                 }
                 return memberHandle(codeContact.getSource(), (Member) val, type);
+            }else if(val instanceof Image){
+                Image image = (Image) val;
+                return "<Rain:Image:" + image.getId() + ">";
             }else {
                 return val.toString();
             }

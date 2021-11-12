@@ -3,7 +3,6 @@ package sereinfish.bot.database.dao;
 import com.icecreamqaq.yudb.YuDao;
 import com.icecreamqaq.yudb.jpa.annotation.Dao;
 import sereinfish.bot.database.entity.Account;
-import sereinfish.bot.database.entity.Reply;
 
 import java.util.List;
 

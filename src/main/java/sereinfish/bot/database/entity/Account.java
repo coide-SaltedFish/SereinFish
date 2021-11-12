@@ -3,7 +3,6 @@ package sereinfish.bot.database.entity;
 import com.icecreamqaq.yudb.annotation.DB;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 

@@ -28,11 +28,17 @@ public class SFMessage {
             if (ClassManager.hasInterfaces(c, SFMsgCode.class)){
                 try {
                     SFMsgCode sfMsgCode = (SFMsgCode) c.newInstance();
-                    if (classMap.containsKey(sfMsgCodeInfo.value().toLowerCase())){
-                        SfLog.getInstance().w(this.getClass(), "SFCode冲突警告：" + sfMsgCodeInfo.value() + "\n" + c.getTypeName());
-                    }
 
-                    classMap.put(sfMsgCodeInfo.value().toLowerCase(), sfMsgCode);
+                    String[] names = sfMsgCodeInfo.value();
+                    for (String name:names){
+                        name = name.toLowerCase();
+
+                        if (classMap.containsKey(name)){
+                            SfLog.getInstance().w(this.getClass(), "SFCode冲突警告：" + sfMsgCodeInfo.value() + "\n" + c.getTypeName());
+                        }
+
+                        classMap.put(name, sfMsgCode);
+                    }
                 }catch (IllegalAccessException e){
                     SfLog.getInstance().e(this.getClass(),"类型实例化失败：" + sfMsgCodeInfo.value(), e);
                 }catch (InstantiationException e){

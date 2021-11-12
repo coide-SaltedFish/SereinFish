@@ -18,7 +18,7 @@ public class ReplyService {
 
     @Transactional(dbList = "user")
     public List<Reply> findByKeyAndSource(String key, long group){
-        return dao.findByKeyAndSource(key, group);
+        return dao.finLikeKeyAndSource("%" + key + "%", group);
     }
 
     @Transactional(dbList = "user")

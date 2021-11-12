@@ -12,7 +12,7 @@ import java.sql.Timestamp;
  * 白名单
  */
 @Data
-@Table(name = "whitelist")
+@Table(name = "redbot_minecraft_players")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,17 +24,32 @@ public class WhiteList {
     private Integer id;
 
     @Column
+    private long group;//qq号
+
+    @Column
     private long qq;//qq号
 
     @Column
-    private String main_uuid;//大号uuid
+    private long joinTimestamp;
 
     @Column
-    private Timestamp main_add_time;//大号添加时间
+    private long leaveTimestamp;
+
+    @Column(length = 40)
+    private String uuid1;//大号uuid
 
     @Column
-    private String alt_uuid;//小号uuid
+    private Timestamp uuid1AddedTime;//大号添加时间
 
     @Column
-    private Timestamp alt_add_time;//小号添加时间
+    private String uuid2;//小号uuid
+
+    @Column(length = 40)
+    private Timestamp uuid2AddedTime;//小号添加时间
+
+    @Column
+    private boolean blocked;
+
+    @Column(length = 1000)
+    private String blockReason;
 }

@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SFMsgCodeInfo {
-    String value();//类型
+    String[] value();//类型
 }

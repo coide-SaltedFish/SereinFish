@@ -558,6 +558,9 @@ public class OnGroupMessageEvent {
         if (groupConf.isAutoReplyEnable()){
             ArrayList<SFMessage.SFMessageEntity> sfMessages = ReplyManager.reply(event.getBotActionContact());
             MyYuQ.sendSFMessage(event.getContact(), sfMessages);
+            if (sfMessages != null){
+                return;
+            }
         }
 
         //判断功能是否启用
