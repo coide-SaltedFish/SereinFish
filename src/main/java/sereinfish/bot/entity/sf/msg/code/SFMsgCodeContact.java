@@ -8,9 +8,12 @@ import com.icecreamqaq.yuq.message.Message;
 import lombok.Data;
 import lombok.NonNull;
 import sereinfish.bot.cache.CacheManager;
+import sereinfish.bot.entity.calendar.holiday.HolidayManager;
+import sereinfish.bot.entity.calendar.holiday.Holidays;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -18,6 +21,8 @@ import java.util.Map;
 
 @Data
 public class SFMsgCodeContact {
+    HolidayManager holidayManager = MyYuQ.getHolidayManager();
+
     Map<String,Object> map = new HashMap<>();
 
     Contact sender;
@@ -41,17 +46,40 @@ public class SFMsgCodeContact {
         //时间相关
         map.put("YEAR", Calendar.getInstance().get(Calendar.YEAR));
 
-        map.put("MONTH", Calendar.getInstance().get(Calendar.MONTH));
+        map.put("MONTH", Calendar.getInstance().get(Calendar.MONTH) + 1);
 
         map.put("DAY_OF_YEAR", Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
         map.put("DAY_OF_MONTH", Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
-        map.put("DAY_OF_WEEK", Calendar.getInstance().get(Calendar.DAY_OF_WEEK));
+
+
+        //一周第一天是否为星期天
+        boolean isFirstSunday = (Calendar.getInstance().getFirstDayOfWeek() == Calendar.SUNDAY);
+        //获取周几
+        int weekDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        //若一周第一天为星期天，则-1
+        if(isFirstSunday){
+            weekDay = weekDay - 1;
+            if(weekDay == 0){
+                weekDay = 7;
+            }
+        }
+        map.put("DAY_OF_WEEK", weekDay);
 
         map.put("HOUR", Calendar.getInstance().get(Calendar.HOUR));
         map.put("HOUR_OF_DAY", Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
 
         map.put("MINUTE", Calendar.getInstance().get(Calendar.MINUTE));
 
+        //节假日数据注入
+        for (Holidays.Holiday.List list:holidayManager.getYearHolidays(Calendar.getInstance().get(Calendar.YEAR))){
+            map.put("今年" + list.getName(), list.getDayOfYear());
+            map.put("今年" + list.getName() + "_DATE", list.getDate().getTime());
+        }
+
+        for (Holidays.Holiday.List list:holidayManager.getYearHolidays(Calendar.getInstance().get(Calendar.YEAR) + 1)){
+            map.put("明年" + list.getName(), list.getDayOfLastYear());
+            map.put("明年" + list.getName() + "_DATE", list.getDate().getTime());
+        }
 
     }
 

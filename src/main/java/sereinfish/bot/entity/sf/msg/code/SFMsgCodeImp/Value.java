@@ -31,6 +31,8 @@ public class Value implements SFMsgCode {
                 return (String) val;
             }else if(val instanceof Integer){
                 return val + "";
+            }else if(val instanceof Long){
+                return val + "";
             }else if(val instanceof Member){
                 String type = "at";
                 if (paras.length > 1){

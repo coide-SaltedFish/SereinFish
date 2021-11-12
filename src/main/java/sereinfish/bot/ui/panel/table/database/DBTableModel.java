@@ -35,6 +35,9 @@ public class DBTableModel<E> extends AbstractTableModel{
     }
 
     public E getRows(int rows){
+        if (rows < 0){
+            return null;
+        }
         return datas.get(rows);
     }
 
@@ -59,6 +62,10 @@ public class DBTableModel<E> extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (rowIndex < 0 || columnIndex < 0){
+            return null;
+        }
+
         if (!(rowIndex < datas.size())){
             return null;
         }

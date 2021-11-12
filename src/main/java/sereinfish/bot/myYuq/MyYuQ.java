@@ -26,10 +26,12 @@ import sereinfish.bot.database.service.BlackListService;
 import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.database.service.ReplyService;
 import sereinfish.bot.database.service.WhiteListService;
+import sereinfish.bot.entity.calendar.holiday.HolidayManager;
 import sereinfish.bot.entity.sf.msg.SFMessage;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.mlog.SfLog;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -67,6 +69,8 @@ public class MyYuQ {
     private static ReplyService replyService;
     private static BlackListService blackListService;
     private static WhiteListService whiteListService;
+
+    private static HolidayManager holidayManager;
 
     public static final String BASE_PACK = "sereinfish.bot";//包名
 
@@ -127,6 +131,14 @@ public class MyYuQ {
 
     public static Web getWeb() {
         return web;
+    }
+
+    public static HolidayManager getHolidayManager() {
+        return holidayManager;
+    }
+
+    public static void setHolidayManager(HolidayManager holidayManager) {
+        MyYuQ.holidayManager = holidayManager;
     }
 
     public static GroupHistoryMsgService getGroupHistoryMsgService() {

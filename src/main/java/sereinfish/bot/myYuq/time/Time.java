@@ -38,6 +38,18 @@ public class Time{
 	}
 
 	/**
+	 * 通过时间秒毫秒数判断两个时间的间隔
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static int differentDaysByMillisecond(Date date1,Date date2)
+	{
+		int days = (int) (Math.abs((date2.getTime() - date1.getTime())) / (1000*3600*24));
+		return days;
+	}
+
+	/**
 	 * 判断当前时间是否在[startTime, endTime]区间，注意时间格式要一致
 	 *
 	 * @param nowTime 当前时间

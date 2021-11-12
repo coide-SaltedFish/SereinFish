@@ -14,6 +14,8 @@ public interface ReplyDao extends YuDao<Reply, Integer> {
 
     Reply findByUuid(String uuid);
 
+    Reply findByUuidAndSource(String uuid, long source);
+
     @Select(value = "FROM Reply WHERE reKey LIKE ?0 AND source = ?1", nativeQuery = true)
     List<Reply> finLikeKeyAndSource(String key, long source);
 

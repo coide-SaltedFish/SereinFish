@@ -27,8 +27,13 @@ public class ReplyService {
     }
 
     @Transactional(dbList = "user")
-    public boolean exist(String uuid){
+    public boolean existAll(String uuid){
         return dao.findByUuid(uuid) != null;
+    }
+
+    @Transactional(dbList = "user")
+    public boolean exist(String uuid, long group){
+        return dao.findByUuidAndSource(uuid, group) != null;
     }
 
     @Transactional(dbList = "user")

@@ -158,7 +158,9 @@ public class MyEditorPanel extends JPanel {
     }
 
     public void setText(String str){
-        textPane.setText(str);
+        if (str != null){
+            textPane.setText(str);
+        }
     }
 
     public String getText(){

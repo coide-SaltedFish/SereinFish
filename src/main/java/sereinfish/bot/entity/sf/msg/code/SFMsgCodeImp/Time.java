@@ -16,12 +16,19 @@ public class Time implements SFMsgCode {
 
     @Override
     public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter();
+        String[] paras = codeContact.getParameter().split(",", 2);
         BotActionContext context = codeContact.getBotActionContext();
-        if (para.equals("")){
-            para = sereinfish.bot.myYuq.time.Time.LOG_TIME;
+
+        if (paras.length == 1){
+            String para = paras[0];
+            if (para.equals("")){
+                para = sereinfish.bot.myYuq.time.Time.LOG_TIME;
+            }
+
+            return sereinfish.bot.myYuq.time.Time.dateToString(new Date(), para);
+        }else {
+            return sereinfish.bot.myYuq.time.Time.dateToString(new Date(Long.decode(paras[0])), paras[1]);
         }
 
-        return sereinfish.bot.myYuq.time.Time.dateToString(new Date(), para);
     }
 }

@@ -93,7 +93,9 @@ public class SFMessage {
                 continue;
             }
 
-            Pattern pattern = Pattern.compile("<SF:Split:.+?>",Pattern.CASE_INSENSITIVE);
+            Pattern pattern = Pattern.compile("<SF:Split:[^<>]+?>",Pattern.CASE_INSENSITIVE);
+            //
+            str = keyReplace(str);//关键字处理
             Matcher matcher = pattern.matcher(str);
 
             int start = 0;
@@ -105,14 +107,14 @@ public class SFMessage {
                 String c = gr.substring(1, gr.length() - 1);
                 String[] p = c.split(":", 3);
                 if (p.length > 2){
-                    String paraStr = p[2];
+                    String paraStr = reKey(p[2]);
                     long time = 0;
                     try {
                         time = Long.decode(paraStr);
                     }catch (Exception e){
                         //
                     }
-                    String sfCode = str.substring(start, matcher.start());
+                    String sfCode = reKey(str.substring(start, matcher.start()));
                     start = matcher.end();
                     String rainCode = codeHandle(codeContact, sfCode);
                     if (!rainCode.equals("")){
@@ -121,12 +123,12 @@ public class SFMessage {
                 }
             }
             if (isFind){
-                String rainCode = str.substring(start);
+                String rainCode = reKey(str.substring(start));
                 if (!rainCode.equals("")){
                     msgList.add(new Msg(rainCode, 0));
                 }
             }else {
-                msgList.add(new Msg(str, 0));
+                msgList.add(new Msg(reKey(str), 0));
             }
         }
 
@@ -139,6 +141,8 @@ public class SFMessage {
      * @return
      */
     public String codeHandle(SFMsgCodeContact codeContact, String code){
+
+        code = keyReplace(code);
         StringBuilder stringBuilder = new StringBuilder(code);
 
         Pattern pattern = Pattern.compile("<SF:[^<>]+?>",Pattern.CASE_INSENSITIVE);
@@ -152,7 +156,7 @@ public class SFMessage {
         while (matcher.find()){
             String gr = matcher.group();
             //去除头尾
-            String c = gr.substring(1, gr.length() - 1);
+            String c = reKey(gr.substring(1, gr.length() - 1));
 
             String[] p = c.split(":", 3);
             if (p.length >= 2){
@@ -192,7 +196,7 @@ public class SFMessage {
         }
 
         if (!isFind){
-            return code;
+            return reKey(code);
         }
 
         //从后向前替换
@@ -201,6 +205,30 @@ public class SFMessage {
             stringBuilder.replace(replace.start, replace.end, replace.reCode);
         }
         return codeHandle(codeContact, stringBuilder.toString());
+    }
+
+    /**
+     * 关键字处理
+     * @param str
+     * @return
+     */
+    private String keyReplace(String str){
+        str = str.replace("\\<", "$&a&$");
+        str = str.replace("\\>", "$&b&$");
+        str = str.replace("\\,", "$&c&$");
+        return str;
+    }
+
+    /**
+     * 关键字恢复
+     * @param str
+     * @return
+     */
+    private String reKey(String str){
+        str = str.replace("$&a&$","\\<");
+        str = str.replace("$&b&$", "\\>");
+        str = str.replace("$&c&$", "\\,");
+        return str;
     }
 
     @Getter

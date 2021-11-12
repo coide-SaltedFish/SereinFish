@@ -63,7 +63,7 @@ public class ReplyController extends QQController {
             String re = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
 
             Reply reply = new Reply(sender.getId(), group.getId(), key, re);
-            if (replyService.exist(reply.getUuid())){
+            if (replyService.exist(reply.getUuid(), group.getId())){
                 return MyYuQ.getMif().at(sender).toMessage().plus("\n问答已存在");
             }else {
                 replyService.save(reply);

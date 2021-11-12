@@ -19,6 +19,7 @@ import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.database.service.ReplyService;
 import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.bili.BiliManager;
+import sereinfish.bot.entity.calendar.holiday.HolidayManager;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.ClassManager;
@@ -35,12 +36,16 @@ import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.util.Locale;
 
 /**
  * 初始化类
  */
 @EventListener
 public class InitEvent{
+    @Inject
+    private HolidayManager holidayManager;
+
     @Inject
     private BlackListService blackListService;
 
@@ -84,6 +89,7 @@ public class InitEvent{
      */
     @Event
     public void initEvent(AppStartEvent event){
+        Locale.setDefault(Locale.CHINA);
         //初始化MyYuQ
         if (name == null || name.equals("")){
             name = yuQ.getBotInfo().getName();
@@ -94,6 +100,7 @@ public class InitEvent{
         MyYuQ.setReplyService(replyService);
         MyYuQ.setBlackListService(blackListService);
         MyYuQ.setWhiteListService(whiteListService);
+        MyYuQ.setHolidayManager(holidayManager);
         //初始化日志
         SfLog.init();
         SfLog.getInstance().d(this.getClass(),"SfLog初始化完成");
