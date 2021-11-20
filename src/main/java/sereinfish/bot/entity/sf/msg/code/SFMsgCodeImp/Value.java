@@ -8,6 +8,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.mlog.SfLog;
 
 import java.io.IOException;
@@ -20,9 +21,8 @@ public class Value implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
-        String[] paras = codeContact.getParameter().split(",");
-        String name = paras[0];
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
+        String name = parameter.getString(0);
 
         if (codeContact.containsKey(name)){
             Object val = codeContact.get(name);
@@ -35,8 +35,8 @@ public class Value implements SFMsgCode {
                 return val + "";
             }else if(val instanceof Member){
                 String type = "at";
-                if (paras.length > 1){
-                    type = paras[1];
+                if (parameter.size() > 1){
+                    type = parameter.getString(1);
                 }
                 return memberHandle(codeContact.getSource(), (Member) val, type);
             }else if(val instanceof Image){

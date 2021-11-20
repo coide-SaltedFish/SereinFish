@@ -8,6 +8,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 
 @SFMsgCodeInfo("sender")
 public class Sender implements SFMsgCode {
@@ -18,37 +19,37 @@ public class Sender implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter().toLowerCase();
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
+        String type = parameter.getString(0).toLowerCase();
 
-        if (para.equals("name")){
+        if (type.equals("name")){
             return codeContact.getSender().getName();
         }
 
-        if (para.equals("id")){
+        if (type.equals("id")){
             return codeContact.getSender().getId() + "";
         }
 
-        if (para.equals("namecard")){
+        if (type.equals("namecard")){
             if (codeContact.getSource() instanceof Group){
                 Group group = (Group) codeContact.getSource();
                 return group.get(codeContact.getSender().getId()).nameCardOrName();
             }
             return codeContact.getSender().getName();
         }
-        if (para.equals("headimage")){
+        if (type.equals("headimage")){
             Image image = codeContact.getSource().uploadImage(CacheManager.getMemberHeadImageFile(codeContact.getSender().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
 
-        if (para.equals("at")){
+        if (type.equals("at")){
             return "<Rain:At:" + codeContact.getSender().getId() + ">";
         }
 
-        if (para.equals("message")){
+        if (type.equals("message")){
             return codeContact.getBotActionContext().getMessage().getCodeStr();
         }
 
-        return "<参数错误>";
+        return null;
     }
 }

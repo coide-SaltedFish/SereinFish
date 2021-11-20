@@ -4,6 +4,7 @@ import com.icecreamqaq.yuq.controller.BotActionContext;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.myYuq.MyYuQ;
 
 @SFMsgCodeInfo("random")
@@ -14,17 +15,18 @@ public class Random implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter();
-        BotActionContext context = codeContact.getBotActionContext();
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
+        int min = 0;
+        int max = 100;
 
-        if (para.equals("")){
-            para = "0,100";
+        if (parameter.size() == 1){
+            max = parameter.getInt(0);
         }
-        String paras[] = para.split(",");
-        int start = Integer.decode(paras[0]);
-        int end = Integer.decode(paras[1]);
+        if (parameter.size() >= 2){
+            min = parameter.getInt(0);
+            max = parameter.getInt(1);
+        }
 
-        return MyYuQ.getRandom(start, end) + "";
+        return MyYuQ.getRandom(min, max) + "";
     }
 }

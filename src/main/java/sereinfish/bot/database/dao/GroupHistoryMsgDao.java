@@ -13,6 +13,9 @@ public interface GroupHistoryMsgDao extends YuDao<GroupHistoryMsg, Integer> {
 
     GroupHistoryMsg findBySourceAndMid(long source, int mid);
 
+    @Select("FROM GroupHistoryMsg WHERE source = ?0 AND time > ?1")
+    List<GroupHistoryMsg> queSourceAndTime(long source, long time);
+
     @Select("FROM GroupHistoryMsg WHERE time = (SELECT MAX(time) FROM GroupHistoryMsg WHERE source = ?0 AND qq = ?1)" )
     GroupHistoryMsg queLast(long source, long qq);
 }

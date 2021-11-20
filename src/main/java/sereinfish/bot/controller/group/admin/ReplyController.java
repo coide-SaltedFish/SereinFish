@@ -103,8 +103,9 @@ public class ReplyController extends QQController {
 //        }
 //    }
 
-    @Action("\\^[!！.]问答查询$\\ {key}")
-    @Synonym("\\^[!！.]问答查询$\\ {key}")
+    @Action("问答查询 {key}")
+    @Synonym("查询问答 {key}")
+    @QMsg(mastAtBot = true)
     public Message queryReply(Group group, @PathVar(2) String pageStr, String key){
         int page = 1;
 

@@ -3,6 +3,8 @@ package sereinfish.bot.entity.sf.msg.code.SFMsgCodeImp;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
+import sereinfish.bot.utils.math.Calculator;
 
 import java.util.Map;
 import java.util.Stack;
@@ -15,16 +17,19 @@ public class SFMath implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
-        String para = codeContact.getParameter();
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
+        String para = parameter.getString(0);
+
         //变量替换
         for (Map.Entry<String, Object> entry:codeContact.getMap().entrySet()){
             para = para.replace(entry.getKey(), entry.getValue() + "");
         }
 
-        String expression = FormatExpreesion(para);     //对表达式进行格式化
-        int result = EvulateExpression(expression);    //对格式化之后的等式进行计算
-        return result + "";
+        double result = Calculator.conversion(para);;    //对格式化之后的等式进行计算
+        if (result == (int) result){
+            return String.format("%d", (int) result);
+        }
+        return String.format("%.2f", result);
     }
 
     private static int EvulateExpression(String expression) {

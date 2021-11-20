@@ -3,6 +3,7 @@ package sereinfish.bot.controller.group.normal;
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Catch;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
+import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.entity.Group;
@@ -10,6 +11,7 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SkipMe;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import sereinfish.bot.cache.day.OnlyDay;
 import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
@@ -192,6 +194,34 @@ public class RandomController {
         }else {
             group.sendMessage(new Message().lineQ().at(sender).textLine("").textLine("已经给你塞上口球了").text("时间没到之前不能说话哦"));
         }
+    }
+
+    /**
+     * ybb小火车
+     * @return
+     */
+    @Action("\\[.。!！]ybb$\\")
+    public Message ybb(Group group, Member sender) throws IOException {
+
+        if (group.getBot().isAdmin()){
+            //查看今日是否被创过
+            if (!OnlyDay.read().get(group.getId(), sender.getId() + "_ybb").getContent().equals("")){
+                return new Message().lineQ().at(sender).textLine("").text("今天你已经被创过了，明天再来吧").getMessage();
+            }
+
+            //开始随机
+            int speed = MyYuQ.getRandom(200, 800);
+            OnlyDay onlyDay = OnlyDay.read();
+            onlyDay.get(group.getId(), sender.getId() + "_ybb").setContent(speed);
+            onlyDay.save();
+            group.sendMessage(new Message().lineQ().at(sender).text(String.format("，你今天的小火车速度为%dkm/h，看我把你绑在铁轨上", speed)).getMessage());
+            if (sender.getPermission() < group.getBot().getPermission()){
+                sender.ban(speed);
+            }else {
+                group.sendMessage(new Message().lineQ().at(sender).text(",运气不错，火车停下了").getMessage());
+            }
+        }
+        throw new DoNone();
     }
 
     @Catch(error = IOException.class)

@@ -10,6 +10,7 @@ import sereinfish.bot.entity.ClassManager;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.mlog.SfLog;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class SFMessage {
      * @return
      */
     public ArrayList<Msg> sfCodeToRainCode(SFMsgCodeContact codeContact, String code){
-        code = codeHandle(codeContact, code);//处理标签
+        code = reOriginalKey(codeHandle(codeContact, code));//处理标签
         //处理分割符
         ArrayList<Msg> msgList = new ArrayList<>();
         for (String str:code.split("<SF:Split>")){
@@ -107,14 +108,15 @@ public class SFMessage {
                 String c = gr.substring(1, gr.length() - 1);
                 String[] p = c.split(":", 3);
                 if (p.length > 2){
-                    String paraStr = reKey(p[2]);
+                    String[] paras =  p[2].split(",");
+
                     long time = 0;
                     try {
-                        time = Long.decode(paraStr);
+                        time = Long.decode(paras[0]);
                     }catch (Exception e){
                         //
                     }
-                    String sfCode = reKey(str.substring(start, matcher.start()));
+                    String sfCode = str.substring(start, matcher.start());
                     start = matcher.end();
                     String rainCode = codeHandle(codeContact, sfCode);
                     if (!rainCode.equals("")){
@@ -123,12 +125,12 @@ public class SFMessage {
                 }
             }
             if (isFind){
-                String rainCode = reKey(str.substring(start));
+                String rainCode = reOriginalKey(str.substring(start));
                 if (!rainCode.equals("")){
                     msgList.add(new Msg(rainCode, 0));
                 }
             }else {
-                msgList.add(new Msg(reKey(str), 0));
+                msgList.add(new Msg(reOriginalKey(str), 0));
             }
         }
 
@@ -143,6 +145,7 @@ public class SFMessage {
     public String codeHandle(SFMsgCodeContact codeContact, String code){
 
         code = keyReplace(code);
+
         StringBuilder stringBuilder = new StringBuilder(code);
 
         Pattern pattern = Pattern.compile("<SF:[^<>]+?>",Pattern.CASE_INSENSITIVE);
@@ -156,14 +159,14 @@ public class SFMessage {
         while (matcher.find()){
             String gr = matcher.group();
             //去除头尾
-            String c = reKey(gr.substring(1, gr.length() - 1));
+            String c = gr.substring(1, gr.length() - 1);
 
             String[] p = c.split(":", 3);
             if (p.length >= 2){
                 String type = p[1].toLowerCase();
-                String para = "";
+                String[] paras = new String[]{};
                 if (p.length > 2){
-                    para = p[2];
+                    paras = p[2].split(",");
                 }
 
                 if (!classMap.containsKey(type)){
@@ -171,10 +174,10 @@ public class SFMessage {
                 }
 
                 //匹配函数
-                codeContact.setParameter(para);
+                codeContact.setParameter(new Parameter(paras));
 
                 try {
-                    String reCode = classMap.get(type).code(codeContact);
+                    String reCode = classMap.get(type).code(codeContact, codeContact.getParameter());
                     if (reCode != null){
                         replaces.add(new Replace(matcher.start(), matcher.end(), reCode));
                         isFind = true;
@@ -196,7 +199,7 @@ public class SFMessage {
         }
 
         if (!isFind){
-            return reKey(code);
+            return code;
         }
 
         //从后向前替换
@@ -204,6 +207,7 @@ public class SFMessage {
             Replace replace = replaces.get(i);
             stringBuilder.replace(replace.start, replace.end, replace.reCode);
         }
+
         return codeHandle(codeContact, stringBuilder.toString());
     }
 
@@ -212,7 +216,7 @@ public class SFMessage {
      * @param str
      * @return
      */
-    private String keyReplace(String str){
+    public static String keyReplace(String str){
         str = str.replace("\\<", "$&a&$");
         str = str.replace("\\>", "$&b&$");
         str = str.replace("\\,", "$&c&$");
@@ -224,10 +228,10 @@ public class SFMessage {
      * @param str
      * @return
      */
-    private String reKey(String str){
-        str = str.replace("$&a&$","\\<");
-        str = str.replace("$&b&$", "\\>");
-        str = str.replace("$&c&$", "\\,");
+    public static String reOriginalKey(String str){
+        str = str.replace("$&a&$","<");
+        str = str.replace("$&b&$", ">");
+        str = str.replace("$&c&$", ",");
         return str;
     }
 

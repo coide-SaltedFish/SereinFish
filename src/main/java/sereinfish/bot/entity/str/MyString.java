@@ -1,6 +1,10 @@
 package sereinfish.bot.entity.str;
 
+import com.kennycason.kumo.Word;
+import sereinfish.bot.entity.sf.msg.SFMessage;
+
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,13 +33,12 @@ public class MyString {
 
             String[] p = c.split(":", 3);
             if (p.length >= 2) {
-                String type = p[1].toLowerCase();
                 String valType = "";
                 String valName = "";
                 if (p.length > 2) {
                     String[] paras = p[2].split(",", 2);
                     if (paras.length > 1){
-                        valType = paras[0];
+                        valType = paras[0].toLowerCase();
                         valName = paras[1];
                     }
                 }
@@ -66,11 +69,11 @@ public class MyString {
                         beforeIndex = matcher.end();
                     }
 
-                    if (valType.toLowerCase().equals("string")){
-                        reMap.put(valName, valStr);
+                    if (valType.equals("string")){
+                        reMap.put(valName, keyReplace(valStr));
                     }
 
-                    if (valType.toLowerCase().equals("int")){
+                    if (valType.equals("int")){
                         reMap.put(valName, Integer.decode(valStr));
                     }
                 }
@@ -79,6 +82,22 @@ public class MyString {
         }
 
         return reMap;
+    }
+
+    /**
+     * 关键字处理
+     * @param str
+     * @return
+     */
+    public static String keyReplace(String str){
+        str = str.replace("\\<", "$&a&$");
+        str = str.replace("\\>", "$&b&$");
+        str = str.replace("\\,", "$&c&$");
+
+        str = str.replace("<", "$&a&$");
+        str = str.replace(">", "$&b&$");
+        str = str.replace(",", "$&c&$");
+        return str;
     }
 
 

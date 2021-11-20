@@ -13,6 +13,7 @@ import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
+import org.apdplat.word.WordSegmenter;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.database.service.BlackListService;
 import sereinfish.bot.database.service.GroupHistoryMsgService;
@@ -160,6 +161,10 @@ public class InitEvent{
         //初始化B站管理器
         BiliManager.init();
         SfLog.getInstance().d(this.getClass(),"Bili管理器初始化完成");
+
+        //分词
+        WordSegmenter.seg("");
+        SfLog.getInstance().d(this.getClass(),"分词工具初始化完成");
 
         //设置LookAndFeel
         lookAndFeel();

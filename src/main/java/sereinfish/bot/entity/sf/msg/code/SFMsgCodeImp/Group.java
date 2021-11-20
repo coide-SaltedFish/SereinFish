@@ -7,6 +7,7 @@ import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 
 @SFMsgCodeInfo("group")
 public class Group implements SFMsgCode {
@@ -16,13 +17,12 @@ public class Group implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
-        String[] paras = codeContact.getParameter().toLowerCase().split(",", 2);
-
-        String type = paras[0];
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
+        //<SF:group:>
+        String type = parameter.getString(0).toLowerCase();
         int num = 0;
-        if (paras.length > 1){
-            num = Integer.decode(paras[1]);
+        if (parameter.size() > 1){
+            num = parameter.getInt(1);
         }
 
 

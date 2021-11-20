@@ -10,11 +10,13 @@ import lombok.NonNull;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.calendar.holiday.HolidayManager;
 import sereinfish.bot.entity.calendar.holiday.Holidays;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,10 @@ public class SFMsgCodeContact {
     HolidayManager holidayManager = MyYuQ.getHolidayManager();
 
     Map<String,Object> map = new HashMap<>();
+
+    BotActionContext botActionContext;
+    Message reMessage = new Message();
+    Parameter parameter;
 
     Contact sender;
     Contact source;
@@ -97,10 +103,6 @@ public class SFMsgCodeContact {
         this.source = source;
     }
 
-    BotActionContext botActionContext;
-    Message reMessage = new Message();
-    String parameter;
-
     public Message getReMessage(){
         Message message = new Message();
         message.setRecallDelay(reMessage.getRecallDelay());
@@ -122,6 +124,8 @@ public class SFMsgCodeContact {
     public Object getOrDefault(String key, Object defaultValue){
         return map.getOrDefault(key, defaultValue);
     }
+
+
 
     public Group getGroup(){
         if (source instanceof Group){

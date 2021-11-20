@@ -5,6 +5,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
+import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 
 @SFMsgCodeInfo("member")
 public class SFMember implements SFMsgCode {
@@ -14,14 +15,13 @@ public class SFMember implements SFMsgCode {
     }
 
     @Override
-    public String code(SFMsgCodeContact codeContact) throws Exception {
+    public String code(SFMsgCodeContact codeContact, Parameter parameter) throws Exception {
         Group group = codeContact.getGroup();
-        String[] paras = codeContact.getParameter().split(",", 2);
-        if (paras.length < 2){
+        if (parameter.size() < 2){
             throw new DoNone();
         }
-        String name = paras[0].toLowerCase();
-        String val = paras[1];
+        String name = parameter.getString(0).toLowerCase();
+        String val = parameter.getString(1);
 
         if (group == null){
             return null;
