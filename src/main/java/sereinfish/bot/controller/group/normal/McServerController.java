@@ -140,7 +140,7 @@ public class McServerController {
 
             BufferedImage stateImage = null;
             try {
-                stateImage = ServerListPing.getServerInfoImage(name, response, rcon);
+                stateImage = ServerListPing.getServerInfoImage(name, response, rcon, groupConf);
             } catch (Exception e) {
                 SfLog.getInstance().e(this.getClass(), e);
                 return MyYuQ.getMif().text("服务器信息获取失败：" + e.getMessage()).toMessage();

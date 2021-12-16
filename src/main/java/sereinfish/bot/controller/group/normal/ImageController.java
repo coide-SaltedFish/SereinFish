@@ -317,6 +317,37 @@ public class ImageController extends QQController {
         return getDingGif(qq);
     }
 
+    @Action("忍不住了 {member}")
+    public Message chonging(Group group, String member){
+        long qq = -1;
+        try {
+            if (member.startsWith("At_")){
+                member = member.substring("At_".length());
+            }
+            //是数字
+            qq = Long.valueOf(member);
+            if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
+                throw new SkipMe();
+            }
+        }catch (Exception e){
+            //是名称
+            if (member.equals(group.getBot().getName()) || member.equals(group.getBot().getNameCard())){
+                qq = group.getBot().getId();
+            }else {
+                for (Map.Entry<Long, Member> entry:group.getMembers().entrySet()){
+                    if (entry.getValue().getNameCard().equals(member) || entry.getValue().getName().equals(member)){
+                        qq = entry.getKey();
+                        break;
+                    }
+                }
+            }
+            if (qq == -1){
+                throw new SkipMe();
+            }
+        }
+        return getChonging(group,qq);
+    }
+
     @Action("摸")
     @Synonym({"rua"})
     @MenuItem(name = "rua", usage = "rua | 摸", description = "生成rua触发者表情")
@@ -749,7 +780,7 @@ public class ImageController extends QQController {
     private Message getDingGif(long m){
         int bgW = 480;
         int bgH = 400;
-        int delay = 120;//每张图之间的延迟
+        int delay = 80;//每张图之间的延迟
 
         BufferedImage headImage = ImageHandle.imageToBufferedImage(CacheManager.getMemberHeadImage(m));//得到头像
         File imageFile = new File(FileHandle.imageCachePath,"ding_temp_" + new Date().getTime());//文件缓存路径
@@ -921,6 +952,111 @@ public class ImageController extends QQController {
 
         if(animatedGifEncoder.finish()){
             return new Message().lineQ().imageByFile(imageFile).getMessage();
+        }
+        return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+    }
+
+    /**
+     * 得到一个忍不住
+     * @return
+     */
+    private Message getChonging(Group group, long m){
+        int bgW = 450;
+        int bgH = 240;
+        int delay = 80;//每张图之间的延迟
+
+        File imageFile = new File(FileHandle.imageCachePath,"chonging_temp_" + new Date().getTime());//文件缓存路径
+
+        AnimatedGifEncoder animatedGifEncoder = new AnimatedGifEncoder();
+        animatedGifEncoder.setSize(bgW,bgH);
+        animatedGifEncoder.setDelay(delay);
+        animatedGifEncoder.setRepeat(repeat);
+        animatedGifEncoder.start(imageFile.getAbsolutePath());
+
+        //x1,y1,x2,y2,角度
+        int imageHeadInfo[][] = {
+                {81,40,237,148,-4},//1
+                {82,40,237,149,-4},//2
+                {82,39,238,148,-4},//3
+                {82,39,238,148,-4},//4
+                {83,37,238,148,-4},//5
+                {83,36,239,147,-4},//6
+                {81,33,243,140,-5},//7
+                {77,35,240,131,-4},//8
+                {76,35,239,123,1},//9
+                {75,39,234,110,3},//10
+                {66,54,238,105,7},//11
+                {80,71,232,108,10},//12
+                {82,68,229,105,12},//13
+                {89,55,236,101,13},//14
+                {85,51,239,102,11},//15
+                {78,60,241,105,5},//16
+                {66,65,235,116,8},//17
+                {50,64,199,114,2},//18
+                {63,56,193,110,7},//19
+                {58,48,203,104,6},//20
+                {64,44,212,99,7},//21
+                {63,44,222,97,5},//22
+                {59,44,218,100,6},//23
+        };
+
+        for (int i = 0; i < imageHeadInfo.length; i++){
+            BufferedImage bgImage;
+            try {
+                //得到背景
+                bgImage = ImageIO.read(getClass().getClassLoader().getResource("image/chonging/" + (i + 1) + ".png"));
+
+                //计算头位置
+                int modelWidth = imageHeadInfo[i][2] - imageHeadInfo[i][0];//模板宽
+                int modelHeight = imageHeadInfo[i][3] - imageHeadInfo[i][1];//模板高
+
+                int headHeight = modelHeight - 10;
+                int headWidth = modelWidth - 20;
+
+                int headY = (modelHeight - headHeight) / 2;
+                int headX = (modelWidth - headWidth) / 2;
+
+                BufferedImage bufferedImage = new BufferedImage(modelWidth,modelHeight,BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D graphics2D = bufferedImage.createGraphics();
+
+                BufferedImage headImage = ImageHandle.imageToBufferedImage(ImageHandle.getMemberHeadImage(m, headWidth));//得到头像
+
+                //画头
+                graphics2D.drawImage(headImage, headX, headY, headWidth, headHeight, null);
+                //旋转
+                graphics2D.rotate(Math.toRadians(imageHeadInfo[i][4]),headWidth / 2,headHeight / 2);
+
+                graphics2D.dispose();
+
+                //背景
+                graphics2D = bgImage.createGraphics();
+                graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
+                graphics2D.dispose();
+                //
+                //白底
+                BufferedImage outImage = new BufferedImage(bgW, bgH, BufferedImage.TYPE_4BYTE_ABGR);
+                Graphics2D outGraphics2D = outImage.createGraphics();
+                outGraphics2D.setColor(Color.WHITE);
+                outGraphics2D.fillRect(0,0,bgW,bgH);
+                outGraphics2D.drawImage(bgImage, 0, 0, bgImage.getWidth(), bgImage.getHeight(), null);
+
+                //画上头
+                outGraphics2D.drawImage(bufferedImage,imageHeadInfo[i][0], imageHeadInfo[i][1],  imageHeadInfo[i][2],  imageHeadInfo[i][3],
+                        0, 0,bufferedImage.getWidth(),bufferedImage.getHeight(),null);
+                //画上背景
+                outGraphics2D.drawImage(bgImage,0 ,0, bgImage.getWidth(), bgImage.getHeight(), null);
+                outGraphics2D.dispose();
+
+                animatedGifEncoder.addFrame(outImage);
+            } catch (IOException e) {
+                SfLog.getInstance().e(this.getClass(),e);
+                return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
+            }
+        }
+
+        if(animatedGifEncoder.finish()){
+            com.icecreamqaq.yuq.message.Image image = group.uploadImage(imageFile);
+            return new Message().lineQ().plus(image).getMessage();
         }
         return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
     }

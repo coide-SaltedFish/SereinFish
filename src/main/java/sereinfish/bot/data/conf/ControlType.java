@@ -12,4 +12,5 @@ public  enum ControlType {
     Edit_Small_Plain,//小型普通编辑框
     Edit_IntNum,//整数编辑框
     SelectRcon,//rcon选择器
+    SelectSex,//性别选择器
 }

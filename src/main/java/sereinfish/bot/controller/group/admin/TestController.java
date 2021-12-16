@@ -22,10 +22,16 @@ import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.message.data.ForwardMessage;
+import net.mamoe.mirai.message.data.MessageUtils;
+import net.mamoe.mirai.message.data.PlainText;
+import sereinfish.bot.entity.ascii2d.Ascii2d;
 import sereinfish.bot.entity.bili.BiliManager;
 import sereinfish.bot.entity.bili.entity.dynamic.DynamicCard;
 import sereinfish.bot.entity.bili.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.entity.live.LiveRoom;
+import sereinfish.bot.entity.ffmpeg.AudioHandle;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.image.gif.GifDecoder;
@@ -33,6 +39,7 @@ import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
+import ws.schild.jave.EncoderException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -42,8 +49,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @GroupController
@@ -61,6 +70,44 @@ public class TestController extends QQController {
             msg.setReply(message.getSource());
             throw msg.toThrowable();
         }
+    }
+
+    @Action("语音测试 {file}")
+    @QMsg(mastAtBot = true)
+    public Message audioTest(String file) throws EncoderException {
+        File source = new File(file);
+        File target = new File(FileHandle.cachePath, "temp_audio_" + source.getName().substring(0, source.getName().lastIndexOf(".")) + ".amr");
+
+        if (!source.exists()){
+            return new Message().lineQ().text("文件未找到").getMessage();
+        }
+
+        AudioHandle.mp3ToAmr(source, target);
+
+        return MyYuQ.getMif().voiceByFile(target).toMessage();
+    }
+
+    @Action("Ascii2d")
+    @QMsg(mastAtBot = true)
+    public Message ascii2d(Group group) throws IOException {
+        group.sendMessage("Ascii2d");
+        Ascii2d ascii2d = new Ascii2d("http://img0.baidu.com/it/u=2357664251,2893458483&fm=253&app=138&f=JPEG?w=500&h=371");
+        return ascii2d.getColorResponse().getInfo(group);
+    }
+
+    @Action("转发我")
+    @QMsg(mastAtBot = true)
+    public void fm(Message message, Group group){
+        List<ForwardMessage.Node> list = new ArrayList<>();
+
+        net.mamoe.mirai.message.data.Message message1 = new PlainText(message.getCodeStr());
+        list.add(new ForwardMessage.Node(123, 0, "test", message1));
+
+        List<String> preList = new ArrayList<>();
+        preList.add("123");
+
+        ForwardMessage forwardMessage = new ForwardMessage(preList, "转发消息123", "brief", "source", "summary", list);
+        Bot.getInstance(MyYuQ.getYuQ().getBotId()).getGroup(group.getId()).sendMessage(forwardMessage);
     }
 
     @Action("获取B站用户信息 {uid}")
@@ -275,10 +322,5 @@ public class TestController extends QQController {
     @QMsg(mastAtBot = true)
     public void thrEx(String text){
         throw new NullPointerException(text);
-    }
-
-    @Catch(error = IOException.class)
-    public String iOException(IOException e){
-        return "出现错误：" + e.getMessage();
     }
 }

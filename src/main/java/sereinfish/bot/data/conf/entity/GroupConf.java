@@ -1,5 +1,6 @@
 package sereinfish.bot.data.conf.entity;
 
+import com.icecreamqaq.yuq.entity.UserSex;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -59,6 +60,31 @@ public class GroupConf{
     //自动同意入群
     @Control(group = "自动同意入群", name = "自动同意入群", type = ControlType.CheckBox, tip = "在有人申请入群时自动同意申请(需管理员权限)")
     boolean autoAgreeJoinGroupEnable = false;
+//    //MC ID 验证
+//    @Control(group = "自动同意入群", name = "MC账号问答验证", type = ControlType.CheckBox, tip = "在有人申请入群时检查其回答的MC ID(需管理员权限且开启进群问题)")
+//    boolean autoAgreeJoinGroupMCAccountCheckEnable = false;
+
+    //启用条件筛选
+    @Control(group = "自动同意入群", name = "条件筛选", type = ControlType.CheckBox, tip = "在有人申请入群时按条件筛选了再自动同意申请(需管理员权限)")
+    boolean autoAgreeJoinGroupCheckEnable = false;
+
+    @Control(group = "自动同意入群", name = "等级", type = ControlType.Edit_IntNum, tip = "等级，-1为忽略（需打开筛选开关）")
+    int autoAgreeJoinGroupCheckLevel = -1;
+
+    @Control(group = "自动同意入群", name = "登录天数", type = ControlType.Edit_IntNum, tip = "登录天数，-1为忽略（需打开筛选开关）")
+    int autoAgreeJoinGroupCheckLoginDays = -1;
+
+    @Control(group = "自动同意入群", name = "性别", type = ControlType.SelectSex, tip = "性别筛选条件（需打开筛选开关）")
+    String autoAgreeJoinGroupCheckSex = UserSex.none.name();
+
+    @Control(group = "自动同意入群", name = "年龄", type = ControlType.Edit_IntNum, tip = "年龄，-1为忽略（需打开筛选开关）")
+    int autoAgreeJoinGroupCheckAge = -1;
+
+    @Control(group = "自动同意入群", name = "Q龄", type = ControlType.Edit_IntNum, tip = "Q龄，-1为忽略（需打开筛选开关）")
+    int autoAgreeJoinGroupCheckQQAge = -1;
+
+
+
     //黑名单
     @Control(group = "黑名单", name = "启用黑名单", type = ControlType.CheckBox, tip = "启用黑名单功能")
     boolean blackListGroupEnable = false;
@@ -165,6 +191,18 @@ public class GroupConf{
 
     @Control(group = "Mc服务器", name = "启用Rcon命令", type = ControlType.CheckBox, tip = "启用后可使用QQ执行rcon命令")
     boolean RconCMDEnable = false;
+
+    @Control(group = "Mc服务器", name = "TPS命令", type = ControlType.Edit_Small_Plain, tip = "获取TPS信息所用命令")
+    String RconTpsCmd = "tps";
+
+    @Control(group = "Mc服务器", name = "TPS命令解析", type = ControlType.Edit, tip = "TPS信息解析")
+    String RconTpsCmdAnalysis = "<SF:Value:string,tps>";
+
+    @Control(group = "Mc服务器", name = "MSPT命令", type = ControlType.Edit_Small_Plain, tip = "获取MSPT信息所用命令")
+    String RconMsptCmd = "mspt";
+
+    @Control(group = "Mc服务器", name = "MSPT命令解析", type = ControlType.Edit, tip = "Mspt信息解析")
+    String RconMsptCmdAnalysis = "<SF:Value:string,mspt>";
 
     @Control(group = "Mc服务器", name = "启用state命令", type = ControlType.CheckBox, tip = "启用后可在QQ群获取服务器状态")
     boolean mcServerState = false;

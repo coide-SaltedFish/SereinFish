@@ -70,6 +70,38 @@ public class McRconCmd extends QQController {
         return "本群Rcon未连接";
     }
 
+    @Action("\\^[.!！][rR][cC][Ee][Oo]$\\ {var}")
+    @MenuItem(name = "Rcon短指令指行", usage = "[.!！][rR][cC][Ee] {var}", description = "执行一个不包含空格的rcon指令", permission = Permissions.OP)
+    public String rconCmdExecuteSource(GroupConf groupConf, String var){
+        //前置检查
+        if (groupConf.isRconEnable()){
+            if (!groupConf.isRconCMDEnable()){
+                throw new DoNone();
+            }
+        }else {
+            throw new DoNone();
+        }
+        //得到Rcon
+        Rcon rcon = null;
+        if (groupConf.getSelectGroupRcon() != null){
+            RconConf rconConf = groupConf.getSelectGroupRcon();
+            if (rconConf != null){
+                rcon = RconManager.getInstance().getRcon(rconConf.getID());
+            }
+        }
+        //命令执行
+        if (rcon != null){
+            try {
+                return "命令返回值如下：\n" + rcon.cmd(var);
+            } catch (IOException e) {
+                return "命令执行失败：\n" + e.getMessage();
+            } catch (AuthenticationException e) {
+                return "Rcon连接异常：\n" + e.getMessage();
+            }
+        }
+        return "本群Rcon未连接";
+    }
+
     /**
      * 长命令执行
      * @param groupConf

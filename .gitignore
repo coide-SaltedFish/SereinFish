@@ -33,3 +33,5 @@ build/generated/
 /device_2094004601.json
 /db/sereinfish.mv.db
 /db/sereinfish.trace.db
+/build/
+/image/

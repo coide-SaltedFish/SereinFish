@@ -26,7 +26,7 @@ public class WordCloudController {
     @Inject
     GroupHistoryMsgService groupHistoryMsgService;
 
-    @Action("今日词云")
+    //@Action("今日词云")
     public Message createGroupWordCloud(Group group, @PathVar(value = 1, type = PathVar.Type.Source) Image image) throws IOException {
         //默认背景图片
         BufferedImage bufferedImage = null;
@@ -41,9 +41,9 @@ public class WordCloudController {
 
         File file = new File(FileHandle.imageCachePath,"wordCloud_temp_" + System.currentTimeMillis());
 
-        BufferedImage wordCloud = MyWordCloud.getWordCloud(list, bufferedImage);
+        //BufferedImage wordCloud = MyWordCloud.getWordCloud(list, bufferedImage);
 
-        ImageIO.write(wordCloud, "PNG", file);
+        //ImageIO.write(wordCloud, "PNG", file);
         return new Message().lineQ().plus(group.uploadImage(file)).getMessage();
     }
 }

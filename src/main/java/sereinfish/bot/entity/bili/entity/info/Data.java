@@ -11,6 +11,7 @@ import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 public class Data {
     long mid;
     String name;
+    String uname;
     String sex;
     String face;
     String sign;

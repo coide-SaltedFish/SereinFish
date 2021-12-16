@@ -70,7 +70,7 @@ public class NetHandle {
         URL url = new URL(strUrl);
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
         //设置超时间为3秒
-        conn.setConnectTimeout(5*1000);
+        conn.setConnectTimeout(5 * 1000);
         //防止屏蔽程序抓取而返回403错误
         conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         //得到输入流
@@ -98,9 +98,25 @@ public class NetHandle {
                 }
             }
         }else {
-            return null;
+            throw new FileNotFoundException("玩家信息或皮肤未找到");
         }
         return getImage(new URL(GamerInfo.getValue(textures).getTextures().getSKIN().getUrl()));
+    }
+
+    public static File getMcPlayerSkinImageFile(String uuid, int w) throws IOException {
+        File file = new File(FileHandle.imageCachePath, "temp_" + System.currentTimeMillis());
+
+        ImageIO.write(getMcPlayerSkin(uuid), "PNG", file);
+
+        return file;
+    }
+
+    public static File getMcPlayerHeadImageFile(String uuid, int w) throws IOException {
+        File file = new File(FileHandle.imageCachePath, "temp_" + System.currentTimeMillis());
+
+        ImageIO.write(getMcPlayerHeadImage(uuid, w), "PNG", file);
+
+        return file;
     }
 
     /**

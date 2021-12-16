@@ -28,6 +28,7 @@ public class GroupPanel extends JTabbedPane {
         add("群配置",new GroupConfPanel(conf));
         add("计划任务", new JobPanel(conf));
         add("自动回复",new DBReplyPanel(conf));
+        add("进群信息", new JPanel());
         add("黑名单",new DBBlackPanel(conf));
     }
 }

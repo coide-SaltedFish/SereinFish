@@ -9,6 +9,7 @@ import java.util.Date;
 
 public class Time{
 	public static final String LOG_TIME="yyyy-MM-dd HH:mm:ss:mss";
+	public static final String LOG_TIME_="yyyy-MM-dd HH:mm:ss";
 	public static final String DATE_FORMAT="yyyy-MM-dd";
 	public static final String RUN_TIME = "dd:HH:mm:ss";
 	public static final String DAY_TIME = "HH:mm:ss";
@@ -35,6 +36,17 @@ public class Time{
 			SfLog.getInstance().e(Time.class,"时间转换错误,格式应为："+style,e);
 		}
 		return date;
+	}
+
+	public static int getSecondTimestamp(){
+		Date date = new Date();
+		String timestamp = String.valueOf(date.getTime());
+		int length = timestamp.length();
+		if (length > 3) {
+			return Integer.parseInt(timestamp.substring(0,length-3));
+		} else {
+			return 0;
+		}
 	}
 
 	/**

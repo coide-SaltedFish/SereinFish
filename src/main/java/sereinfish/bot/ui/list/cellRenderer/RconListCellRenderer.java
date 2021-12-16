@@ -1,11 +1,15 @@
 package sereinfish.bot.ui.list.cellRenderer;
 
 import lombok.AllArgsConstructor;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.mc.rcon.RconConf;
+import sereinfish.bot.net.mc.rcon.RconManager;
+import sereinfish.bot.net.mc.rcon.ex.AuthenticationException;
 import sereinfish.bot.ui.list.CellManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 @AllArgsConstructor
 public class RconListCellRenderer implements ListCellRenderer {
@@ -39,6 +43,35 @@ public class RconListCellRenderer implements ListCellRenderer {
             label_name.setText(rconConf.getName());
         }
         panel_name.add(label_name);
+        //状态
+        JLabel label_state = new JLabel("未连接");
+        label_state.setOpaque(false);
+        label_state.setForeground(Color.RED);
+        if (RconManager.getInstance().getRcon(rconConf.getID()) != null){
+            label_state.setText("已连接");
+            label_state.setForeground(Color.GREEN);
+        }
+        //检查可用性
+        MyYuQ.getJobManager().registerTimer(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (RconManager.getInstance().isEnable(rconConf)){
+                        label_state.setText("连接可用");
+                        label_state.setForeground(Color.GREEN);
+                    }else {
+                        label_state.setText("连接不可用");
+                        label_state.setForeground(Color.RED);
+                    }
+                } catch (Exception e) {
+                    label_state.setText("检测错误");
+                    label_state.setForeground(Color.RED);
+                }
+            }
+        }, 0);
+
+        panel_name.add(label_state);
+
         jPanel.add(panel_name, BorderLayout.CENTER);
 
         //地址端口

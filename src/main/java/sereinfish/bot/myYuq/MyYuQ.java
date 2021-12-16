@@ -225,6 +225,14 @@ public class MyYuQ {
     }
 
     /**
+     * 得到图片链接
+     * @return
+     */
+    public static String getImageUrlId(String id) throws MalformedURLException {
+        return "http://gchat.qpic.cn/gchatpic_new/0/-0-" + id.substring(0, id.indexOf(".")) + "/0";
+    }
+
+    /**
      * 对象转json文本
      * @param o
      * @param type
@@ -412,6 +420,48 @@ public class MyYuQ {
             }, time);
             time += messageEntity.getWaitTime();
         }
+    }
+
+    /**
+     * yuq图片id转mirai
+     * @param id
+     * @return
+     */
+    public static String getMiraiImageId(String id){
+        StringBuilder md5 = new StringBuilder(id.substring(0, id.lastIndexOf(".")));
+
+        md5.insert(20,"-");
+        md5.insert(16,"-");
+        md5.insert(12,"-");
+        md5.insert(8,"-");
+
+        id = "{" + md5 + "}" + id.substring(id.indexOf("."));
+
+        return id;
+    }
+
+    /**
+     * md5转mirai
+     * @return
+     */
+    public static String getMiraiImageId(String md5, String ex){
+        StringBuilder stringBuilder = new StringBuilder(md5);
+
+        stringBuilder.insert(20,"-");
+        stringBuilder.insert(16,"-");
+        stringBuilder.insert(12,"-");
+        stringBuilder.insert(8,"-");
+
+        String id = "{" + stringBuilder + "}" + "." + ex;
+
+        return id;
+    }
+
+    public static String getFileExtension(File file) {
+        String fileName = file.getName();
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        else return "";
     }
 
     /**

@@ -3,11 +3,14 @@ package sereinfish.bot.net.mc;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.NonNull;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.mc.JsonColor;
+import sereinfish.bot.entity.str.MyString;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.net.mc.rcon.Rcon;
 import sereinfish.bot.net.mc.rcon.RconConf;
 import sereinfish.bot.ui.tray.AppTray;
@@ -16,12 +19,15 @@ import sun.misc.BASE64Decoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -176,7 +182,7 @@ public class ServerListPing {
      * @param statusResponse
      * @return
      */
-    public static BufferedImage getServerInfoImage(String name, @NonNull StatusResponse statusResponse, Rcon rcon) throws Exception{
+    public static BufferedImage getServerInfoImage(String name, @NonNull StatusResponse statusResponse, Rcon rcon, GroupConf groupConf) throws Exception{
         try {
             Color defaultColor = Color.decode("#EEEEEE");//背景颜色
             Color shadeColor = new Color(0, 0, 0, 60);
@@ -326,9 +332,9 @@ public class ServerListPing {
             int playerNumStartY = delayStartY;
             graphics2D.drawString(playerNumStr, playerNumStartX, playerNumStartY);//绘制人数
             //绘制服务器描述
+            int descriptionStartX = startX + 262;
+            int descriptionStartY = startY + serverNameHeight + 14;
             if (statusResponse.getDescription() != null && statusResponse.getDescription().getExtra() != null){//null值检测
-                int descriptionStartX = startX + 262;
-                int descriptionStartY = startY + serverNameHeight + 14;
                 graphics2D.setPaint(Color.WHITE);
                 font = font.deriveFont(52f);//设置字体大小
                 graphics2D.setFont(font);
@@ -353,6 +359,11 @@ public class ServerListPing {
                     graphics2D.drawString(extra.getText(), descriptionStartX, descriptionStartY + metrics.getAscent());
                     //坐标计算
                     descriptionStartX += metrics.stringWidth(extra.getText());
+                }
+            }else if(statusResponse.getDescription() != null && statusResponse.getDescription().getText() != null && !statusResponse.getDescription().getText().equals("")){
+                for (String str:statusResponse.getDescription().getText().split("\n")){
+                    drawString(graphics2D, Color.WHITE, font, str, descriptionStartX, descriptionStartY);
+                    descriptionStartY += metrics.getAscent() + 14;
                 }
             }
 
@@ -408,14 +419,27 @@ public class ServerListPing {
             String mspt = "";
             if (rcon != null){
                 try{
-                    tps = rcon.cmd("tps").split(":")[1];
+                    tps = MyString.placeholderExtraction(groupConf.getRconTpsCmdAnalysis(), rcon.cmd(groupConf.getRconTpsCmd())).get("tps").toString();
                 }catch (Exception e){
                     tps = "未知";
                 }
                 try {
-                    mspt = rcon.cmd("mspt").split(":")[1].split(",")[0].split("/")[2];
+                    mspt = MyString.placeholderExtraction(groupConf.getRconMsptCmdAnalysis(), rcon.cmd(groupConf.getRconMsptCmd())).get("mspt").toString();
                 }catch (Exception e){
                     mspt = "未知";
+                }
+
+                try {
+                    float t = Float.parseFloat(tps);
+                    if (t == 20){
+                        tps = "§a" + tps;
+                    }else if(t < 20 && t > 15){
+                        tps = "§e" + tps;
+                    }else {
+                        tps = "§c" + tps;
+                    }
+                }catch (Exception e){
+
                 }
 
                 String info = "§fTPS:" + tps + "   §fMSPT:" + mspt;
@@ -449,18 +473,61 @@ public class ServerListPing {
      * @param y
      */
     private static int drawString(Graphics2D graphics2D, Color color, Font font, String str, int x, int y){
+        boolean isK = false;//是否随机字符
+
         graphics2D.setPaint(color);
         graphics2D.setFont(font);
+
+        HashMap<TextAttribute, Object> textAttributeObjectHashMap;
+
         FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
         int textX = x;
         for (int i = 0; i < str.length(); i++){
-            String c = String.valueOf(str.charAt(i));
-            if (c.equals("§")){
+            char c = str.charAt(i);
+            if (c == '§'){
                 i++;
-                graphics2D.setPaint(JsonColor.getColor(c + str.charAt(i)));
+                char ca = str.charAt(i);
+                //加粗
+                switch (ca){
+                    case 'k':
+                        isK = true;
+                        break;
+                    case 'l'://加粗
+                        Font nFont = font.deriveFont(Font.BOLD);
+                        graphics2D.setFont(nFont);
+                        break;
+                    case 'n':
+                        textAttributeObjectHashMap = new HashMap<>();
+                        textAttributeObjectHashMap.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON); // 定义是否有下划线
+
+                        nFont = font.deriveFont(textAttributeObjectHashMap);
+                        graphics2D.setFont(nFont);
+                        break;
+                    case 'm':
+                        textAttributeObjectHashMap = new HashMap<>();
+                        textAttributeObjectHashMap.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON); // 定义是否有删除线
+
+                        nFont = font.deriveFont(textAttributeObjectHashMap);
+                        graphics2D.setFont(nFont);
+                        break;
+                    case 'o'://斜体
+                        nFont = font.deriveFont(Font.ITALIC);
+                        graphics2D.setFont(nFont);
+                        break;
+                    case 'r'://重置
+                        isK = false;
+                        graphics2D.setFont(font);
+                        break;
+                    default:
+                        graphics2D.setPaint(JsonColor.getColor(new String(new char[]{c,ca})));
+                }
             }else {
-                graphics2D.drawString(c, textX, y + metrics.getAscent());
-                textX += metrics.stringWidth(c);
+                if (isK){
+                    c = (char) MyYuQ.getRandom(32,126);
+                }
+
+                graphics2D.drawString(String.valueOf(c), textX, y + metrics.getAscent());
+                textX += metrics.stringWidth(String.valueOf(c));
             }
         }
         return metrics.getHeight();

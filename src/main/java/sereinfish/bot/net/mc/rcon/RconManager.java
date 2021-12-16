@@ -64,6 +64,15 @@ public class RconManager {
         return rcon;
     }
 
+    /**
+     * 检查连接可用性
+     * @param conf
+     * @return
+     */
+    public boolean isEnable(RconConf conf) throws AuthenticationException, IOException {
+        return link(conf) != null;
+    }
+
     public Map<String, Rcon> getRcons() {
         return rcons;
     }

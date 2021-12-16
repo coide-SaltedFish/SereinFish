@@ -1,5 +1,6 @@
 package sereinfish.bot.ui.context;
 
+import com.icecreamqaq.yuq.entity.UserSex;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.data.conf.ControlType;
 import sereinfish.bot.mlog.SfLog;
@@ -51,9 +52,49 @@ public class ConfContext {
             component = ConfContext.getRconSelect(control);
         }else if (control.getType() == ControlType.Authority_ComboBox){
             component = ConfContext.getAuthorityComboBox(control);
+        }else if (control.getType() == ControlType.SelectSex){
+            component = ConfContext.getSelectSex(control);
         }
 
         return component;
+    }
+
+    /**
+     * 得到性别选择器
+     * @param control
+     * @return
+     */
+    public static JPanel getSelectSex(ConfControls.Control control){
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBorder(BorderFactory.createTitledBorder(control.getName()));
+
+        JComboBox comboBox = new JComboBox();
+        comboBox.setToolTipText(control.getTip());
+
+        //初始化列表
+        comboBox.addItem("无条件");
+        comboBox.addItem(UserSex.none.name());
+        comboBox.addItem(UserSex.man.name());
+        comboBox.addItem(UserSex.woman.name());
+
+        comboBox.setSelectedItem(control.getValue());
+
+        control.setListener(control1 -> {
+            comboBox.setSelectedItem(control.getValue());
+        });
+
+        //设置点击事件
+        comboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED){
+                    control.setValue(e.getItem());
+                }
+            }
+        });
+
+        panel.add(comboBox);
+        return panel;
     }
 
     /**

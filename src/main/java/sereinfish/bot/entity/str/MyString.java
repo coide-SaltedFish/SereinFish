@@ -1,10 +1,6 @@
 package sereinfish.bot.entity.str;
 
-import com.kennycason.kumo.Word;
-import sereinfish.bot.entity.sf.msg.SFMessage;
-
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,24 +41,29 @@ public class MyString {
                 if (!valType.equals("") && !valName.equals("")){
                     //TODO:变量名称检查
 
-
                     String valStr = "";
 
-                    if (matcher.end() == model.length()){//如果是结尾
+                    startStr += matcher.start() - beforeIndex;
 
-                        valStr = str.substring(startStr + (matcher.start() - beforeIndex));
-                        startStr += str.length();
+                    if (matcher.end() == model.length()){//如果是结尾
+                        valStr = str.substring(startStr);
+                        startStr = str.length();
                     }else {//如果是中间
                         //获取输入值的宽度
                         char nextStr = model.charAt(matcher.end());
                         int len = 0;
+
                         while (str.charAt(startStr + len) != nextStr){
-                            if (str.charAt(startStr + len) == ' '
-                                    || str.charAt(startStr + len) == '\n'
-                                    || str.charAt(startStr + len) == '\t'){
+//                            if (str.charAt(startStr + len) == ' '
+//                                    || str.charAt(startStr + len) == '\n'
+//                                    || str.charAt(startStr + len) == '\t'){
+//                                break;
+//                            }
+                            if (startStr + len + 1 < str.length()){
+                                len++;
+                            }else {
                                 break;
                             }
-                            len++;
                         }
                         valStr = str.substring(startStr, startStr + len);
                         startStr += len;

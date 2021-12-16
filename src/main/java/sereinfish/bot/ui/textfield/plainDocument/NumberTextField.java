@@ -10,6 +10,7 @@ import javax.swing.text.PlainDocument;
 public class NumberTextField extends PlainDocument {
 
     private int limit;
+
     public NumberTextField(int limit) {
         super();
         this.limit = limit;
@@ -28,7 +29,12 @@ public class NumberTextField extends PlainDocument {
                 //限制在0-9
                 if (upper[i]>='0' && upper[i]<='9'){
                     upper[length++] = upper[i];
+
+                }else if (upper[i] == '-' && i == 0 && offset == 0){
+                    upper[length++] = upper[i];
                 }
+                //负号
+
             }
             super.insertString(offset, new String(upper,0,length), attr);
         }

@@ -13,14 +13,17 @@ import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import org.apdplat.word.WordSegmenter;
+//import org.apdplat.word.WordSegmenter;
+import opennlp.maxent.Main;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.database.service.BlackListService;
 import sereinfish.bot.database.service.GroupHistoryMsgService;
 import sereinfish.bot.database.service.ReplyService;
 import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.bili.BiliManager;
+import sereinfish.bot.entity.bili.entity.vtbs.VtbsInfo;
 import sereinfish.bot.entity.calendar.holiday.HolidayManager;
+import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.ClassManager;
@@ -33,9 +36,11 @@ import sereinfish.bot.net.mc.rcon.RconManager;
 import sereinfish.bot.ui.frame.MainFrame;
 import sereinfish.bot.ui.tray.AppTray;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Locale;
 
@@ -162,9 +167,17 @@ public class InitEvent{
         BiliManager.init();
         SfLog.getInstance().d(this.getClass(),"Bili管理器初始化完成");
 
+        //初始化Vtb列表
+//        try {
+//            VtbsInfo.init();
+//            SfLog.getInstance().d(this.getClass(),"Vtb列表初始化完成");
+//        } catch (IOException e) {
+//            SfLog.getInstance().e(this.getClass(),"Vtb列表初始化失败", e);
+//        }
+
         //分词
-        WordSegmenter.seg("");
-        SfLog.getInstance().d(this.getClass(),"分词工具初始化完成");
+//        WordSegmenter.seg("");
+//        SfLog.getInstance().d(this.getClass(),"分词工具初始化完成");
 
         //设置LookAndFeel
         lookAndFeel();
@@ -188,6 +201,16 @@ public class InitEvent{
         SfLog.getInstance().d(this.getClass(),"主界面初始化中");
         MainFrame.getMainFrame().setVisible(true);
         SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
+
+//        //输出
+//        BufferedImage bufferedImage = new BufferedImage(MainFrame.getMainFrame().getWidth(), MainFrame.getMainFrame().getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+//        MainFrame.getMainFrame().paint(bufferedImage.createGraphics());
+//
+//        try {
+//            ImageIO.write(bufferedImage, "PNG",new File(FileHandle.imageCachePath, "111.png"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         //bot开始处理消息
         MyYuQ.isEnable = true;

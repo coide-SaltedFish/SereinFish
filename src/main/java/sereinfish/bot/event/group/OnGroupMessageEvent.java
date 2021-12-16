@@ -3,18 +3,17 @@ package sereinfish.bot.event.group;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.EventBus;
-import com.icecreamqaq.yuq.entity.Contact;
-import com.icecreamqaq.yuq.entity.Group;
-import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.entity.*;
 import com.icecreamqaq.yuq.event.*;
 import com.icecreamqaq.yuq.message.*;
 import com.icecreamqaq.yuq.message.Image;
+import net.mamoe.mirai.message.action.BotNudge;
+import net.mamoe.mirai.message.data.MessageChain;
+import org.apache.log4j.Logger;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.data.conf.entity.GroupConf;
-import sereinfish.bot.database.service.BlackListService;
-import sereinfish.bot.database.service.GroupHistoryMsgService;
-import sereinfish.bot.database.service.ReplyService;
-import sereinfish.bot.database.service.WhiteListService;
+import sereinfish.bot.database.entity.GroupJoinInfo;
+import sereinfish.bot.database.service.*;
 import sereinfish.bot.entity.msg.LeavingMessage;
 import sereinfish.bot.entity.msg.MyMessage;
 import sereinfish.bot.entity.msg.ReplyManager;
@@ -68,6 +67,9 @@ public class OnGroupMessageEvent {
     private WhiteListService whiteListService;
 
     @Inject
+    private GroupJoinInfoService groupJoinInfoService;
+
+    @Inject
     private EventBus eventBus;
 
     @Event
@@ -83,6 +85,7 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMessageEvent(GroupMessageEvent event){
+
         Message message = event.getMessage();
         //消息记录
         try {
@@ -334,9 +337,7 @@ public class OnGroupMessageEvent {
             SfLog.getInstance().d(this.getClass(), "消息Id：" + id);
 
             //消息记录
-            if (message.getId() != null){
-                groupHistoryMsgService.save(new GroupHistoryMsg(contact.getId(), MyYuQ.getYuQ().getBotId(), message.getId(), message.getCodeStr()));
-            }
+            groupHistoryMsgService.save(new GroupHistoryMsg(contact.getId(), MyYuQ.getYuQ().getBotId(), messageSource.getId(), message.getCodeStr()));
 
         }catch (ArrayIndexOutOfBoundsException e){
             if (event.getMessage() instanceof MyMessage) {
@@ -361,9 +362,16 @@ public class OnGroupMessageEvent {
                     SfLog.getInstance().e(this.getClass(),e1);
                     group.sendMessage(MyYuQ.getMif().text("错误：" + e1.getMessage()).toMessage());
                 }
-                group.sendMessage(new MyMessage(true).lineQ().imageByFile(imageFile));
+                //生成转发消息
+                Image image = contact.uploadImage(imageFile);
+                MyMessage myMessage = (MyMessage) new MyMessage(true).lineQ().plus(image).getMessage();
+                myMessage.setRecallDelay(message.getRecallDelay());
+
+                group.sendMessage(myMessage);
                 return;
             }
+        }catch (Exception e){
+            SfLog.getInstance().e(this.getClass() ,e);
         }
 
         //撤回管理
@@ -379,6 +387,10 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberJoinEvent(GroupMemberJoinEvent.Join event){//群功能启用判断
+        SfLog.getInstance().d(this.getClass(), event.getMember() + " 加入群聊 " + event.getGroup());
+
+        groupJoinInfoService.accept(event.getGroup().getId(), event.getMember().getId());
+
         GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
             event.setCancel(true);
@@ -400,8 +412,27 @@ public class OnGroupMessageEvent {
     }
 
     @Event
-    public void g(GroupMemberJoinEvent.Invite invite){
+    public void g(GroupMemberJoinEvent.Invite event){
         //TODO:进群邀请事件
+        SfLog.getInstance().d(this.getClass(), event.getInviter() + " 邀请 " + event.getMember() + " 加入群聊 " + event.getGroup());
+
+        GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
+        if (!conf.isEnable()){
+            event.setCancel(true);
+            return;
+        }
+
+        //进群提示
+        if (conf.isEnable() && conf.isJoinGroupTipEnable()){
+            String tip = conf.getJoinGroupTipText();
+            if (!tip.trim().equals("")){
+                SfLog.getInstance().d(this.getClass(), "发送入群提示，[" + event.getGroup() + " " + event.getMember() + "]Time:" + new Date().getTime() );
+
+                SFMsgCodeContact sfMsgCodeContact = new SFMsgCodeContact(event.getMember(), event.getGroup());
+
+                MyYuQ.sendSFMessage(event.getGroup(), SFMessage.getInstance().sfCodeToMessage(sfMsgCodeContact,tip));
+            }
+        }
     }
 
     /**
@@ -491,6 +522,9 @@ public class OnGroupMessageEvent {
      */
     @Event
     public void groupMemberRequestEvent(GroupMemberRequestEvent event){
+        //数据库记录
+        groupJoinInfoService.saveOrUpdate(new GroupJoinInfo(event.getGroup().getId(), event.getQq().getId(), event.getMessage()));
+
         //群功能启用判断
         GroupConf conf = ConfManager.getInstance().get(event.getGroup().getId());
         if (!conf.isEnable()){
@@ -514,11 +548,7 @@ public class OnGroupMessageEvent {
                             event.setCancel(true);
                             event.getGroup().sendMessage(MyYuQ.getMif().text("[全局]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
                                     ")，尝试加入本群，已自动拒绝").toMessage());
-                        }else {
-                            //同意
-                            event.setAccept(true);
-                            event.setCancel(true);
-                            SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                            return;
                         }
                     }else {
                         if(blackListService.existGroup(event.getGroup().getId(), event.getQq().getId())){
@@ -528,18 +558,115 @@ public class OnGroupMessageEvent {
                             event.setCancel(true);
                             event.getGroup().sendMessage(MyYuQ.getMif().text("[群]黑名单用户[" + event.getQq().getName() + "](" + event.getQq().getId() +
                                     ")，尝试加入本群，已自动拒绝").toMessage());
-                        }else {
-                            //同意
-                            event.setAccept(true);
-                            event.setCancel(true);
-                            SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
+                            return;
                         }
                     }
                 }
-            }else {
+
+                //QQ条件验证
+                if (conf.isAutoAgreeJoinGroupCheckEnable()){
+                    UserInfo userInfo = event.getQq();
+                    //等级
+                    System.out.println(conf.getAutoAgreeJoinGroupCheckLevel());
+                    if (conf.getAutoAgreeJoinGroupCheckLevel() != -1){
+                        if (userInfo.getLevel() < conf.getAutoAgreeJoinGroupCheckLevel()){
+                            event.setRejectMessage("您的QQ等级不符合加群条件");
+                            event.setAccept(false);
+                            event.setCancel(true);
+
+                            MessageLineQ messageLineQ = new Message().lineQ();
+                            messageLineQ.textLine("用户：");
+                            messageLineQ.textLine(userInfo.toString());
+                            messageLineQ.textLine("尝试加入群聊");
+                            messageLineQ.textLine("用户等级未到达要求，已自动拒绝申请");
+                            event.getGroup().sendMessage(messageLineQ.getMessage());
+                            return;
+                        }
+                    }
+                    //登录天数
+                    if (conf.getAutoAgreeJoinGroupCheckLoginDays() != -1){
+                        if (userInfo.getLevel() < conf.getAutoAgreeJoinGroupCheckLoginDays()){
+                            event.setRejectMessage("您的QQ登录天数不符合加群条件");
+                            event.setAccept(false);
+                            event.setCancel(true);
+
+                            MessageLineQ messageLineQ = new Message().lineQ();
+                            messageLineQ.textLine("用户：");
+                            messageLineQ.textLine(userInfo.toString());
+                            messageLineQ.textLine("尝试加入群聊");
+                            messageLineQ.textLine("用户QQ登录天数未到达要求，已自动拒绝申请");
+                            event.getGroup().sendMessage(messageLineQ.getMessage());
+                            return;
+                        }
+                    }
+
+                    //性别
+                    if (!conf.getAutoAgreeJoinGroupCheckSex().equals("无条件")){
+                        if (!userInfo.getSex().name().equals(conf.getAutoAgreeJoinGroupCheckSex())){
+                            event.setRejectMessage("您的性别不符合加群条件");
+                            event.setAccept(false);
+                            event.setCancel(true);
+
+                            MessageLineQ messageLineQ = new Message().lineQ();
+                            messageLineQ.textLine("用户：");
+                            messageLineQ.textLine(userInfo.toString());
+                            messageLineQ.textLine("尝试加入群聊");
+                            messageLineQ.textLine("用户性别不是[" + conf.getAutoAgreeJoinGroupCheckSex() + "]，已自动拒绝申请");
+                            event.getGroup().sendMessage(messageLineQ.getMessage());
+                            return;
+                        }
+                    }
+
+                    //年龄
+                    if (conf.getAutoAgreeJoinGroupCheckAge() != -1){
+                        if (userInfo.getLevel() < conf.getAutoAgreeJoinGroupCheckAge()){
+                            event.setRejectMessage("您的年龄不符合加群条件");
+                            event.setAccept(false);
+                            event.setCancel(true);
+
+                            MessageLineQ messageLineQ = new Message().lineQ();
+                            messageLineQ.textLine("用户：");
+                            messageLineQ.textLine(userInfo.toString());
+                            messageLineQ.textLine("尝试加入群聊");
+                            messageLineQ.textLine("用户年龄未到达要求，已自动拒绝申请");
+                            event.getGroup().sendMessage(messageLineQ.getMessage());
+                            return;
+                        }
+                    }
+
+                    //Q龄
+                    if (conf.getAutoAgreeJoinGroupCheckQQAge() != -1){
+                        if (userInfo.getLevel() < conf.getAutoAgreeJoinGroupCheckQQAge()){
+                            event.setRejectMessage("您的Q龄不符合加群条件");
+                            event.setAccept(false);
+                            event.setCancel(true);
+
+                            MessageLineQ messageLineQ = new Message().lineQ();
+                            messageLineQ.textLine("用户：");
+                            messageLineQ.textLine(userInfo.toString());
+                            messageLineQ.textLine("尝试加入群聊");
+                            messageLineQ.textLine("用户Q龄未到达要求，已自动拒绝申请");
+                            event.getGroup().sendMessage(messageLineQ.getMessage());
+                            return;
+                        }
+                    }
+                }
+
+                //TODO:问答验证
+
+                MessageLineQ messageLineQ = new Message().lineQ();
+                messageLineQ.textLine("已自动同意[" + event.getQq().getName() + "](" + event.getQq().getId() + ")的入群申请");
+                //发送其入群消息
+                if (!event.getMessage().equals("")){
+                    messageLineQ.textLine("入群附加消息：");
+                    messageLineQ.text(event.getMessage());
+                }
+                event.getGroup().sendMessage(messageLineQ.getMessage());
+
                 //同意
                 event.setAccept(true);
                 event.setCancel(true);
+
                 SfLog.getInstance().d(this.getClass(),"已自动同意[" + event.getQq() + "]加入群聊[" + event.getGroup() + "]");
             }
         }else {

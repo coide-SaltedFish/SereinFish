@@ -207,7 +207,7 @@ public class BiliManager {
                 }
 
                 followConf.save();//配置保存
-            } catch (IOException e) {
+            } catch (Exception e) {
                 SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
             }
         }
