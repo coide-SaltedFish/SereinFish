@@ -18,6 +18,7 @@ public class FileHandle {
 
     public static File cachePath = new File(dataPath,"cache/");//缓存文件路径
     public static File groupHeadCachePath = new File(cachePath,"group/head/");//群头像缓存路径
+    public static File neteaseCloudMusicCachePath = new File(cachePath,"netease/music/");//网易云音乐缓存路径
     public static File memberHeadCachePath = new File(cachePath,"member/head/");//qq头像缓存路径
     public static File gameInfoCacheFile = new File(cachePath,"gameInfo.json");//玩家信息缓存
     public static File imageCachePath = new File(cachePath,"image/");//网络图片缓存
@@ -44,28 +45,30 @@ public class FileHandle {
 
     static {
         //初始化
-        if (dataPath.exists())
+        if (!dataPath.exists())
             dataPath.mkdirs();
-        if (dataBasePath.exists())
+        if (!dataBasePath.exists())
             dataBasePath.mkdirs();
-        if (configPath.exists())
+        if (!configPath.exists())
             configPath.mkdirs();
-        if (cachePath.exists())
+        if (!cachePath.exists())
             cachePath.mkdirs();
-        if (groupHeadCachePath.exists())
+        if (!groupHeadCachePath.exists())
             groupHeadCachePath.mkdirs();
-        if (memberHeadCachePath.exists())
+        if (!memberHeadCachePath.exists())
             memberHeadCachePath.mkdirs();
-        if (imageCachePath.exists())
+        if (!imageCachePath.exists())
             imageCachePath.mkdirs();
-        if (imageLoliconCachePath.exists())
+        if (!imageLoliconCachePath.exists())
             imageLoliconCachePath.mkdirs();
-        if (groupDataPath.exists())
+        if (!groupDataPath.exists())
             groupDataPath.mkdirs();
-        if (mcResPath.exists())
+        if (!mcResPath.exists())
             mcResPath.mkdirs();
-        if (backupsPath.exists())
+        if (!backupsPath.exists())
             backupsPath.mkdirs();
+        if (!neteaseCloudMusicCachePath.exists())
+            neteaseCloudMusicCachePath.mkdirs();
     }
     /**
      * 写入文件

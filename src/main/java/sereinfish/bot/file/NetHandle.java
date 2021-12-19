@@ -4,12 +4,17 @@ import com.IceCreamQAQ.Yu.util.IO;
 import okhttp3.OkHttp;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import sereinfish.bot.entity.mc.GamerInfo;
+import sereinfish.bot.entity.netease.music.msg.PlayeInfoMessage;
+import sereinfish.bot.entity.netease.music.song.Song;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.utils.OkHttpUtils;
+import sun.nio.ch.Net;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -264,5 +269,84 @@ public class NetHandle {
         SfLog.getInstance().d(NetHandle.class, "文件写入缓存完成:" + url);
 
         return imageFile;
+    }
+
+    /**
+     * 网易云音乐下载
+     * @param song
+     * @return
+     */
+    public static File neteaseCloudMusicDownload(Song song) throws IOException {
+        File file = new File(FileHandle.neteaseCloudMusicCachePath, song.getId() + "");
+        File tem_file = new File(FileHandle.neteaseCloudMusicCachePath, "tem_" + song.getId() + "");
+
+        //检查缓存
+        if (file.exists() && file.isFile()){
+            SfLog.getInstance().d(NetHandle.class, "返回缓存音乐:" + file);
+            return file;
+        }
+
+        PlayeInfoMessage playeInfoMessage = song.getPlayerInfo();
+        if (playeInfoMessage.getCode() != 200 || playeInfoMessage.getData() == null || playeInfoMessage.getData().length == 0){
+            throw new IOException("歌曲信息获取失败");
+        }
+
+        PlayeInfoMessage.Data data = playeInfoMessage.getData()[0];
+
+        SfLog.getInstance().d(NetHandle.class, "开始从网络获取音乐文件:" + data.getUrl());
+
+        FileOutputStream downloadFile = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = OkHttpUtils.getByteStream(data.getUrl());
+            int index;
+            byte[] bytes = new byte[10240];
+            downloadFile = new FileOutputStream(tem_file);
+            while ((index = inputStream.read(bytes)) != -1) {
+                downloadFile.write(bytes, 0, index);
+                downloadFile.flush();
+            }
+        } catch (IOException e){
+            if (downloadFile != null){
+                downloadFile.close();
+            }
+            if (inputStream != null){
+                inputStream.close();
+            }
+
+            if(tem_file.delete()){
+                SfLog.getInstance().d(NetHandle.class, "下载出错，文件已删除");
+            }else {
+                SfLog.getInstance().d(NetHandle.class, "下载出错，且文件删除失败");
+            }
+            throw e;
+        }
+
+        downloadFile.close();
+        inputStream.close();
+
+        //检查md5
+        FileInputStream inputStream1 = new FileInputStream(tem_file);
+        String md5 = DigestUtils.md5Hex(inputStream1);
+        inputStream1.close();
+        if(!md5.equalsIgnoreCase(data.getMd5())){
+            if(tem_file.delete()){
+                SfLog.getInstance().d(NetHandle.class, "下载出错，文件已删除");
+            }else {
+                SfLog.getInstance().d(NetHandle.class, "下载出错，且文件删除失败");
+            }
+            throw new IOException("文件下载出错：MD5验证失败");
+        }
+
+        //临时文件转移
+        FileUtils.copyFile(tem_file, file);
+        SfLog.getInstance().d(NetHandle.class, "文件写入缓存完成");
+        if(tem_file.delete()){
+            SfLog.getInstance().d(NetHandle.class, "下载成功，且临时文件已删除");
+        }else {
+            SfLog.getInstance().w(NetHandle.class, "下载成功，但临时文件删除失败");
+        }
+
+        return file;
     }
 }

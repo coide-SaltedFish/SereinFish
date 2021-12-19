@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import sereinfish.bot.data.conf.ConfManager;
+import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.entity.pixiv.Pixiv;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.FileHandle;
@@ -118,6 +119,8 @@ public class Ascii2d {
         }
 
         public Message getInfo(Contact contact) throws IOException {
+            boolean isR18 = false;
+
             MessageLineQ messageLineQ = new Message().lineQ().textLine("Ascii2d 检索结果");
 
             if (document.select("div[class=row item-box]").size() < 2){
@@ -132,7 +135,22 @@ public class Ascii2d {
                     messageLineQ.textLine("来源：" + source);
 
                     if (source.equals("pixiv")){
-                        getPixivInfo(contact, messageLineQ, element);
+                        Element element1 = element.select("div[class=detail-box gray-link]").get(0);
+                        String link = element1.select("a[target=_blank]").get(0).attr("href");
+                        long id = Long.valueOf(link.substring(link.lastIndexOf("/") + 1));
+                        Illust illust = Pixiv.getIllust(id).getIllust();
+                        illust.setProxy(ConfManager.getInstance().get(contact.getId()).getPixivProxy());
+
+                        if (illust.isR18G()){
+                            messageLineQ.textLine("注意：R18G警告！！！！");
+                        }
+
+                        getPixivInfo(contact, messageLineQ, illust);
+
+                        if (illust.isR18() || illust.isR18G()){
+                            isR18 = true;
+                        }
+
                     }else {
                         //messageLineQ.textLine("来源链接：" + linkElement.select("a[target=_blank]").get(0).text());
                         //图片链接
@@ -152,10 +170,21 @@ public class Ascii2d {
                         messageLineQ.text(element.select("small[class=text-muted]").get(0).text());
                     }
 
-                    return messageLineQ.getMessage();
+                    Message message = messageLineQ.getMessage();
+
+                    if (isR18){
+                        message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
+                    }
+                    return message;
                 }catch (IOException e){
                     messageLineQ.textLine("错误：");
-                    return messageLineQ.text(e.getMessage()).getMessage();
+                    Message message = messageLineQ.text(e.getMessage()).getMessage();
+
+                    if (isR18){
+                        message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
+                    }
+
+                    return message;
                 }catch (Exception e){
                     SfLog.getInstance().w(this.getClass(), "解析错误");
                     messageLineQ = new Message().lineQ().textLine("Ascii2d 检索结果");
@@ -165,13 +194,7 @@ public class Ascii2d {
             return new Message().lineQ().text("未搜索到结果").getMessage();
         }
 
-        private void getPixivInfo(Contact contact, MessageLineQ messageLineQ, Element element) throws IOException {
-            Element linkElement = element.select("div[class=detail-box gray-link]").get(0);
-            String link = linkElement.select("a[target=_blank]").get(0).attr("href");
-            long id = Long.valueOf(link.substring(link.lastIndexOf("/") + 1));
-            Illust illust = Pixiv.getIllust(id).getIllust();
-            illust.setProxy(ConfManager.getInstance().get(contact.getId()).getPixivProxy());
-
+        private void getPixivInfo(Contact contact, MessageLineQ messageLineQ, Illust illust) throws IOException {
             messageLineQ.textLine("作者：" + illust.getUser().getName());
             messageLineQ.textLine("标题：" + illust.getTitle());
 
@@ -196,7 +219,7 @@ public class Ascii2d {
                 File imageFile = new File(FileHandle.imageCachePath, "/QR_" + new Date().getTime());
                 try {
                     BufferedImage image = QRCodeImage.backgroundMatrix(
-                            QRCodeImage.generateQRCodeBitMatrix(illust.getProxy(), 800, 800),
+                            QRCodeImage.generateQRCodeBitMatrix(illust.getProxyUrl(), 800, 800),
                             ImageIO.read(getClass().getClassLoader().getResource("arknights/" + MyYuQ.getRandom(1, 5) + ".png")),
                             0.3f,
                             Color.BLACK);
@@ -217,10 +240,7 @@ public class Ascii2d {
             }
 
             //图片链接
-            messageLineQ.textLine("链接：\n" + link);
-
-            //图片信息
-            messageLineQ.text(element.select("small[class=text-muted]").get(0).text());
+            messageLineQ.textLine("链接：\nhttps://www.pixiv.net/artworks/" + illust.getId());
         }
     }
 }

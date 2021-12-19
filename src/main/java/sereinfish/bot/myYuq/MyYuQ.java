@@ -6,9 +6,9 @@ import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.icecreamqaq.yuq.RainBot;
-import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
+import com.icecreamqaq.yuq.YuQInternalBotImpl;
+import com.icecreamqaq.yuq.YuQVersion;
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
@@ -59,11 +59,11 @@ public class MyYuQ {
     private static MessageItemFactory mif;
     private static JobManager jobManager;
     private static DateUtil dateUtil;
-    private static RainBot rainBot;
+    private static YuQInternalBotImpl rainBot;
     private static OkHttpClient okHttpClient;
     private static Web web;
     private static String botName;
-    private static RainVersion rainVersion;
+    private static YuQVersion rainVersion;
 
     private static GroupHistoryMsgService groupHistoryMsgService;
     private static ReplyService replyService;
@@ -80,7 +80,7 @@ public class MyYuQ {
     @Config("yu.scanPackages")
     Object scanPackages;
 
-    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,RainBot rainBot, Web web, String botName) {
+    private MyYuQ(YuQ yuQ, MessageItemFactory mif, JobManager jobManager,DateUtil dateUtil,YuQInternalBotImpl rainBot, Web web, String botName) {
         this.yuQ = yuQ;
         this.mif = mif;
         this.jobManager = jobManager;
@@ -92,7 +92,7 @@ public class MyYuQ {
         okHttpClient = new OkHttpClient();
     }
 
-    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, RainBot rainBot, Web web, String botName){
+    public static MyYuQ init(YuQ yuQ, MessageItemFactory mif, JobManager jobManager, DateUtil dateUtil, YuQInternalBotImpl rainBot, Web web, String botName){
         myYuQ = new MyYuQ(yuQ,mif,jobManager,dateUtil,rainBot, web, botName);
 
         return myYuQ;
@@ -121,7 +121,7 @@ public class MyYuQ {
         return dateUtil;
     }
 
-    public static RainBot getRainBot() {
+    public static YuQInternalBotImpl getRainBot() {
         return rainBot;
     }
 
@@ -198,11 +198,11 @@ public class MyYuQ {
         return htmlStr.trim(); //返回文本字符串
     }
 
-    public static RainVersion getRainVersion() {
+    public static YuQVersion getRainVersion() {
         return rainVersion;
     }
 
-    public static void setRainVersion(RainVersion rainVersion) {
+    public static void setRainVersion(YuQVersion rainVersion) {
         MyYuQ.rainVersion = rainVersion;
     }
 

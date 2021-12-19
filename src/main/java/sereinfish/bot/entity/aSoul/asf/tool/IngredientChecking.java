@@ -16,7 +16,8 @@ public class IngredientChecking {
     private Data data;
 
     public IngredientChecking(String name) throws IOException {
-        data = MyYuQ.toClass(OkHttpUtils.getStr(api + name), Data.class);
+        String json = OkHttpUtils.getStr(api + name);
+        data = MyYuQ.toClass(json, Data.class);
     }
 
     @Getter

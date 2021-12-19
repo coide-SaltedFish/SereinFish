@@ -302,7 +302,7 @@ public class LoliconController {
                 return messages.toArray(new Message[]{});
             }else {
                 Message message = MyYuQ.getMif().text("发生了错误："
-                        + lolicon.getError()).plus(Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>"));
+                        + lolicon.getError()).plus(Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>")).toMessage();
                 return new Message[]{message};
             }
         } catch (IOException e) {

@@ -8,9 +8,9 @@ import com.IceCreamQAQ.Yu.event.events.AppStopEvent;
 import com.IceCreamQAQ.Yu.job.JobManager;
 import com.IceCreamQAQ.Yu.util.DateUtil;
 import com.IceCreamQAQ.Yu.util.Web;
-import com.icecreamqaq.yuq.RainBot;
-import com.icecreamqaq.yuq.RainVersion;
 import com.icecreamqaq.yuq.YuQ;
+import com.icecreamqaq.yuq.YuQInternalBotImpl;
+import com.icecreamqaq.yuq.YuQVersion;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 //import org.apdplat.word.WordSegmenter;
@@ -73,11 +73,11 @@ public class InitEvent{
     @Inject
     private DateUtil dateUtil;
     @Inject
-    private RainBot rainBot;
+    private YuQInternalBotImpl rainBot;
     @Inject
     private Web web;
     @Inject
-    RainVersion rainVersion;
+    YuQVersion rainVersion;
 
     @Config("YuQ.bot.name")
     private String name;

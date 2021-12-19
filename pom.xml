@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.IceCreamQAQ.YuQ</groupId>
             <artifactId>YuQ-Mirai</artifactId>
-            <version>0.1.0.0-DEV20</version>
+            <version>0.1.0.0-DEV22</version>
         </dependency>
 
         <dependency>
@@ -179,6 +179,12 @@
             <groupId>ws.schild</groupId>
             <artifactId>jave-native-win64</artifactId>
             <version>2.4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>top.yumbo.music</groupId>
+            <artifactId>yumbo-music-utils</artifactId>
+            <version>1.2.1</version>
         </dependency>
 
     </dependencies>

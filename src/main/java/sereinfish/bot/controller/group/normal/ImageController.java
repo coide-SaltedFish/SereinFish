@@ -325,7 +325,7 @@ public class ImageController extends QQController {
                 member = member.substring("At_".length());
             }
             //是数字
-            qq = Long.valueOf(member);
+            qq = Long.parseLong(member);
             if (!group.getMembers().containsKey(qq) && qq != MyYuQ.getYuQ().getBotId()){
                 throw new SkipMe();
             }
@@ -1055,8 +1055,7 @@ public class ImageController extends QQController {
         }
 
         if(animatedGifEncoder.finish()){
-            com.icecreamqaq.yuq.message.Image image = group.uploadImage(imageFile);
-            return new Message().lineQ().plus(image).getMessage();
+            return new Message().lineQ().imageByFile(imageFile).getMessage();
         }
         return Message.Companion.toMessageByRainCode("在生成图片时出现了一点点错误");
     }

@@ -91,48 +91,6 @@ public class BotUtils {
         return ((int) (Math.random() * max)) % (max - min + 1) + min;
     }
 
-    public static JSONArray messageToJsonArray(Message rm){
-        if (rm == null) return null;
-        ArrayList<MessageItem> body = rm.getBody();
-        JSONArray aJsonArray = new JSONArray();
-        for (MessageItem messageItem: body){
-            JSONObject aJsonObject = new JSONObject();
-            if (messageItem instanceof Text){
-                Text text = (Text) messageItem;
-                aJsonObject.put("type", "text");
-                aJsonObject.put("content", text.getText());
-            }else if (messageItem instanceof ImageReceive){
-                ImageReceive image = (ImageReceive) messageItem;
-                aJsonObject.put("type", "image");
-                aJsonObject.put("id", image.getId());
-                aJsonObject.put("content", image.getUrl());
-            }else if (messageItem instanceof Face){
-                Face face = (Face) messageItem;
-                aJsonObject.put("type", "face");
-                aJsonObject.put("content", face.getFaceId());
-            }else if (messageItem instanceof At){
-                At at = (At) messageItem;
-                aJsonObject.put("type", "at");
-                aJsonObject.put("content", at.getUser());
-            }else if (messageItem instanceof XmlEx){
-                XmlEx xmlEx = (XmlEx) messageItem;
-                aJsonObject.put("type", "xml");
-                aJsonObject.put("content", xmlEx.getValue());
-                aJsonObject.put("serviceId", xmlEx.getServiceId());
-            }else if (messageItem instanceof JsonEx){
-                JsonEx jsonEx = (JsonEx) messageItem;
-                aJsonObject.put("type", "at");
-                aJsonObject.put("content", jsonEx.getValue());
-            }else if (messageItem instanceof Voice){
-                Voice voice = (Voice) messageItem;
-                aJsonObject.put("type", "voice");
-                aJsonObject.put("content", voice.getUrl());
-            }else continue;
-            aJsonArray.add(aJsonObject);
-        }
-        return aJsonArray;
-    }
-
     public static Message jsonArrayToMessage(JSONArray jsonArray){
         Message msg = Message.Companion.toMessage("");
         MessageItemFactory mif = FunKt.getMif();

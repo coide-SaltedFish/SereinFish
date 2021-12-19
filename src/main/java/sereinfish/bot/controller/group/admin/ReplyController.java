@@ -57,9 +57,9 @@ public class ReplyController extends QQController {
     @MenuItem(name = "添加问答", usage = "@Bot 添加问答", description = "为Bot添加精确问答", permission = Permissions.GROUP_ADMIN)
     public Message addReply(Member sender, Group group, ContextSession session){
         try{
-            reply(MyYuQ.getMif().at(sender).plus("\n请输入问题"));
+            reply(MyYuQ.getMif().at(sender).plus("\n请输入问题").toMessage());
             String key = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
-            reply(MyYuQ.getMif().at(sender).plus("\n请输入回答"));
+            reply(MyYuQ.getMif().at(sender).plus("\n请输入回答").toMessage());
             String re = Message.Companion.toCodeString(session.waitNextMessage(maxTime));
 
             Reply reply = new Reply(sender.getId(), group.getId(), key, re);

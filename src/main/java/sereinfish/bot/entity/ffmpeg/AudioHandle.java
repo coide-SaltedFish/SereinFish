@@ -31,6 +31,8 @@ public class AudioHandle {
      * @throws EncoderException
      */
     public static void mp3ToAmr (File source, File target) throws EncoderException {
+        MultimediaObject multimediaObject  = new MultimediaObject(source);
+
         AudioAttributes audio = new AudioAttributes();
         audio.setCodec("libopencore_amrnb");
 
@@ -42,7 +44,7 @@ public class AudioHandle {
         attrs.setFormat("amr");
         attrs.setAudioAttributes(audio);
         Encoder encoder = new Encoder();
-        MultimediaObject multimediaObject  = new MultimediaObject(source);
+
         encoder.encode(multimediaObject,target, attrs);
     }
 }

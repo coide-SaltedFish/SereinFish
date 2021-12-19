@@ -44,6 +44,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -192,11 +193,22 @@ public class OnGroupMessageEvent {
                             .at(MyYuQ.getYuQ().getBotId())
                             .text(noNameMsg)
                             .getMessage();
-                    ArrayList<MessageItem> messageItems = new ArrayList<>(msgStart.getBody());
+                    MessageItemChain messageItems = msgStart.getBody();
                     for (int i = 1; i < message.getBody().size(); i++){
                         messageItems.add(message.getBody().get(i));
                     }
-                    message.setBody(messageItems);
+
+                    try {
+                        Field field = message.getClass().getDeclaredField("body");
+                        field.setAccessible(true);
+                        field.set(message, messageItems);
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+
+//                    message.setBody(messageItems);
 
                     //path修改
                     if (message.getPath().size() > 0){

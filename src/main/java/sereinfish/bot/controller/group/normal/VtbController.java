@@ -16,6 +16,7 @@ import sereinfish.bot.entity.bili.entity.info.Data;
 import sereinfish.bot.entity.bili.entity.info.follow.Follow;
 import sereinfish.bot.entity.bili.entity.info.search.UserSearch;
 import sereinfish.bot.entity.bili.entity.vtbs.VtbsInfo;
+import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
@@ -148,17 +149,24 @@ public class VtbController {
             messageChain.append("\n" + num + ".");
             //头像
             try {
-                File file = NetHandle.imageDownload(data.getFace(), "bili_" + data.getFace().substring(data.getFace().lastIndexOf("/")));
+                File file = NetHandle.imageDownload(data.getFace(), "bili_/" + data.getFace().substring(data.getFace().lastIndexOf("/") + 1));
                 //头像加工
-                BufferedImage bufferedImage = ImageIO.read(file);
-                bufferedImage = ImageHandle.imageToBufferedImage(ImageHandle.getHeadImageNoFrame(bufferedImage, 640, 640));
-                File headImageFile = new File(file.getParentFile(), "tem_" + System.currentTimeMillis());
-                ImageIO.write(bufferedImage, "PNG", headImageFile);
+                String md5 = data.getFace().substring(data.getFace().lastIndexOf("/") + 1).substring(0, data.getFace().substring(data.getFace().lastIndexOf("/") + 1).lastIndexOf("."));
+                File imageHeadCircular = new File(FileHandle.imageCachePath, "bill_circular_" + md5);
+
+                if (!imageHeadCircular.exists()){
+                    BufferedImage bufferedImage = ImageIO.read(file);
+                    bufferedImage = ImageHandle.imageToBufferedImage(ImageHandle.getHeadImageNoFrame(bufferedImage, 640, 640));
+                    ImageIO.write(bufferedImage, "PNG", imageHeadCircular);
+                    SfLog.getInstance().d(this.getClass(), "图片生成完成：" + imageHeadCircular);
+                }else {
+                    SfLog.getInstance().d(this.getClass(), "使用缓存图片：" + imageHeadCircular);
+                }
 
                 //计算文件md5
-                String fileMd5 = DigestUtils.md5Hex(new FileInputStream(headImageFile)).toUpperCase();
+                //String fileMd5 = DigestUtils.md5Hex(new FileInputStream(imageHeadCircular)).toUpperCase();
 
-                ExternalResource res = ExternalResource.create(headImageFile);
+                ExternalResource res = ExternalResource.create(imageHeadCircular);
                 net.mamoe.mirai.message.data.Image image = Bot.getInstance(MyYuQ.getYuQ().getBotId()).getGroup(group.getId()).uploadImage(res);
                 res.close(); // 记得关闭资源
                 messageChain.append(image);

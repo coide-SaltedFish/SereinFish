@@ -39,11 +39,11 @@ public class MiraiEvent extends SimpleListenerHost {
     public void groupMessagePostSendEvent(GroupMessagePostSendEvent event){
         //发送是否成功
         if (event.getException() == null){
-            SfLog.getInstance().d(this.getClass(), event.getMessage().toString());
+            //SfLog.getInstance().d(this.getClass(), event.getMessage().toString());
             RepeaterManager.getInstance().add(MyYuQ.getYuQ().getBotId(), event.getTarget(), event.getMessage());//复读
         }else {
             //发送失败
-            event.getTarget().sendMessage("消息发送失败：" + event.getException().getMessage());
+            //event.getTarget().sendMessage("消息发送失败：" + event.getException().getMessage());
         }
 
 
