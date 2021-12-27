@@ -38,7 +38,7 @@ YuQ.Mirai.user.pwd =
 
 ```text
 
-[java.exe路径] [本程序包名称(注：请带上后缀名:.jar)]
+[java.exe路径] -jar [本程序包名称(注：请带上后缀名:.jar)]
 
 ```
 
@@ -47,7 +47,7 @@ YuQ.Mirai.user.pwd =
 当程序包命名为`sereinfish_bot.jar`时
 
 ```text
-java sereinfish_bot.jar
+java -jar sereinfish_bot.jar
 ```
 
 ## 启动
