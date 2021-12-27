@@ -48,7 +48,7 @@ public class HelpController {
             messageLineQ.textLine("");
             messageLineQ.textLine("可执行以下命令:");
 
-            Image image = group.uploadImage(file);
+            Image image = MyYuQ.uploadImage(group, file);
             messageLineQ.plus(image);
 
             return messageLineQ.getMessage();

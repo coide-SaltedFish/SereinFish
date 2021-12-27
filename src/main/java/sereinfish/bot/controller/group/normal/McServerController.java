@@ -147,7 +147,7 @@ public class McServerController {
             }
             ImageIO.write(stateImage, "PNG", file);
 
-            return new Message().lineQ().plus(group.uploadImage(file)).getMessage();
+            return new Message().lineQ().plus(MyYuQ.uploadImage(group, file)).getMessage();
         } catch (TextParseException e) {
             SfLog.getInstance().e(this.getClass(), e);
             return Message.Companion.toMessageByRainCode("失败：" + e.getMessage());

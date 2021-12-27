@@ -198,30 +198,6 @@ public class CacheManager {
         return file;
     }
 
-    /**Lolicon**/
-
-    /**
-     * 得到一个Lolicon图片
-     * @param id
-     * @param setu
-     * @return
-     */
-    public static File getLoliconImage(int id, Lolicon.Setu setu) throws Exception {
-        File file = setu.isR18() ? new File(FileHandle.imageLoliconCachePath,"R18/lolicon_" + id) : new File(FileHandle.imageLoliconCachePath,"lolicon_" + id);
-        SfLog.getInstance().d(CacheManager.class,"图片获取：" + file);
-        if (!file.getParentFile().exists()){
-            file.getParentFile().mkdirs();
-        }
-        if (file.exists() && file.isFile()){
-            //从缓存获取
-            return file;
-        }else {
-            //从网络获取
-            LoliconManager.download(setu.getUrl(),file);
-            return file;
-        }
-    }
-
     /**关于游戏**/
 
     /**

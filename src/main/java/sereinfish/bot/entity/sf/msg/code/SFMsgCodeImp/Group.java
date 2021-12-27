@@ -8,6 +8,7 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
 import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
+import sereinfish.bot.myYuq.MyYuQ;
 
 @SFMsgCodeInfo("group")
 public class Group implements SFMsgCode {
@@ -42,7 +43,7 @@ public class Group implements SFMsgCode {
         }
 
         if (type.equals("headimage")){
-            Image image = codeContact.getSource().uploadImage(CacheManager.getGroupHeadImageFile(codeContact.getSource().getId()));
+            Image image = MyYuQ.uploadImage(codeContact.getSource(), CacheManager.getGroupHeadImageFile(codeContact.getSource().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
 

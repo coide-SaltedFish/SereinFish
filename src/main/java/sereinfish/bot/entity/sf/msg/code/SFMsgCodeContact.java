@@ -42,7 +42,7 @@ public class SFMsgCodeContact {
 
         if (contact != null){
             try {
-                Image image = contact.uploadImage(CacheManager.getMemberHeadImageFile(MyYuQ.getYuQ().getBotId()));
+                Image image =  MyYuQ.uploadImage(contact, CacheManager.getMemberHeadImageFile(MyYuQ.getYuQ().getBotId()));
                 map.put("BOT_AVATAR", image);
             } catch (IOException e) {
                 SfLog.getInstance().e(this.getClass(), "bot 头像对象注入失败", e);

@@ -15,8 +15,10 @@ import sereinfish.bot.entity.pixiv.Pixiv;
 import sereinfish.bot.entity.pixiv.entity.Illust;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.CallBack;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.QRCodeImage;
 import sereinfish.bot.utils.UA;
@@ -100,6 +102,7 @@ public class Ascii2d {
         cookie = str.substring(str.indexOf("=") + 1, str.indexOf(";"));
 
         Document document = Jsoup.parse(response.body().string());
+
         for (Element element:document.select("meta[name]")){
             if (element.attr("name").equals("csrf-param")){
                 tokenName = element.attr("content");
@@ -118,13 +121,14 @@ public class Ascii2d {
             this.document = document;
         }
 
-        public Message getInfo(Contact contact) throws IOException {
-            boolean isR18 = false;
+        public void getInfo(Contact contact, CallBack<Message> callBack) throws IOException {
+            final boolean[] isR18 = {false};
 
             MessageLineQ messageLineQ = new Message().lineQ().textLine("Ascii2d 检索结果");
 
             if (document.select("div[class=row item-box]").size() < 2){
-                return new Message().lineQ().text("未搜索到结果").getMessage();
+                callBack.callback(new Message().lineQ().text("未搜索到结果").getMessage());
+                return;
             }
 
             for (Element element:document.select("div[class=row item-box]")){
@@ -145,11 +149,29 @@ public class Ascii2d {
                             messageLineQ.textLine("注意：R18G警告！！！！");
                         }
 
-                        getPixivInfo(contact, messageLineQ, illust);
+                        MessageLineQ finalMessageLineQ1 = messageLineQ;
+                        getPixivInfo(contact, messageLineQ, illust, new CallBack() {
+                            @Override
+                            public void callback(Object p) {
+                                if (illust.isR18() || illust.isR18G()){
+                                    isR18[0] = true;
+                                }
 
-                        if (illust.isR18() || illust.isR18G()){
-                            isR18 = true;
-                        }
+                                //图片信息
+                                if (element.select("small[class=text-muted]").size() > 0){
+                                    finalMessageLineQ1.text(element.select("small[class=text-muted]").get(0).text());
+                                }
+
+                                Message message = finalMessageLineQ1.getMessage();
+
+                                if (isR18[0]){
+                                    message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
+                                }
+
+                                callBack.callback(message);
+                            }
+                        });
+                        return;
 
                     }else {
                         //messageLineQ.textLine("来源链接：" + linkElement.select("a[target=_blank]").get(0).text());
@@ -160,41 +182,68 @@ public class Ascii2d {
                         messageLineQ.text("预览图：");
                         String link = "https://ascii2d.net" + element.select("img[loading=lazy]").get(0).attr("src");
 
-                        File file = NetHandle.imageDownload(link, "Ascii2d_" + System.currentTimeMillis());
-                        Image image = contact.uploadImage(file);
-                        messageLineQ.plus(image);
-                    }
+                        MessageLineQ finalMessageLineQ = messageLineQ;
+                        boolean finalIsR1 = isR18[0];
+                        NetHandle.imageDownload(contact, link, "Ascii2d_" + System.currentTimeMillis(), new NetworkLoader.NetworkLoaderListener() {
+                            @Override
+                            public void start(long len) {
 
-                    //图片信息
-                    if (element.select("small[class=text-muted]").size() > 0){
-                        messageLineQ.text(element.select("small[class=text-muted]").get(0).text());
-                    }
+                            }
 
-                    Message message = messageLineQ.getMessage();
+                            @Override
+                            public void success(File file) {
+                                Image image = MyYuQ.uploadImage(contact, file);
+                                finalMessageLineQ.plus(image);
 
-                    if (isR18){
-                        message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
+                                //图片信息
+                                if (element.select("small[class=text-muted]").size() > 0){
+                                    finalMessageLineQ.text(element.select("small[class=text-muted]").get(0).text());
+                                }
+
+                                Message message = finalMessageLineQ.getMessage();
+
+                                if (finalIsR1){
+                                    message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
+                                }
+
+                                callBack.callback(message);
+                                return;
+                            }
+
+                            @Override
+                            public void fail(Exception e) {
+                                finalMessageLineQ.text("图片加载失败：" + e.getMessage());
+                                Message message = finalMessageLineQ.getMessage();
+                                callBack.callback(message);
+                                return;
+                            }
+
+                            @Override
+                            public void progress(long pro, long len, long speed) {
+
+                            }
+                        });
                     }
-                    return message;
                 }catch (IOException e){
                     messageLineQ.textLine("错误：");
                     Message message = messageLineQ.text(e.getMessage()).getMessage();
 
-                    if (isR18){
+                    if (isR18[0]){
                         message.setRecallDelay((long) ConfManager.getInstance().get(contact.getId()).getSetuReCallTime() * 1000);
                     }
 
-                    return message;
+                    callBack.callback(message);
+                    return;
                 }catch (Exception e){
                     SfLog.getInstance().w(this.getClass(), "解析错误");
                     messageLineQ = new Message().lineQ().textLine("Ascii2d 检索结果");
                 }
             }
 
-            return new Message().lineQ().text("未搜索到结果").getMessage();
+            callBack.callback(new Message().lineQ().text("未搜索到结果").getMessage());
         }
 
-        private void getPixivInfo(Contact contact, MessageLineQ messageLineQ, Illust illust) throws IOException {
+        private void getPixivInfo(Contact contact, MessageLineQ messageLineQ, Illust illust, CallBack callBack) throws IOException {
             messageLineQ.textLine("作者：" + illust.getUser().getName());
             messageLineQ.textLine("标题：" + illust.getTitle());
 
@@ -232,15 +281,41 @@ public class Ascii2d {
                     SfLog.getInstance().e(this.getClass(), e);
                     messageLineQ.text("唔，二维码图片生成失败了：IOException");
                 }
-                messageLineQ.plus(contact.uploadImage(imageFile));
+                messageLineQ.plus(MyYuQ.uploadImage(contact, imageFile));
             }else {
-                File file = NetHandle.imagePixivDownload(illust, 0);
-                Image image = contact.uploadImage(file);
-                messageLineQ.plus(image);
+                NetHandle.imagePixivDownload(contact, illust, 0, new NetworkLoader.NetworkLoaderListener() {
+                    @Override
+                    public void start(long len) {
+
+                    }
+
+                    @Override
+                    public void success(File file) {
+                        Image image = MyYuQ.uploadImage(contact, file);
+                        messageLineQ.plus(image);
+                        //图片链接
+                        messageLineQ.textLine("链接：\nhttps://www.pixiv.net/artworks/" + illust.getId());
+
+                        callBack.callback(null);
+                    }
+
+                    @Override
+                    public void fail(Exception e) {
+                        messageLineQ.textLine("图片加载失败：" + e.getMessage());
+                        //图片链接
+                        messageLineQ.textLine("链接：\nhttps://www.pixiv.net/artworks/" + illust.getId());
+
+                        callBack.callback(null);
+                    }
+
+                    @Override
+                    public void progress(long pro, long len, long speed) {
+
+                    }
+                });
             }
 
-            //图片链接
-            messageLineQ.textLine("链接：\nhttps://www.pixiv.net/artworks/" + illust.getId());
+
         }
     }
 }

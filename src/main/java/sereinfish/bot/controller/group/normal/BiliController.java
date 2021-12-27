@@ -22,7 +22,9 @@ import sereinfish.bot.entity.bili.entity.info.UserInfo;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
 import sereinfish.bot.entity.bot.menu.annotation.MenuItem;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.utils.OkHttpUtils;
 import sereinfish.bot.utils.Result;
@@ -47,7 +49,7 @@ public class BiliController {
 
     @Action("\\^[Bb][Vv].*\\")
     @QMsg(at = true)
-    public Message bvToAv(Group group, Message message, GroupConf groupConf) throws IOException {
+    public void bvToAv(Group group, Message message, GroupConf groupConf) throws IOException {
         //启用判断
         if (!groupConf.isBiliBvExplainEnable()){
             throw new DoNone();
@@ -82,15 +84,43 @@ public class BiliController {
             }
 
             MessageLineQ messageLineQ = new Message().lineQ();
-            File imageFile = NetHandle.imageDownload(map.get("pic"), "bili_" + bv);
-            Image image = group.uploadImage(imageFile);
-            messageLineQ.plus(image);//封面
-            messageLineQ.textLine("标题：" + map.get("title"));
-            messageLineQ.textLine("描述：" + desc);
-            messageLineQ.textLine("链接：" + map.get("url"));
+            String finalDesc = desc;
+            String finalDesc1 = desc;
+            NetHandle.imageDownload(group, map.get("pic"), "bili_" + bv, new NetworkLoader.NetworkLoaderListener() {
+                @Override
+                public void start(long len) {
 
-            return messageLineQ.getMessage();
-        }else return Message.Companion.toMessage(result.getMessage());
+                }
+
+                @Override
+                public void success(File file) {
+                    Image image = MyYuQ.uploadImage(group, file);
+                    messageLineQ.plus(image);//封面
+                    messageLineQ.textLine("标题：" + map.get("title"));
+                    messageLineQ.textLine("描述：" + finalDesc);
+                    messageLineQ.textLine("链接：" + map.get("url"));
+
+                    group.sendMessage(messageLineQ.getMessage());
+                }
+
+                @Override
+                public void fail(Exception e) {
+                    messageLineQ.textLine("封面加载失败：" + e.getMessage());
+                    messageLineQ.textLine("标题：" + map.get("title"));
+                    messageLineQ.textLine("描述：" + finalDesc1);
+                    messageLineQ.textLine("链接：" + map.get("url"));
+
+                    group.sendMessage(messageLineQ.getMessage());
+                }
+
+                @Override
+                public void progress(long pro, long len, long speed) {
+
+                }
+            });
+        }else {
+            group.sendMessage(Message.Companion.toMessage(result.getMessage()));
+        }
     }
 
     @Action("加B站关注 {mid}")
@@ -135,7 +165,7 @@ public class BiliController {
     @Synonym("b站关注列表")
     @QMsg(mastAtBot = true)
     @MenuItem(name = "B站关注列表", usage = "B站关注列表", description = "查看Bot的关注列表", permission = Permissions.GROUP_ADMIN)
-    public Message biliFollowList(Member sender, Group group){
+    public void biliFollowList(Member sender, Group group){
         if (!Permissions.getInstance().authorityCheck(group, sender, Permissions.GROUP_ADMIN)){
             throw new DoNone();
         }
@@ -147,23 +177,47 @@ public class BiliController {
 
             for (FollowConf.BiliUser biliUser:followConf.getFollows()){
                 UserInfo userInfo = BiliManager.getUserInfo(biliUser.getMid());
-                try {
-                    Image image = group.uploadImage(NetHandle.imageDownload(userInfo.getData().getFace(), userInfo.getData().getMid() + "_face"));
-                    messageLineQ.plus(image);
-                }catch (Exception e){
-                    messageLineQ.textLine("图片加载失败：" + e.getMessage());
-                }
-                messageLineQ.textLine("名称：" + userInfo.getData().getName());
-                messageLineQ.textLine("MID:" + userInfo.getData().getMid());
+
+                NetHandle.imageDownload(group, userInfo.getData().getFace(), userInfo.getData().getMid() + "_face", new NetworkLoader.NetworkLoaderListener() {
+                    @Override
+                    public void start(long len) {
+
+                    }
+
+                    @Override
+                    public void success(File file) {
+                        Image image = MyYuQ.uploadImage(group, file);
+                        messageLineQ.plus(image);
+                        messageLineQ.textLine("名称：" + userInfo.getData().getName());
+                        messageLineQ.textLine("MID:" + userInfo.getData().getMid());
+                        messageLineQ.text("にゃ～");
+
+                        group.sendMessage(messageLineQ.getMessage());
+                    }
+
+                    @Override
+                    public void fail(Exception e) {
+                        messageLineQ.textLine("图片加载失败：" + e.getMessage());
+                        messageLineQ.textLine("名称：" + userInfo.getData().getName());
+                        messageLineQ.textLine("MID:" + userInfo.getData().getMid());
+                        messageLineQ.text("にゃ～");
+
+                        group.sendMessage(messageLineQ.getMessage());
+                    }
+
+                    @Override
+                    public void progress(long pro, long len, long speed) {
+
+                    }
+                });
+
             }
 
-            messageLineQ.text("にゃ～");
+
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);
-            return new Message().lineQ().text("获取失败").getMessage();
+            group.sendMessage(new Message().lineQ().text("获取失败").getMessage());
         }
-
-        return messageLineQ.getMessage();
     }
 
     public Result<Map<String, String>> bvToAv(String bv) throws IOException {

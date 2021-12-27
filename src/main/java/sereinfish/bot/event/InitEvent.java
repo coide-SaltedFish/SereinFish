@@ -15,6 +15,7 @@ import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.mamoe.mirai.event.GlobalEventChannel;
 //import org.apdplat.word.WordSegmenter;
 import opennlp.maxent.Main;
+import sereinfish.bot.Start;
 import sereinfish.bot.data.conf.ConfManager;
 import sereinfish.bot.database.service.BlackListService;
 import sereinfish.bot.database.service.GroupHistoryMsgService;
@@ -24,6 +25,7 @@ import sereinfish.bot.entity.bili.BiliManager;
 import sereinfish.bot.entity.bili.entity.vtbs.VtbsInfo;
 import sereinfish.bot.entity.calendar.holiday.HolidayManager;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.ClassManager;
@@ -82,6 +84,11 @@ public class InitEvent{
     @Config("YuQ.bot.name")
     private String name;
 
+    @Config("YuQ.NoUI")
+    private String noUIStr;
+
+    private boolean noUI = false;
+
     @Event
     public void exitEvent(AppStopEvent event){
         SystemTray systemTray = SystemTray.getSystemTray();
@@ -95,6 +102,11 @@ public class InitEvent{
      */
     @Event
     public void initEvent(AppStartEvent event){
+        //初始化配置
+        if (noUIStr != null && !noUIStr.equals("")){
+            noUI = MyYuQ.toClass(noUIStr, Boolean.class);
+        }
+
         Locale.setDefault(Locale.CHINA);
         //初始化MyYuQ
         if (name == null || name.equals("")){
@@ -137,6 +149,7 @@ public class InitEvent{
         }
         //初始化缓存管理器
         CacheManager.init();
+        NetworkLoader.init();
         SfLog.getInstance().d(this.getClass(),"缓存管理器初始化完成");
 //        //初始化数据库连接池
 //        DataBaseManager.init();
@@ -183,24 +196,34 @@ public class InitEvent{
         lookAndFeel();
         SfLog.getInstance().d(this.getClass(),"LookAndFeel设置完成");
 
-        //显示托盘
-        try {
-            AppTray.init(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("image/icon_16_16.jpg"))).buildMenu().setTray();
-            SfLog.getInstance().d(this.getClass(),"托盘菜单初始化完成");
-        } catch (AWTException e) {
-            SfLog.getInstance().e(this.getClass(),"托盘菜单初始化失败，应用退出",e);
-            System.exit(-1);
-        } catch (UnsupportedEncodingException e) {
-            SfLog.getInstance().e(this.getClass(),"托盘菜单初始化失败，应用退出",e);
-            System.exit(-1);
-        }
+
         //初始化消息队列
         MessageState.getInstance();
         SfLog.getInstance().d(this.getClass(),"消息队列初始化完成");
+
         //显示主窗体
         SfLog.getInstance().d(this.getClass(),"主界面初始化中");
-        MainFrame.getMainFrame().setVisible(true);
-        SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
+        MainFrame.getMainFrame();
+        if (!noUI){
+            //显示托盘
+            try {
+                AppTray.init(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("image/icon_16_16.jpg"))).buildMenu().setTray();
+                SfLog.getInstance().d(this.getClass(),"托盘菜单初始化完成");
+            } catch (AWTException e) {
+                SfLog.getInstance().e(this.getClass(),"托盘菜单初始化失败，应用退出",e);
+                System.exit(-1);
+            } catch (UnsupportedEncodingException e) {
+                SfLog.getInstance().e(this.getClass(),"托盘菜单初始化失败，应用退出",e);
+                System.exit(-1);
+            }
+            //显示主窗体
+            MainFrame.getMainFrame().setVisible(true);
+            SfLog.getInstance().d(this.getClass(),"主界面初始化完成");
+
+//            SfLog.getInstance().w(this.getClass(), "启动参数添加 NoUI 可取消UI界面");
+        }else {
+            SfLog.getInstance().w(this.getClass(), "NO UI MODE");
+        }
 
 //        //输出
 //        BufferedImage bufferedImage = new BufferedImage(MainFrame.getMainFrame().getWidth(), MainFrame.getMainFrame().getHeight(), BufferedImage.TYPE_4BYTE_ABGR);

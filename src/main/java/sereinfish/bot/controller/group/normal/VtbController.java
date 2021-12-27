@@ -18,6 +18,7 @@ import sereinfish.bot.entity.bili.entity.info.search.UserSearch;
 import sereinfish.bot.entity.bili.entity.vtbs.VtbsInfo;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
@@ -149,7 +150,9 @@ public class VtbController {
             messageChain.append("\n" + num + ".");
             //头像
             try {
+                NetworkLoader.INSTANCE.setWait(true);
                 File file = NetHandle.imageDownload(data.getFace(), "bili_/" + data.getFace().substring(data.getFace().lastIndexOf("/") + 1));
+                NetworkLoader.INSTANCE.setWait(false);
                 //头像加工
                 String md5 = data.getFace().substring(data.getFace().lastIndexOf("/") + 1).substring(0, data.getFace().substring(data.getFace().lastIndexOf("/") + 1).lastIndexOf("."));
                 File imageHeadCircular = new File(FileHandle.imageCachePath, "bill_circular_" + md5);

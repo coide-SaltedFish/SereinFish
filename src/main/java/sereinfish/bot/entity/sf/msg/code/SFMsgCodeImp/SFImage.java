@@ -7,6 +7,8 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
 import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
+import sereinfish.bot.myYuq.MyYuQ;
 
 @SFMsgCodeInfo("Image")
 public class SFImage implements SFMsgCode{
@@ -25,7 +27,9 @@ public class SFImage implements SFMsgCode{
             }
         }else {
             if (type.equalsIgnoreCase("url")){
+                NetworkLoader.INSTANCE.setWait(true);
                 Image image = codeContact.getSource().uploadImage(NetHandle.imageDownload(parameter.getString(1), "SFCode_" + System.currentTimeMillis()));
+                NetworkLoader.INSTANCE.setWait(false);
                 return "<Rain:Image:" + image.getId() + ">";
             }
         }

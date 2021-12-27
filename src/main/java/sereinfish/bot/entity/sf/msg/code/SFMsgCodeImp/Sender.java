@@ -9,6 +9,7 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCode;
 import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
 import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
+import sereinfish.bot.myYuq.MyYuQ;
 
 @SFMsgCodeInfo("sender")
 public class Sender implements SFMsgCode {
@@ -38,7 +39,7 @@ public class Sender implements SFMsgCode {
             return codeContact.getSender().getName();
         }
         if (type.equals("headimage")){
-            Image image = codeContact.getSource().uploadImage(CacheManager.getMemberHeadImageFile(codeContact.getSender().getId()));
+            Image image = MyYuQ.uploadImage(codeContact.getSource(), CacheManager.getMemberHeadImageFile(codeContact.getSender().getId()));
             return "<Rain:Image:" + image.getId() + ">";
         }
 

@@ -10,6 +10,7 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
 import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 
 import java.io.IOException;
 
@@ -58,7 +59,7 @@ public class Value implements SFMsgCode {
             case "namecard":
                 return member.nameCardOrName();
             case "headimage":
-                Image image = contact.uploadImage(CacheManager.getMemberHeadImageFile(member.getId()));
+                Image image = MyYuQ.uploadImage(contact, CacheManager.getMemberHeadImageFile(member.getId()));
                 return "<Rain:Image:" + image.getId() + ">";
             case "id":
                 return member.getId() + "";

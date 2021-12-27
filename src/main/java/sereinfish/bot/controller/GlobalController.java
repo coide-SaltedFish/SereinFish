@@ -17,6 +17,7 @@ import sereinfish.bot.data.conf.entity.GroupConf;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.mlog.SfLog;
+import sereinfish.bot.myYuq.MyYuQ;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -48,7 +49,7 @@ public class GlobalController {
             BufferedImage bufferedImage = ImageHandle.getXiBao(exception.getClass().getCanonicalName() + ":" + exception.getMessage(),
                     new Font("黑体", Font.BOLD, 168));
             ImageIO.write(bufferedImage, "jpg", file);
-            Image image = actionContext.getSource().uploadImage(file);
+            Image image = MyYuQ.uploadImage(actionContext.getSource(), file);
             messageLineQ.plus(image).getMessage();
         } catch (IOException e) {
             SfLog.getInstance().e(this.getClass(), e);

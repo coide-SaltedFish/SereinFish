@@ -33,12 +33,14 @@ import sereinfish.bot.entity.bili.entity.info.UserInfo;
 import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 import sereinfish.bot.entity.ffmpeg.AudioHandle;
 import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.file.image.ImageHandle;
 import sereinfish.bot.file.image.gif.GifDecoder;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
+import sereinfish.bot.utils.CallBack;
 import ws.schild.jave.EncoderException;
 
 import javax.imageio.ImageIO;
@@ -89,10 +91,15 @@ public class TestController extends QQController {
 
     @Action("Ascii2d")
     @QMsg(mastAtBot = true)
-    public Message ascii2d(Group group) throws IOException {
+    public void ascii2d(Group group) throws IOException {
         group.sendMessage("Ascii2d");
         Ascii2d ascii2d = new Ascii2d("http://img0.baidu.com/it/u=2357664251,2893458483&fm=253&app=138&f=JPEG?w=500&h=371");
-        return ascii2d.getColorResponse().getInfo(group);
+        ascii2d.getColorResponse().getInfo(group, new CallBack<Message>() {
+            @Override
+            public void callback(Message p) {
+                group.sendMessage(p);
+            }
+        });
     }
 
     @Action("转发我")
@@ -153,7 +160,7 @@ public class TestController extends QQController {
                     return dynamicCard.getUser().getName() + ":" + dynamicCard.getItem().getDescription();
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             SfLog.getInstance().e(this.getClass(), e);
         }
         throw new DoNone();
@@ -311,11 +318,22 @@ public class TestController extends QQController {
             File file = new File(FileHandle.imageCachePath, "xibao_" + System.currentTimeMillis());
             BufferedImage bufferedImage = ImageHandle.getXiBao(text, new Font("黑体", Font.BOLD, 168));
             ImageIO.write(bufferedImage, "jpg", file);
-            Image image = group.uploadImage(file);
+            Image image = MyYuQ.uploadImage(group, file);
             return new Message().lineQ().plus(image).getMessage();
         } catch (IOException e) {
             return new Message().lineQ().text("错误：" + e.getMessage()).getMessage();
         }
+    }
+
+    @Action("下载任务")
+    @QMsg(mastAtBot = true)
+    public String netw(){
+
+        String threadInfo = NetworkLoader.INSTANCE.getThread() == null ? "线程未启动" : (NetworkLoader.INSTANCE.getThread().isAlive() ? "线程活动中" : "线程已终止");
+
+        return "当前任务数：" + NetworkLoader.INSTANCE.size()
+                + "\n线程状态：" + threadInfo
+                + "\n下载状态：" + (NetworkLoader.INSTANCE.isWait()?"暂停":"正常");
     }
 
     @Action("抛个异常 {text}")

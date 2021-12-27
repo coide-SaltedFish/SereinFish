@@ -53,7 +53,7 @@ public class ArkNightController {
                 }
                 try {
                     ImageIO.write(penguinStatistics.getDataImage(penguinWidgetData), "PNG", file);
-                    Image image = group.uploadImage(file);
+                    Image image = MyYuQ.uploadImage(group, file);
                     return new Message().lineQ().plus(image).getMessage();
                 } catch (Exception e) {
                     SfLog.getInstance().e(this.getClass(),e);

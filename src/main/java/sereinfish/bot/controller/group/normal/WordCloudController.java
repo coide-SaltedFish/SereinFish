@@ -44,6 +44,6 @@ public class WordCloudController {
         //BufferedImage wordCloud = MyWordCloud.getWordCloud(list, bufferedImage);
 
         //ImageIO.write(wordCloud, "PNG", file);
-        return new Message().lineQ().plus(group.uploadImage(file)).getMessage();
+        return new Message().lineQ().plus(MyYuQ.uploadImage(group, file)).getMessage();
     }
 }

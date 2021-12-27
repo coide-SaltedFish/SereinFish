@@ -7,6 +7,7 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.entity.sf.msg.code.annotation.SFMsgCodeInfo;
 import sereinfish.bot.entity.sf.msg.code.entity.Parameter;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
 
 @SFMsgCodeInfo("McPlayer")
@@ -64,7 +65,8 @@ public class McPlayer implements SFMsgCode {
                 throw new Exception("账号信息获取失败：null");
             }
             //得到皮肤信息
-            Image image = codeContact.getSource().uploadImage(NetHandle.getMcPlayerHeadImageFile(accountInfo.getId(), 128));
+
+            Image image =  MyYuQ.uploadImage(codeContact.getSource(), NetHandle.getMcPlayerHeadImageFile(accountInfo.getId(), 128));
             return "<Rain:Image:" + image.getId() + ">";
         }
 
@@ -75,7 +77,8 @@ public class McPlayer implements SFMsgCode {
                 throw new Exception("账号信息获取失败：null");
             }
             //得到皮肤信息
-            Image image = codeContact.getSource().uploadImage(NetHandle.getMcPlayerSkinImageFile(accountInfo.getId(), 128));
+
+            Image image = MyYuQ.uploadImage(codeContact.getSource(), NetHandle.getMcPlayerSkinImageFile(accountInfo.getId(), 128));
             return "<Rain:Image:" + image.getId() + ">";
         }
 

@@ -15,6 +15,7 @@ public class Start {
      * @param args 启动参数
      */
     public static void main(String[] args) {
+
         YuHook.put(new HookItem("org.hibernate.Version", "initVersion", "com.icecreamqaq.yudb.HibernateVersionHook"));
         YuHook.putMatchHookItem("sereinfish.bot.data.conf.entity.GroupConf.set*", "sereinfish.bot.data.conf.entity.ConfHook");
 

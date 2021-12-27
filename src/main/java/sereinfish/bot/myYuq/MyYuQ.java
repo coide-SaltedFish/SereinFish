@@ -13,10 +13,7 @@ import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.message.Message;
-import com.icecreamqaq.yuq.message.MessageItem;
-import com.icecreamqaq.yuq.message.MessageItemFactory;
-import com.icecreamqaq.yuq.message.Text;
+import com.icecreamqaq.yuq.message.*;
 import lombok.Data;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,6 +26,7 @@ import sereinfish.bot.database.service.WhiteListService;
 import sereinfish.bot.entity.calendar.holiday.HolidayManager;
 import sereinfish.bot.entity.sf.msg.SFMessage;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
 
 import javax.inject.Inject;
@@ -50,8 +48,8 @@ public class MyYuQ {
 
     public static boolean isEnable = false;//功能启用标志
     public static final String appName = "SereinFish Bot";
-    public static final int version = 100544;
-    public static final String versionName = "v_0.0.55";
+    public static final int version = 100644;
+    public static final String versionName = "v_0.0.65";
 
     private static MyYuQ myYuQ = null;//单例模式
     //
@@ -345,9 +343,12 @@ public class MyYuQ {
      * @param file
      * @return
      */
-    public static String uploadImage(Contact contact, File file) throws IOException {
-        contact.uploadImage(file);
-        return DigestUtils.md5Hex(new FileInputStream(file)).toUpperCase();
+    public static Image uploadImage(Contact contact, File file){
+        NetworkLoader.INSTANCE.setWait(true);
+        Image image = contact.uploadImage(file);
+        NetworkLoader.INSTANCE.setWait(false);
+
+        return image;
     }
 
     /**

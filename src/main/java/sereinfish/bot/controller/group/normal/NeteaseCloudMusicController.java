@@ -1,12 +1,12 @@
 package sereinfish.bot.controller.group.normal;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
-import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.alibaba.fastjson.JSONObject;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.QMsg;
 import com.icecreamqaq.yuq.controller.ContextSession;
 import com.icecreamqaq.yuq.controller.QQController;
+import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.error.SendMessageFailedByCancel;
 import com.icecreamqaq.yuq.error.WaitNextMessageTimeoutException;
@@ -17,9 +17,12 @@ import sereinfish.bot.entity.netease.music.msg.SearchMessage;
 import sereinfish.bot.entity.netease.music.song.Song;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.performance.MyPerformance;
 import top.yumbo.util.music.musicImpl.netease.NeteaseCloudMusicInfo;
+import ws.schild.jave.EncoderException;
 
 import java.io.File;
 
@@ -27,7 +30,7 @@ import java.io.File;
 public class NeteaseCloudMusicController extends QQController {
     @Action("点歌")
     @QMsg(mastAtBot = true)
-    public Message neteaseCloudMusic(Message message, Member sender, ContextSession session) throws Exception {
+    public void neteaseCloudMusic(Group group, Message message, Member sender, ContextSession session) throws Exception {
         //获取歌曲名称
         String name = message.getCodeStr().substring(message.getCodeStr().indexOf("点歌") + 2).trim();
 
@@ -39,7 +42,7 @@ public class NeteaseCloudMusicController extends QQController {
         SearchMessage searchMessage = MyYuQ.toClass(result.toString(), SearchMessage.class);
 
         if (searchMessage.getCode() != 200){
-            return MyYuQ.getMif().text("API连接异常").toMessage();
+            group.sendMessage(MyYuQ.getMif().text("API连接异常").toMessage());
         }
 
         //展示音乐列表
@@ -64,24 +67,45 @@ public class NeteaseCloudMusicController extends QQController {
             if (enableReCall){
                 musicListMsg.recall();
             }
-
-            reply("正在获取，请稍后");
-
             Song song = searchMessage.getResult().getSongs()[index];
-            File musicFile = NetHandle.neteaseCloudMusicDownload(song);
-            File target = new File(FileHandle.neteaseCloudMusicCachePath, song.getId() + "_amr");
-            if (target.exists() && target.isFile()){
-                return MyYuQ.getMif().voiceByFile(target).toMessage();
-            }
+            NetHandle.neteaseCloudMusicDownload(group, song, new NetworkLoader.NetworkLoaderListener() {
+                @Override
+                public void start(long len) {
+                    group.sendMessage("开始获取，请稍后(" + MyPerformance.unitConversion(len) + "):\n" +
+                            searchMessage.getResult().getSongs()[index].getName() + " - " + searchMessage.getResult().getSongs()[index].getAllArtistName());
+                }
 
-            AudioHandle.mp3ToAmr(musicFile, target);
-            return MyYuQ.getMif().voiceByFile(target).toMessage();
+                @Override
+                public void success(File file) {
+                    File target = new File(FileHandle.neteaseCloudMusicCachePath, song.getId() + "_amr");
+                    if (target.exists() && target.isFile()){
+                         group.sendMessage(MyYuQ.getMif().voiceByFile(target).toMessage());
+                    }
+
+                    try {
+                        AudioHandle.mp3ToAmr(file, target);
+                    } catch (EncoderException e) {
+                        group.sendMessage("音频转换错误：" + e.getMessage());
+                    }
+                    group.sendMessage(MyYuQ.getMif().voiceByFile(target).toMessage());
+                }
+
+                @Override
+                public void fail(Exception e) {
+                    group.sendMessage(MyYuQ.getMif().text("文件下载失败：" + e.getMessage()).toMessage());
+                }
+
+                @Override
+                public void progress(long pro, long len, long speed) {
+
+                }
+            });
         }catch (WaitNextMessageTimeoutException e){
             musicListMsg.recall();
-            return MyYuQ.getMif().text("已超时取消").toMessage();
+            group.sendMessage(MyYuQ.getMif().text("已超时取消").toMessage());
         }catch (NumberFormatException e){
             musicListMsg.recall();
-            return MyYuQ.getMif().text("输入格式错误").toMessage();
+            group.sendMessage(MyYuQ.getMif().text("输入格式错误").toMessage());
         }
     }
 }

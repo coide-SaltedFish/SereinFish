@@ -12,7 +12,7 @@ import java.io.IOException;
  */
 @Getter
 public class IngredientChecking {
-    private String api = "https://tools.asoulfan.com/api/cfj/?name=";
+    private String api = "https://api.asoulfan.com/cfj/?name=";
     private Data data;
 
     public IngredientChecking(String name) throws IOException {

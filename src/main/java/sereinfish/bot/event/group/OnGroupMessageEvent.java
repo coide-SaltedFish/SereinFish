@@ -27,6 +27,7 @@ import sereinfish.bot.entity.sf.msg.code.SFMsgCodeContact;
 import sereinfish.bot.event.myEvent.BotNameEvent;
 import sereinfish.bot.event.myEvent.NoActionResponseEvent;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.myYuq.time.Time;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.database.entity.BlackList;
@@ -140,7 +141,8 @@ public class OnGroupMessageEvent {
                                         0.0f,
                                         Color.BLACK);
                                 ImageIO.write(bufferedImage, "png", imageFile);
-                                Image image1 = event.getGroup().uploadImage(imageFile);
+
+                                Image image1 = MyYuQ.uploadImage(event.getGroup(), imageFile);
                                 event.getGroup().sendMessage("原图可能是：");
 
                                 MessageLineQ messageLineQ = new Message().lineQ();
@@ -150,9 +152,29 @@ public class OnGroupMessageEvent {
                                 message1.setRecallDelay((long) ConfManager.getInstance().get(event.getGroup().getId()).getSetuReCallTime() * 1000);
                                 event.getGroup().sendMessage(message1);
                             }else {
-                                Image image1 = event.getGroup().uploadImage(NetHandle.imageDownload(imageItem.getUrl(), md5));
-                                event.getGroup().sendMessage("原图可能是：");
-                                event.getGroup().sendMessage(image1);
+                                NetHandle.imageDownload(event.getGroup(), imageItem.getUrl(), md5, new NetworkLoader.NetworkLoaderListener() {
+                                    @Override
+                                    public void start(long len) {
+
+                                    }
+
+                                    @Override
+                                    public void success(File file) {
+                                        Image image1 = MyYuQ.uploadImage(event.getGroup(), file);
+                                        event.getGroup().sendMessage("原图可能是：");
+                                        event.getGroup().sendMessage(image1);
+                                    }
+
+                                    @Override
+                                    public void fail(Exception e) {
+                                        event.getGroup().sendMessage("原图可能是：[图片加载失败" + e.getMessage() + "]");
+                                    }
+
+                                    @Override
+                                    public void progress(long pro, long len, long speed) {
+
+                                    }
+                                });
                             }
                         }
                     }
@@ -319,7 +341,7 @@ public class OnGroupMessageEvent {
                         File imageFile = new File(FileHandle.imageCachePath,"msg_temp_" + new Date().getTime());//文件缓存路径
 
                         ImageIO.write(ImageHandle.messageToImage(event.getMessage(), conf), "png", imageFile);
-                        Image image = event.getSendTo().uploadImage(imageFile);
+                        Image image = MyYuQ.uploadImage(event.getSendTo(), imageFile);
                         event.getSendTo().sendMessage(image);
                     }catch (Exception e){
                         SfLog.getInstance().e(this.getClass(), e);
@@ -375,7 +397,7 @@ public class OnGroupMessageEvent {
                     group.sendMessage(MyYuQ.getMif().text("错误：" + e1.getMessage()).toMessage());
                 }
                 //生成转发消息
-                Image image = contact.uploadImage(imageFile);
+                Image image = MyYuQ.uploadImage(contact, imageFile);
                 MyMessage myMessage = (MyMessage) new MyMessage(true).lineQ().plus(image).getMessage();
                 myMessage.setRecallDelay(message.getRecallDelay());
 

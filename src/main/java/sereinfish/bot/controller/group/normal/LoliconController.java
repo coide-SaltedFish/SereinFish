@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.codec.digest.DigestUtils;
 import sereinfish.bot.data.conf.entity.GroupConf;
+import sereinfish.bot.file.FileHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.permissions.Permissions;
 import sereinfish.bot.cache.CacheManager;
 import sereinfish.bot.entity.bot.menu.annotation.Menu;
@@ -28,6 +30,7 @@ import sereinfish.bot.entity.lolicon.sf.Request;
 import sereinfish.bot.entity.lolicon.sf.Response;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
+import sereinfish.bot.utils.CallBack;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,14 +61,28 @@ public class LoliconController {
     @Action("\\img_B407F708A2C6A506342098DF7CAC4A57\\")
     @Synonym({"\\[!！.]setu$\\", "\\[!！.]色图$\\","\\img_049231702ACB5E94ECCD953F46E6CAB9\\"})
     //@MenuItem(name = "涩图", usage = "[!！.]setu | [!！.]色图", description = "要一张涩图")
-    public Message[] getST(Group group, Message message, GroupConf groupConf){
-        return getLoliconMsg(group, message,true, groupConf, null, null, 1);
+    public void getST(Group group, Message message, GroupConf groupConf){
+        getLoliconMsg(group, message, true, groupConf, null, null, 1, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
     @Action("\\img_7CF98559280FD216C5C48AA3D22A8815\\")
     @QMsg(mastAtBot = true)
-    public Message[] getST_2(Group group, Message message, GroupConf groupConf){
-        return getLoliconMsg(group, message, true, groupConf, null, null, 1);
+    public void getST_2(Group group, Message message, GroupConf groupConf){
+        getLoliconMsg(group, message, true, groupConf, null, null, 1, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
 //    @Action(".来点{key}色图")
@@ -86,7 +103,7 @@ public class LoliconController {
     @Synonym({"来{strNum}张{key}涩图","来{strNum}份{key}涩图"})
     @MenuItem(name = "涩图且指定数量和tag", usage = "@Bot 来{strNum}[张份]{key}[色涩]图", description = "要指定数量和tag的涩图")
     @QMsg(mastAtBot = true)
-    public Message[] setuAtBotKeyWord(Group group, Message message, GroupConf groupConf, String strNum, String key){
+    public void setuAtBotKeyWord(Group group, Message message, GroupConf groupConf, String strNum, String key){
         int num;
         try {
             if (strNum.equals("")){
@@ -95,9 +112,11 @@ public class LoliconController {
             num = Integer.valueOf(strNum);
         }catch (Exception e){
             if (MyYuQ.getRandom(0,100) % 2 == 0){
-                return new Message[]{Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>")};
+                group.sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>"));
+                return;
             }else {
-                return new Message[]{Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:53AF664AB93AAFF6290632025A1B2787.jpg>")};
+                group.sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:53AF664AB93AAFF6290632025A1B2787.jpg>"));
+                return;
             }
         }
 
@@ -106,42 +125,61 @@ public class LoliconController {
         }
 
         ArrayList<Message> messages = new ArrayList<>();
-
-        for (Message msg:getLoliconMsg(group, message, true, groupConf, null, key, num)){
-            messages.add(msg);
-        }
-        return messages.toArray(new Message[]{});
+        getLoliconMsg(group, message, true, groupConf, null, key, num, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
     @Action("来点{key}色图")
     @Synonym({"来点{key}涩图","来张{key}涩图","来张{key}色图","{key}涩图摩多摩多","{key}色图摩多摩多","{key}涩图摩多","{key}色图摩多"})
     @MenuItem(name = "来点涩图且指定tag", usage = "@Bot 来[点张]{key}[涩色]图 | {key}[色涩]图摩多摩多 | {key}色图摩多", description = "要一张涩图且指定tag")
     @QMsg(mastAtBot = true)
-    public Message[] setuAtBot(Group group, Message message, GroupConf groupConf, String key){
-        return getLoliconMsg(group, message, true, groupConf, null, key, 1);
+    public void setuAtBot(Group group, Message message, GroupConf groupConf, String key){
+        getLoliconMsg(group, message, true, groupConf, null, key, 1, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
     @Action("涩图摩多")
     @Synonym({"涩图摩多摩多","色图摩多摩多","涩图摩多","色图摩多"})
     @MenuItem(name = "要一张涩图", usage = "@Bot [色涩]图摩多 | [色涩]图摩多摩多", description = "要一张涩图")
     @QMsg(mastAtBot = true)
-    public Message[] setuAtBotMore(Group group, Message message, GroupConf groupConf){
-        return getLoliconMsg(group, message, true, groupConf, null, null, 1);
+    public void setuAtBotMore(Group group, Message message, GroupConf groupConf){
+        getLoliconMsg(group, message, true, groupConf, null, null, 1, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
     @Action("我要{strNum}张色图")
     @Synonym({"我要{strNum}张涩图","来{strNum}份涩图","来{strNum}份色图", "来{strNum}张涩图"})
     @MenuItem(name = "涩图且指定数量", usage = "@Bot 我要{strNum}张[色涩]图 | 来{strNum}份[涩色]图", description = "要指定数量的涩图")
     @QMsg(mastAtBot = true)
-    public Message[] setuNum(Group group, Message message, GroupConf groupConf, String strNum){
+    public void setuNum(Group group, Message message, GroupConf groupConf, String strNum){
         int num;
         try {
             num = Integer.valueOf(strNum);
         }catch (Exception e){
             if (MyYuQ.getRandom(0,100) % 2 == 0){
-                return new Message[]{Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>")};
+                group.sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:5D6083D0459F5596CB995088E949B71D.jpg>"));
+                return;
             }else {
-                return new Message[]{Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:53AF664AB93AAFF6290632025A1B2787.jpg>")};
+                group.sendMessage(Message.Companion.toMessageByRainCode(strNum + "?不认识\n<Rain:Image:53AF664AB93AAFF6290632025A1B2787.jpg>"));
+                return;
             }
         }
 
@@ -151,11 +189,14 @@ public class LoliconController {
 
         ArrayList<Message> messages = new ArrayList<>();
 
-        for (Message msg:getLoliconMsg(group, message, true, groupConf, null, null, num)){
-            messages.add(msg);
-        }
-
-        return messages.toArray(new Message[]{});
+        getLoliconMsg(group, message, true, groupConf, null, null, num, new CallBack<Message[]>() {
+            @Override
+            public void callback(Message[] p) {
+                for (Message msg:p){
+                    group.sendMessage(msg);
+                }
+            }
+        });
     }
 
     @Action("\\img_0E558CBAE41368A42DB812E7C1D9A172\\")
@@ -204,14 +245,15 @@ public class LoliconController {
      * @param keyword
      * @param num
      */
-    public Message[] getLoliconMsg(Group group, Message message, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
+    public void getLoliconMsg(Group group, Message message, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num, CallBack<Message[]> callBack){
         ArrayList<Message> messages = new ArrayList<>();
         if (isSending){
             Message msg = new Message().lineQ().text(" 别急，正在发呢").getMessage();
             msg.setReply(message.getSource());
             messages.add(msg);
 
-            return messages.toArray(new Message[]{});
+            callBack.callback(messages.toArray(new Message[]{}));
+            return;
         }
 
         int max = conf.getSetuSendMaxNum();
@@ -221,20 +263,18 @@ public class LoliconController {
         }
 
         if (num <= 0){
-            return new Message[]{Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>")};
+            callBack.callback(new Message[]{Message.Companion.toMessageByRainCode("<Rain:Image:22C729AA4F85DE574605FA0D19C6A6B7.jpg>")});
+            return;
         }
 
         isSending = true;
         try {
-            Message[] msgs = getLoliconMsgs(group, isGroupMsg, conf, uids, keyword, num);
-            isSending = false;
-            return msgs;
+            getLoliconMsgs(group, isGroupMsg, conf, uids, keyword, num, callBack);
         }catch (Exception e){
             SfLog.getInstance().e(this.getClass(), e);
+            callBack.callback(new Message[]{Message.Companion.toMessageByRainCode("出现了亿点点问题\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>")});
         }
         isSending = false;
-
-        return new Message[]{Message.Companion.toMessageByRainCode("出现了亿点点问题\n<Rain:Image:62E2788A257962500ECF2401DD69A76B.jpg>")};
     }
 
     /**
@@ -246,7 +286,7 @@ public class LoliconController {
      * @param num
      * @return
      */
-    private Message[] getLoliconMsgs(Group group, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num){
+    private void getLoliconMsgs(Group group, boolean isGroupMsg, GroupConf conf, int[] uids, String keyword, int num, CallBack<Message[]> callBack){
         //普通Lolicon
         Lolicon.Request request = LoliconManager.getRequest(isGroupMsg,conf,keyword,uids, num);
         try {
@@ -257,57 +297,97 @@ public class LoliconController {
 
                 if (lolicon.getData().size() == 0){
                     isSending = false;
-                    return new Message[]{MyYuQ.getMif().text("要求过于奇怪，找不到你想要的图呢").toMessage()};
+                    callBack.callback(new Message[]{MyYuQ.getMif().text("要求过于奇怪，找不到你想要的图呢").toMessage()});
+                    return;
                 }
 
                 ArrayList<Message> messages = new ArrayList<>();
-                for (Lolicon.Setu setu:lolicon.getData()){
-                    try{
-                        File file = CacheManager.getLoliconImage(setu.getPid(),setu);
-                        SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
-                        //MD5发送方法
-                        if (conf.isLoliconMD5ImageEnable()){
-                            try {
 
-                                Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + DigestUtils.md5Hex(new FileInputStream(file)) + ".jpg>");
-                                if (setu.isR18() || conf.isSetuMastReCallEnable()){
-                                    reMsg.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
-                                }
-                                messages.add(reMsg);
-                            } catch (IOException e) {
-                                SfLog.getInstance().e(LoliconManager.class,e);
-                                messages.add(new Message().lineQ().text("图片加载失败：MD5 send>>" + setu.getPid()).getMessage());
-                            }
-                        }else {
-                            //普通发送
-                            Message message;
-                            //上传图片
-                            try {
-                                message = new Message().lineQ().plus(group.uploadImage(file)).getMessage();
-                                if (setu.isR18() || conf.isSetuMastReCallEnable()){
-                                    message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                final int[] index = {0};
+
+                for (Lolicon.Setu setu:lolicon.getData()){
+
+                    File file = setu.isR18() ? new File(FileHandle.imageLoliconCachePath,"R18/lolicon_" + setu.getPid()) :
+                            new File(FileHandle.imageLoliconCachePath,"lolicon_" + setu.getPid());
+
+                    NetworkLoader.INSTANCE.addTask(new NetworkLoader.Task(group, setu.getUrl(), file, new NetworkLoader.NetworkLoaderListener() {
+                        @Override
+                        public void start(long len) {
+
+                        }
+
+                        @Override
+                        public void success(File file) {
+                            try{
+                                SfLog.getInstance().d(LoliconManager.class,"返回：" + file);
+                                //MD5发送方法
+                                String md5 = DigestUtils.md5Hex(new FileInputStream(file));
+
+                                if (conf.isLoliconMD5ImageEnable()){
+                                    Message reMsg = Message.Companion.toMessageByRainCode("<Rain:Image:" + md5 + ".jpg>");
+                                    if (setu.isR18() || conf.isSetuMastReCallEnable()){
+                                        reMsg.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                                    }
+                                    messages.add(reMsg);
+                                }else {
+                                    //普通发送
+                                    Message message;
+                                    //上传图片
+                                    try {
+                                        if (MyYuQ.imageEnableTX(md5)){
+                                            message = new Message().lineQ().plus(Message.Companion.toMessageByRainCode("<Rain:Image:" + md5 + ".jpg>")).getMessage();
+
+                                        }else {
+                                            message = new Message().lineQ().plus(MyYuQ.uploadImage(group, file)).getMessage();
+                                        }
+                                        if (setu.isR18() || conf.isSetuMastReCallEnable()){
+                                            message.setRecallDelay((long) conf.getSetuReCallTime() * 1000);
+                                        }
+
+                                    }catch (Exception e){
+                                        SfLog.getInstance().e(this.getClass(), e);
+                                        message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
+                                    }
+
+                                    messages.add(message);
                                 }
                             }catch (Exception e){
-                                SfLog.getInstance().e(this.getClass(), e);
-                                message = new Message().lineQ().text("图片上传失败qwq：" + setu.getPid()).getMessage();
+                                messages.add(new Message().lineQ().text("图片下载失败：" + e.getMessage()).getMessage());
                             }
+                            index[0]++;
 
-                            messages.add(message);
+                            //是否可以发送了
+                            if (index[0] == lolicon.getData().size()){
+                                callBack.callback(messages.toArray(new Message[]{}));
+                            }
                         }
-                    }catch (Exception e){
-                        messages.add(new Message().lineQ().text("图片下载失败：" + e.getMessage()).getMessage());
-                    }
-                }
 
-                return messages.toArray(new Message[]{});
+                        @Override
+                        public void fail(Exception e) {
+                            messages.add(new Message().lineQ().text("图片下载失败：" + e.getMessage()).getMessage());
+
+                            index[0]++;
+
+                            //是否可以发送了
+                            if (index[0] == lolicon.getData().size()){
+                                callBack.callback(messages.toArray(new Message[]{}));
+                            }
+                        }
+
+                        @Override
+                        public void progress(long pro, long len, long speed) {
+
+                        }
+                    }));
+                }
             }else {
                 Message message = MyYuQ.getMif().text("发生了错误："
                         + lolicon.getError()).plus(Message.Companion.toMessageByRainCode("<Rain:Image:2B15CC31839368DAA35C8F314661FF13.jpg>")).toMessage();
-                return new Message[]{message};
+                callBack.callback(new Message[]{message});
             }
         } catch (IOException e) {
             SfLog.getInstance().e(LoliconManager.class,e);
-            return new Message[]{MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage()};
+            callBack.callback(new Message[]{MyYuQ.getMif().text("错误:" + e.getMessage()).toMessage()});
         }
     }
 }

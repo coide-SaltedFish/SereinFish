@@ -15,6 +15,7 @@ import sereinfish.bot.entity.bili.entity.dynamic.Dynamic;
 import sereinfish.bot.entity.bili.entity.dynamic.DynamicCard;
 import sereinfish.bot.entity.bili.entity.live.LiveRoom;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.myYuq.time.Time;
@@ -84,7 +85,7 @@ public class BiliManager {
      * @param mid
      * @return
      */
-    public static Dynamic getUserDynamic(long mid) throws IOException {
+    public static Dynamic getUserDynamic(long mid) throws Exception {
         String api = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?visitor_uid=0&host_uid=" + mid + "&offset_dynamic_id=0&need_top=1";
         String json = OkHttpUtils.getStr(api, OkHttpUtils.addReferer("https://space.bilibili.com/$id/dynamic"));
 
@@ -259,8 +260,8 @@ public class BiliManager {
                 }
 
                 followConf.save();//配置保存
-            } catch (IOException e) {
-                SfLog.getInstance().e(BiliManager.class, "配置读取失败", e);
+            } catch (Exception e) {
+                SfLog.getInstance().e(BiliManager.class, "动态检测更新失败", e);
             }
         }
     }
@@ -291,7 +292,10 @@ public class BiliManager {
                         messageLineQ.textLine(card.getDynamicCard().getOrigin().getItem().getDescription());
                         for (DynamicCard.Item.Picture picture:card.getDynamicCard().getOrigin().getItem().getPictures()){
                             try{
-                                messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                                NetworkLoader.INSTANCE.setWait(true);
+
+                                messageLineQ.plus(MyYuQ.uploadImage(contact, NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                                NetworkLoader.INSTANCE.setWait(false);
                             }catch (Exception e){
                                 messageLineQ.textLine("图片获取失败：" + e.getMessage());
                             }
@@ -304,7 +308,10 @@ public class BiliManager {
                         messageLineQ.textLine(card.getDynamicCard().getVideoOrigin().getDynamic());
                         messageLineQ.textLine("视频信息：");
                         try {
-                            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(card.getDynamicCard().getVideoOrigin().getPic(), System.currentTimeMillis() + "_cover")));
+                            NetworkLoader.INSTANCE.setWait(true);
+
+                            messageLineQ.plus(MyYuQ.uploadImage(contact, NetHandle.imageDownload(card.getDynamicCard().getVideoOrigin().getPic(), System.currentTimeMillis() + "_cover")));
+                            NetworkLoader.INSTANCE.setWait(false);
                         }catch (Exception e){
                             messageLineQ.textLine("封面获取失败了：" + e.getMessage());
                         }
@@ -346,7 +353,9 @@ public class BiliManager {
                 messageLineQ.textLine(card.getDynamicCard().getItem().getDescription());
                 for (DynamicCard.Item.Picture picture:card.getDynamicCard().getItem().getPictures()){
                     try{
-                        messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                        NetworkLoader.INSTANCE.setWait(true);
+                        messageLineQ.plus(MyYuQ.uploadImage(contact, NetHandle.imageDownload(picture.getImg_src(), System.currentTimeMillis() + "_img_src")));
+                        NetworkLoader.INSTANCE.setWait(false);
                     }catch (Exception e){
                         messageLineQ.textLine("图片获取失败：" + e.getMessage());
                     }
@@ -377,7 +386,9 @@ public class BiliManager {
                 messageLineQ.textLine(dynamicVideo.getDynamic());
                 messageLineQ.textLine("视频信息：");
                 try {
-                    messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(dynamicVideo.getPic(), System.currentTimeMillis() + "_cover")));
+                    NetworkLoader.INSTANCE.setWait(true);
+                    messageLineQ.plus( MyYuQ.uploadImage(contact, NetHandle.imageDownload(dynamicVideo.getPic(), System.currentTimeMillis() + "_cover")));
+                    NetworkLoader.INSTANCE.setWait(false);
                 }catch (Exception e){
                     messageLineQ.textLine("封面获取失败了：" + e.getMessage());
                 }
@@ -433,7 +444,10 @@ public class BiliManager {
         }
 
         try {
-            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(vList.getPic(), System.currentTimeMillis() + "_cover")));
+            NetworkLoader.INSTANCE.setWait(true);
+
+            messageLineQ.plus(MyYuQ.uploadImage(contact, NetHandle.imageDownload(vList.getPic(), System.currentTimeMillis() + "_cover")));
+            NetworkLoader.INSTANCE.setWait(false);
         }catch (Exception e){
             messageLineQ.textLine("封面获取失败了：" + e.getMessage());
         }
@@ -471,7 +485,10 @@ public class BiliManager {
         messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("开播辣！！");
         try {
-            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover")));
+            NetworkLoader.INSTANCE.setWait(true);
+
+            messageLineQ.plus(MyYuQ.uploadImage(contact, (NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover"))));
+            NetworkLoader.INSTANCE.setWait(false);
         }catch (Exception e){
             messageLineQ.textLine("封面获取失败了：" + e.getMessage());
         }
@@ -491,7 +508,10 @@ public class BiliManager {
         messageLineQ.textLine("UP主：" + userInfo.getData().getName());
         messageLineQ.textLine("下播了");
         try {
-            messageLineQ.plus(contact.uploadImage(NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover")));
+            NetworkLoader.INSTANCE.setWait(true);
+
+            messageLineQ.plus( MyYuQ.uploadImage(contact, NetHandle.imageDownload(userInfo.getData().getLive_room().getCover(), System.currentTimeMillis() + "_cover")));
+            NetworkLoader.INSTANCE.setWait(false);
         }catch (Exception e){
             messageLineQ.textLine("封面获取失败了：" + e.getMessage());
         }

@@ -30,6 +30,7 @@ import sereinfish.bot.entity.sauceNAO.sauce.Result;
 import sereinfish.bot.entity.sauceNAO.sauce.SauceNAO;
 import sereinfish.bot.file.FileHandle;
 import sereinfish.bot.file.NetHandle;
+import sereinfish.bot.file.NetworkLoader;
 import sereinfish.bot.mlog.SfLog;
 import sereinfish.bot.myYuq.MyYuQ;
 import sereinfish.bot.performance.MyPerformance;
@@ -271,7 +272,7 @@ public class SauceNaoController extends QQController {
                                             SfLog.getInstance().e(this.getClass(), e);
                                             messageLineQ.text("唔，二维码图片生成失败了：IOException");
                                         }
-                                        messageLineQ.plus(group.uploadImage(imageFile));
+                                        messageLineQ.plus(MyYuQ.uploadImage(group, imageFile));
                                         Message message1 = messageLineQ.getMessage();
                                         message1.setRecallDelay((long) groupConf.getSetuReCallTime() * 1000);
                                         group.sendMessage(message1);
@@ -284,22 +285,47 @@ public class SauceNaoController extends QQController {
                                 }else {
                                     //原图
                                     messageLineQ.textLine("原图（也许是?）：");
-                                    try {
-                                        File file = NetHandle.imagePixivDownload(illust, page - 1);
-                                        BufferedImage bufferedImage = ImageIO.read(file);
-                                        messageLineQ.textLine("图片信息："
-                                                + bufferedImage.getWidth() + "x" + bufferedImage.getHeight()
-                                                + "    "
-                                                + MyPerformance.unitConversion(file.length()));
-                                        messageLineQ.plus(group.uploadImage(file));
-                                    } catch (IllegalStateException e) {
-                                        SfLog.getInstance().e(this.getClass(), e);
-                                        group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
-                                        messageLineQ.text("图片上传失败");
-                                    } catch (IOException e){
-                                        messageLineQ.text("图片下载失败：" + e.getMessage());
-                                    }
-                                    group.sendMessage(messageLineQ.getMessage());
+                                    NetHandle.imagePixivDownload(group, illust, page - 1, new NetworkLoader.NetworkLoaderListener() {
+                                        @Override
+                                        public void start(long len) {
+
+                                        }
+
+                                        @Override
+                                        public void success(File file) {
+                                            BufferedImage bufferedImage = null;
+                                            try {
+                                                bufferedImage = ImageIO.read(file);
+                                                messageLineQ.textLine("图片信息："
+                                                        + bufferedImage.getWidth() + "x" + bufferedImage.getHeight()
+                                                        + "    "
+                                                        + MyPerformance.unitConversion(file.length()));
+                                                messageLineQ.plus(MyYuQ.uploadImage(group, file));
+                                            } catch (IOException e) {
+                                                messageLineQ.text("图片读取失败：" + e.getMessage());
+                                            }
+
+                                            group.sendMessage(messageLineQ.getMessage());
+                                        }
+
+                                        @Override
+                                        public void fail(Exception e) {
+                                            if (e instanceof IllegalStateException){
+                                                SfLog.getInstance().e(this.getClass(), e);
+                                                group.sendMessage(new Message().lineQ().text("唔，预览图上传失败了，但" + MyYuQ.getBotName() + "还是帮你找到了下面的图片信息").getMessage());
+                                                messageLineQ.text("图片上传失败");
+                                            }else {
+                                                messageLineQ.text("图片下载失败：" + e.getMessage());
+                                            }
+                                            group.sendMessage(messageLineQ.getMessage());
+                                        }
+
+                                        @Override
+                                        public void progress(long pro, long len, long speed) {
+
+                                        }
+                                    });
+
                                 }
                             }
                         }else if (result.getHeader().getIndex_id() == 9){//danbooru
